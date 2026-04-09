@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Student } from "@/data/mockData";
-import { CalendarDays, Bell, BookOpen, Brain, UserCheck, TrendingUp, Clock } from "lucide-react";
+import { Student, appointments, Appointment } from "@/data/mockData";
+import { CalendarDays, Bell, BookOpen, Brain, UserCheck, TrendingUp, Clock, PlusCircle } from "lucide-react";
 import StatCard from "./StatCard";
 import StatusBadge from "./StatusBadge";
 
@@ -10,6 +10,12 @@ interface Props {
 
 const StudentDashboard = ({ student }: Props) => {
   const [showNotifications, setShowNotifications] = useState(false);
+  const [studentAppointments, setStudentAppointments] = useState<Appointment[]>(
+    appointments.filter(a => a.studentId === student.id)
+  );
+  const [showBooking, setShowBooking] = useState(false);
+  const [bookingForm, setBookingForm] = useState({ date: "", time: "", reason: "" });
+
   const unreadCount = student.notifications.filter((n) => !n.read).length;
   const completedAssessments = student.skills.filter((s) => s.completed);
   const pendingAssessments = student.skills.filter((s) => !s.completed);
@@ -19,6 +25,23 @@ const StudentDashboard = ({ student }: Props) => {
     if (hour < 12) return "Good Morning";
     if (hour < 17) return "Good Afternoon";
     return "Good Evening";
+  };
+
+  const handleBookAppointment = () => {
+    if (!bookingForm.date || !bookingForm.time || !bookingForm.reason) return;
+    const newApt: Appointment = {
+      id: `apt-new-${Date.now()}`,
+      studentId: student.id,
+      studentName: student.name,
+      lecturerName: "Dr. Zainab",
+      date: bookingForm.date,
+      time: bookingForm.time,
+      reason: bookingForm.reason,
+      status: "pending",
+    };
+    setStudentAppointments(prev => [...prev, newApt]);
+    setBookingForm({ date: "", time: "", reason: "" });
+    setShowBooking(false);
   };
 
   return (
@@ -33,10 +56,8 @@ const StudentDashboard = ({ student }: Props) => {
             {student.matricNo} • Here's your learning progress overview
           </p>
         </div>
-        <button
-          onClick={() => setShowNotifications(!showNotifications)}
-          className="relative p-3 rounded-lg bg-secondary hover:bg-accent transition-colors"
-        >
+        <button onClick={() => setShowNotifications(!showNotifications)}
+          className="relative p-3 rounded-lg bg-secondary hover:bg-accent transition-colors">
           <Bell size={20} />
           {unreadCount > 0 && (
             <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-status-intensive text-status-intensive-foreground text-xs flex items-center justify-center font-bold">
@@ -49,19 +70,14 @@ const StudentDashboard = ({ student }: Props) => {
       {/* Notifications Panel */}
       {showNotifications && (
         <div className="glass-card p-4 space-y-3">
-          <h3 className="font-semibold flex items-center gap-2">
-            <Bell size={16} /> Notifications
-          </h3>
+          <h3 className="font-semibold flex items-center gap-2"><Bell size={16} /> Notifications</h3>
           {student.notifications.length === 0 ? (
             <p className="text-sm text-muted-foreground">No notifications</p>
           ) : (
             student.notifications.map((n) => (
-              <div
-                key={n.id}
-                className={`p-3 rounded-lg text-sm flex items-start gap-3 ${
-                  n.read ? "bg-secondary/50" : "bg-primary/10 border border-primary/30"
-                }`}
-              >
+              <div key={n.id} className={`p-3 rounded-lg text-sm flex items-start gap-3 ${
+                n.read ? "bg-secondary/50" : "bg-primary/10 border border-primary/30"
+              }`}>
                 <span className="mt-0.5">
                   {n.type === "reminder" ? <Clock size={14} className="text-status-developing" /> :
                    n.type === "result" ? <TrendingUp size={14} className="text-status-mastered" /> :
@@ -87,7 +103,7 @@ const StudentDashboard = ({ student }: Props) => {
         <StatCard title="Assessments" value={`${completedAssessments.length}/${student.skills.length}`} icon={BookOpen} color="text-primary" />
       </div>
 
-      {/* Pending Assessments / Reminders */}
+      {/* Pending Assessments */}
       {pendingAssessments.length > 0 && (
         <div className="glass-card p-5 border-l-4 border-l-status-developing">
           <h3 className="font-semibold flex items-center gap-2 mb-3">
@@ -99,13 +115,70 @@ const StudentDashboard = ({ student }: Props) => {
                 <p className="font-medium text-sm">{a.title}</p>
                 <p className="text-xs text-muted-foreground">Due: {a.dueDate}</p>
               </div>
-              <span className="text-xs px-3 py-1 rounded-full bg-status-developing text-status-developing-foreground font-semibold">
-                Pending
-              </span>
+              <span className="text-xs px-3 py-1 rounded-full bg-status-developing text-status-developing-foreground font-semibold">Pending</span>
             </div>
           ))}
         </div>
       )}
+
+      {/* Appointments */}
+      <div className="glass-card p-5 space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold flex items-center gap-2"><CalendarDays size={18} className="text-primary" /> Appointments</h3>
+          <button onClick={() => setShowBooking(!showBooking)}
+            className="text-xs px-3 py-1.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-1">
+            <PlusCircle size={14} /> Book Appointment
+          </button>
+        </div>
+
+        {showBooking && (
+          <div className="p-4 bg-secondary/50 rounded-lg space-y-3">
+            <p className="text-sm font-medium">Book with Dr. Zainab</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <input type="date" className="text-sm px-3 py-2 rounded-lg bg-background border border-border focus:border-primary focus:outline-none"
+                value={bookingForm.date} onChange={e => setBookingForm(p => ({ ...p, date: e.target.value }))} />
+              <select className="text-sm px-3 py-2 rounded-lg bg-background border border-border focus:border-primary focus:outline-none"
+                value={bookingForm.time} onChange={e => setBookingForm(p => ({ ...p, time: e.target.value }))}>
+                <option value="">Select time</option>
+                <option value="9:00 AM">9:00 AM</option>
+                <option value="10:00 AM">10:00 AM</option>
+                <option value="11:00 AM">11:00 AM</option>
+                <option value="2:00 PM">2:00 PM</option>
+                <option value="3:00 PM">3:00 PM</option>
+                <option value="4:00 PM">4:00 PM</option>
+              </select>
+            </div>
+            <input type="text" placeholder="Reason for appointment..."
+              className="w-full text-sm px-3 py-2 rounded-lg bg-background border border-border focus:border-primary focus:outline-none"
+              value={bookingForm.reason} onChange={e => setBookingForm(p => ({ ...p, reason: e.target.value }))} />
+            <button onClick={handleBookAppointment}
+              disabled={!bookingForm.date || !bookingForm.time || !bookingForm.reason}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed">
+              Submit Request
+            </button>
+          </div>
+        )}
+
+        {studentAppointments.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No appointments yet. Book one above!</p>
+        ) : (
+          studentAppointments.map(apt => (
+            <div key={apt.id} className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
+              <div>
+                <p className="font-medium text-sm">with {apt.lecturerName}</p>
+                <p className="text-xs text-muted-foreground">{apt.date} at {apt.time}</p>
+                <p className="text-xs mt-1">{apt.reason}</p>
+              </div>
+              <span className={`text-xs px-3 py-1 rounded-full font-semibold ${
+                apt.status === "confirmed" ? "bg-status-mastered text-status-mastered-foreground" :
+                apt.status === "pending" ? "bg-status-developing text-status-developing-foreground" :
+                apt.status === "completed" ? "bg-secondary text-secondary-foreground" :
+                "bg-status-intensive text-status-intensive-foreground"
+              }`}>{apt.status.charAt(0).toUpperCase() + apt.status.slice(1)}</span>
+            </div>
+          ))
+        )}
+      </div>
 
       {/* Completed Assessments */}
       <div className="space-y-4">
@@ -123,16 +196,12 @@ const StudentDashboard = ({ student }: Props) => {
                     assessment.status === "mastered" ? "text-status-mastered" :
                     assessment.status === "developing" ? "text-status-developing" :
                     "text-status-intensive"
-                  }>
-                    {assessment.score}
-                  </span>
+                  }>{assessment.score}</span>
                   <span className="text-sm text-muted-foreground">/{assessment.maxScore}</span>
                 </p>
                 <StatusBadge status={assessment.status} />
               </div>
             </div>
-
-            {/* Skills breakdown */}
             {assessment.skills.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {assessment.skills.map((skill, i) => (
@@ -143,8 +212,6 @@ const StudentDashboard = ({ student }: Props) => {
                 ))}
               </div>
             )}
-
-            {/* Lecturer Comment */}
             {assessment.lecturerComment && (
               <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg">
                 <p className="text-xs text-muted-foreground mb-1">💬 Lecturer's Comment</p>
