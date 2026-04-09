@@ -68,7 +68,7 @@ const LecturerDashboard = () => {
 
   const courseBarData = courses.map(c => {
     const cs = students.filter(s => c.students.includes(s.id));
-    return { name: c.code, avg: cs.length ? Math.round(cs.reduce((a, s) => a + s.averageScore, 0) / cs.length) : 0 };
+    return { name: c.name, avg: cs.length ? Math.round(cs.reduce((a, s) => a + s.averageScore, 0) / cs.length) : 0 };
   });
 
   return (
