@@ -104,7 +104,10 @@ const LecturerDashboard = () => {
           <button key={c.id} onClick={() => { setSelectedCourse(c); setExpandedStudent(null); }}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               selectedCourse?.id === c.id ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-accent"
-            }`}>{c.code}</button>
+            }`}>
+            <span className="hidden sm:inline">{c.name}</span>
+            <span className="sm:hidden">{c.code}</span>
+          </button>
         ))}
       </div>
 
