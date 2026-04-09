@@ -66,9 +66,17 @@ const LecturerDashboard = () => {
     { name: "Intensive", value: allSkillStatuses.filter(s => s.status === "intensive").length, color: "hsl(0, 84%, 60%)" },
   ];
 
+  const courseShortNames: Record<string, string> = {
+    "DPB3012": "SAD",
+    "DPB2022": "SAK",
+    "DPB2033": "SAR",
+    "DPA1014": "SAA",
+    "DPB1015": "SAE",
+    "DPB3046": "SAB",
+  };
   const courseBarData = courses.map(c => {
     const cs = students.filter(s => c.students.includes(s.id));
-    return { name: c.name, avg: cs.length ? Math.round(cs.reduce((a, s) => a + s.averageScore, 0) / cs.length) : 0 };
+    return { name: courseShortNames[c.code] || c.code, avg: cs.length ? Math.round(cs.reduce((a, s) => a + s.averageScore, 0) / cs.length) : 0 };
   });
 
   return (
