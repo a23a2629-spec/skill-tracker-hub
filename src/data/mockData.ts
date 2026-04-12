@@ -61,6 +61,7 @@ export interface Appointment {
   time: string;
   reason: string;
   status: "pending" | "confirmed" | "completed" | "cancelled";
+  createdBy: "student" | "lecturer";
 }
 
 export const courses: Course[] = [
@@ -307,10 +308,10 @@ export const students: Student[] = [
 ];
 
 export const appointments: Appointment[] = [
-  { id: "apt1", studentId: "s1", studentName: "Ahmad Farhan bin Ismail", lecturerName: "Dr. Zainab", date: "2026-04-10", time: "10:00 AM", reason: "Discuss Quiz 2 performance", status: "confirmed" },
-  { id: "apt2", studentId: "s4", studentName: "Siti Nurhaliza binti Kamal", lecturerName: "Dr. Zainab", date: "2026-04-11", time: "2:00 PM", reason: "AI usage warning discussion", status: "pending" },
-  { id: "apt3", studentId: "s12", studentName: "Rajesh a/l Muthu", lecturerName: "Dr. Zainab", date: "2026-04-12", time: "11:00 AM", reason: "Academic intervention meeting", status: "confirmed" },
-  { id: "apt4", studentId: "s2", studentName: "Nurul Aisyah binti Abdullah", lecturerName: "Dr. Zainab", date: "2026-04-09", time: "3:00 PM", reason: "Extra tutorial discussion", status: "completed" },
+  { id: "apt1", studentId: "s1", studentName: "Ahmad Farhan bin Ismail", lecturerName: "Dr. Zainab", date: "2026-04-10", time: "10:00 AM", reason: "Discuss Quiz 2 performance", status: "confirmed", createdBy: "student" },
+  { id: "apt2", studentId: "s4", studentName: "Siti Nurhaliza binti Kamal", lecturerName: "Dr. Zainab", date: "2026-04-11", time: "2:00 PM", reason: "AI usage warning discussion", status: "pending", createdBy: "lecturer" },
+  { id: "apt3", studentId: "s12", studentName: "Rajesh a/l Muthu", lecturerName: "Dr. Zainab", date: "2026-04-12", time: "11:00 AM", reason: "Academic intervention meeting", status: "confirmed", createdBy: "student" },
+  { id: "apt4", studentId: "s2", studentName: "Nurul Aisyah binti Abdullah", lecturerName: "Dr. Zainab", date: "2026-04-09", time: "3:00 PM", reason: "Extra tutorial discussion", status: "completed", createdBy: "student" },
 ];
 
 export function getStatusColor(status: SkillStatus): string {

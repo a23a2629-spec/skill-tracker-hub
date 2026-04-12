@@ -1,20 +1,20 @@
 import { useState } from "react";
-import { Student, appointments, Appointment } from "@/data/mockData";
-import { CalendarDays, Bell, BookOpen, Brain, UserCheck, TrendingUp, Clock, PlusCircle, User } from "lucide-react";
+import { Student, Appointment } from "@/data/mockData";
+import { CalendarDays, Bell, BookOpen, Brain, UserCheck, TrendingUp, Clock, PlusCircle, User, Check, X } from "lucide-react";
 import StatCard from "./StatCard";
 import StatusBadge from "./StatusBadge";
 import StudentProfile from "./StudentProfile";
 
 interface Props {
   student: Student;
+  appointments: Appointment[];
+  onAddAppointment: (apt: Appointment) => void;
+  onUpdateStatus: (id: string, status: Appointment["status"]) => void;
 }
 
-const StudentDashboard = ({ student }: Props) => {
+const StudentDashboard = ({ student, appointments: studentAppointments, onAddAppointment, onUpdateStatus }: Props) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
-  const [studentAppointments, setStudentAppointments] = useState<Appointment[]>(
-    appointments.filter(a => a.studentId === student.id)
-  );
   const [showBooking, setShowBooking] = useState(false);
   const [bookingForm, setBookingForm] = useState({ date: "", time: "", reason: "" });
 
@@ -32,7 +32,7 @@ const StudentDashboard = ({ student }: Props) => {
   const handleBookAppointment = () => {
     if (!bookingForm.date || !bookingForm.time || !bookingForm.reason) return;
     const newApt: Appointment = {
-      id: `apt-new-${Date.now()}`,
+      id: `apt-s-${Date.now()}`,
       studentId: student.id,
       studentName: student.name,
       lecturerName: "Dr. Zainab",
@@ -40,11 +40,15 @@ const StudentDashboard = ({ student }: Props) => {
       time: bookingForm.time,
       reason: bookingForm.reason,
       status: "pending",
+      createdBy: "student",
     };
-    setStudentAppointments(prev => [...prev, newApt]);
+    onAddAppointment(newApt);
     setBookingForm({ date: "", time: "", reason: "" });
     setShowBooking(false);
   };
+
+  // Appointments set by lecturer that need student response
+  const lecturerSetAppointments = studentAppointments.filter(a => a.createdBy === "lecturer" && a.status === "pending");
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -114,6 +118,34 @@ const StudentDashboard = ({ student }: Props) => {
         <StatCard title="Assessments" value={`${completedAssessments.length}/${student.skills.length}`} icon={BookOpen} color="text-primary" />
       </div>
 
+      {/* Lecturer-set appointments needing response */}
+      {lecturerSetAppointments.length > 0 && (
+        <div className="glass-card p-5 border-l-4 border-l-primary space-y-3">
+          <h3 className="font-semibold flex items-center gap-2">
+            <CalendarDays size={18} className="text-primary" /> Appointment Requests from Lecturer
+          </h3>
+          {lecturerSetAppointments.map(apt => (
+            <div key={apt.id} className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg">
+              <div>
+                <p className="font-medium text-sm">with {apt.lecturerName}</p>
+                <p className="text-xs text-muted-foreground">{apt.date} at {apt.time}</p>
+                <p className="text-xs mt-1">{apt.reason}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button onClick={() => onUpdateStatus(apt.id, "confirmed")}
+                  className="text-xs px-3 py-1.5 bg-status-mastered text-status-mastered-foreground rounded-lg hover:opacity-90 flex items-center gap-1">
+                  <Check size={12} /> Accept
+                </button>
+                <button onClick={() => onUpdateStatus(apt.id, "cancelled")}
+                  className="text-xs px-3 py-1.5 bg-status-intensive text-status-intensive-foreground rounded-lg hover:opacity-90 flex items-center gap-1">
+                  <X size={12} /> Decline
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Pending Assessments */}
       {pendingAssessments.length > 0 && (
         <div className="glass-card p-5 border-l-4 border-l-status-developing">
@@ -135,7 +167,7 @@ const StudentDashboard = ({ student }: Props) => {
       {/* Appointments */}
       <div className="glass-card p-5 space-y-4">
         <div className="flex items-center justify-between">
-          <h3 className="font-semibold flex items-center gap-2"><CalendarDays size={18} className="text-primary" /> Appointments</h3>
+          <h3 className="font-semibold flex items-center gap-2"><CalendarDays size={18} className="text-primary" /> My Appointments</h3>
           <button onClick={() => setShowBooking(!showBooking)}
             className="text-xs px-3 py-1.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-1">
             <PlusCircle size={14} /> Book Appointment
@@ -179,6 +211,9 @@ const StudentDashboard = ({ student }: Props) => {
                 <p className="font-medium text-sm">with {apt.lecturerName}</p>
                 <p className="text-xs text-muted-foreground">{apt.date} at {apt.time}</p>
                 <p className="text-xs mt-1">{apt.reason}</p>
+                {apt.createdBy === "lecturer" && (
+                  <span className="text-[10px] text-primary font-medium">Set by lecturer</span>
+                )}
               </div>
               <span className={`text-xs px-3 py-1 rounded-full font-semibold ${
                 apt.status === "confirmed" ? "bg-status-mastered text-status-mastered-foreground" :
