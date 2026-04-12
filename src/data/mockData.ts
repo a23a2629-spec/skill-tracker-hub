@@ -116,6 +116,7 @@ export const students: Student[] = [
       { id: "n1", message: "Quiz 3 - Transportation Models is due on April 14", date: "2026-04-07", read: false, type: "reminder" },
       { id: "n2", message: "Lecturer commented on Quiz 2", date: "2026-03-25", read: true, type: "comment" },
     ],
+    profile: { phone: "011-2345 6781", email: "farhan.ismail@student.edu.my", address: "No. 12, Jalan Merbau, Kuala Lumpur", semester: 3, intake: "June 2022", guardian: "Ismail bin Ahmad", guardianPhone: "012-3456 7890" },
   },
   {
     id: "s2", name: "Nurul Aisyah binti Abdullah", matricNo: "01DPB22F1002", course: "DPB3012",
@@ -128,6 +129,7 @@ export const students: Student[] = [
     notifications: [
       { id: "n3", message: "You are flagged for intensive support in Statistical Reasoning", date: "2026-03-26", read: false, type: "general" },
     ],
+    profile: { phone: "011-2345 6782", email: "aisyah.abdullah@student.edu.my", address: "Blok C, Apt Sri Dahlia, Petaling Jaya", semester: 3, intake: "June 2022", guardian: "Abdullah bin Yusof", guardianPhone: "013-4567 8901" },
   },
   {
     id: "s3", name: "Muhammad Hafiz bin Razak", matricNo: "01DPB22F1003", course: "DPB3012",
@@ -137,6 +139,7 @@ export const students: Student[] = [
        [{ name: "Statistical Reasoning", status: "developing" }, { name: "Applied Data Interpretation", status: "mastered" }, { name: "Disciplinary Vocabulary", status: "mastered" }]],
       ["Outstanding work! Consider mentoring peers.", undefined]),
     notifications: [{ id: "n4", message: "Quiz 3 due on April 14", date: "2026-04-07", read: false, type: "reminder" }],
+    profile: { phone: "011-2345 6783", email: "hafiz.razak@student.edu.my", address: "No. 5, Taman Melati, Shah Alam", semester: 3, intake: "June 2022", guardian: "Razak bin Hamid", guardianPhone: "014-5678 9012" },
   },
 
   // Course 2: Commerce (s4, s5, s6)
@@ -148,6 +151,7 @@ export const students: Student[] = [
        [{ name: "Statistical Reasoning", status: "intensive" }, { name: "Applied Data Interpretation", status: "intensive" }, { name: "Disciplinary Vocabulary", status: "developing" }]],
       ["High AI usage detected. Ensure original work.", "Attendance is low. Please see me."]),
     notifications: [{ id: "n5", message: "Warning: Attendance below 80%", date: "2026-04-01", read: false, type: "general" }],
+    profile: { phone: "011-2345 6784", email: "nurhaliza.kamal@student.edu.my", address: "No. 8, Jalan Kenanga, Klang", semester: 3, intake: "June 2022", guardian: "Kamal bin Osman", guardianPhone: "015-6789 0123" },
   },
   {
     id: "s5", name: "Lee Wei Jian", matricNo: "01DPB22F1005", course: "DPB2022",
@@ -157,6 +161,7 @@ export const students: Student[] = [
        [{ name: "Statistical Reasoning", status: "developing" }, { name: "Applied Data Interpretation", status: "developing" }, { name: "Disciplinary Vocabulary", status: "mastered" }]],
       [undefined, "Good progress. Keep working on statistical reasoning."]),
     notifications: [{ id: "n6", message: "Quiz 3 due on April 14", date: "2026-04-07", read: false, type: "reminder" }],
+    profile: { phone: "011-2345 6785", email: "weijian.lee@student.edu.my", address: "No. 22, Taman Desa, Subang Jaya", semester: 3, intake: "June 2022", guardian: "Lee Ah Kow", guardianPhone: "016-7890 1234" },
   },
   {
     id: "s6", name: "Priya a/p Kumaran", matricNo: "01DPB22F1006", course: "DPB2022",
@@ -166,6 +171,7 @@ export const students: Student[] = [
        [{ name: "Statistical Reasoning", status: "developing" }, { name: "Applied Data Interpretation", status: "developing" }, { name: "Disciplinary Vocabulary", status: "developing" }]],
       ["Solid effort. Work on critical reading.", undefined]),
     notifications: [{ id: "n7", message: "Quiz 3 due on April 14", date: "2026-04-07", read: false, type: "reminder" }],
+    profile: { phone: "011-2345 6786", email: "priya.kumaran@student.edu.my", address: "No. 15, Jalan Puteri, Puchong", semester: 3, intake: "June 2022", guardian: "Kumaran a/l Raju", guardianPhone: "017-8901 2345" },
   },
 
   // Course 3: Retailing (s7, s8, s9)
@@ -177,6 +183,7 @@ export const students: Student[] = [
        [{ name: "Statistical Reasoning", status: "mastered" }, { name: "Applied Data Interpretation", status: "developing" }, { name: "Disciplinary Vocabulary", status: "mastered" }]],
       ["Great analysis skills.", "Keep improving data interpretation."]),
     notifications: [],
+    profile: { phone: "011-2345 6787", email: "amir.yusof@student.edu.my", address: "No. 3, Kampung Baru, Ampang", semester: 3, intake: "June 2022", guardian: "Yusof bin Ali", guardianPhone: "018-9012 3456" },
   },
   {
     id: "s8", name: "Tan Mei Ling", matricNo: "01DPB22F1008", course: "DPB2033",
@@ -186,6 +193,7 @@ export const students: Student[] = [
        [{ name: "Statistical Reasoning", status: "developing" }, { name: "Applied Data Interpretation", status: "intensive" }, { name: "Disciplinary Vocabulary", status: "developing" }]],
       ["Needs more effort on synthesis.", "Please reduce AI dependency."]),
     notifications: [{ id: "n8", message: "Warning: AI usage above threshold", date: "2026-04-02", read: false, type: "general" }],
+    profile: { phone: "011-2345 6788", email: "meiling.tan@student.edu.my", address: "No. 18, Jalan SS2, Petaling Jaya", semester: 3, intake: "June 2022", guardian: "Tan Ah Huat", guardianPhone: "019-0123 4567" },
   },
   {
     id: "s9", name: "Kavitha a/p Rajan", matricNo: "01DPB22F1009", course: "DPB2033",
@@ -195,6 +203,7 @@ export const students: Student[] = [
        [{ name: "Statistical Reasoning", status: "developing" }, { name: "Applied Data Interpretation", status: "mastered" }, { name: "Disciplinary Vocabulary", status: "developing" }]],
       ["Very good work!", "Solid performance."]),
     notifications: [],
+    profile: { phone: "011-2345 6789", email: "kavitha.rajan@student.edu.my", address: "No. 7, Taman Sentosa, Klang", semester: 3, intake: "June 2022", guardian: "Rajan a/l Krishnan", guardianPhone: "012-1234 5678" },
   },
 
   // Course 4: Accounting (s10, s11, s12)
@@ -206,6 +215,7 @@ export const students: Student[] = [
        [{ name: "Statistical Reasoning", status: "mastered" }, { name: "Applied Data Interpretation", status: "mastered" }, { name: "Disciplinary Vocabulary", status: "developing" }]],
       ["Excellent! Top student.", "Maintain this level."]),
     notifications: [],
+    profile: { phone: "011-3456 7890", email: "cheekeong.lim@student.edu.my", address: "No. 10, Jalan Mawar, Cheras", semester: 3, intake: "June 2022", guardian: "Lim Ah Seng", guardianPhone: "013-2345 6789" },
   },
   {
     id: "s11", name: "Farah binti Hassan", matricNo: "01DPA22F1011", course: "DPA1014",
@@ -215,6 +225,7 @@ export const students: Student[] = [
        [{ name: "Statistical Reasoning", status: "developing" }, { name: "Applied Data Interpretation", status: "intensive" }, { name: "Disciplinary Vocabulary", status: "developing" }]],
       ["Work on algebraic skills.", "Seek help if needed."]),
     notifications: [],
+    profile: { phone: "011-3456 7891", email: "farah.hassan@student.edu.my", address: "Blok A, Pangsapuri Harmoni, Rawang", semester: 3, intake: "June 2022", guardian: "Hassan bin Idris", guardianPhone: "014-3456 7890" },
   },
   {
     id: "s12", name: "Rajesh a/l Muthu", matricNo: "01DPA22F1012", course: "DPA1014",
@@ -227,6 +238,7 @@ export const students: Student[] = [
       { id: "n9", message: "Warning: Attendance below 80%", date: "2026-04-01", read: false, type: "general" },
       { id: "n10", message: "Warning: AI usage critically high", date: "2026-04-03", read: false, type: "general" },
     ],
+    profile: { phone: "011-3456 7892", email: "rajesh.muthu@student.edu.my", address: "No. 25, Taman Seri, Kajang", semester: 3, intake: "June 2022", guardian: "Muthu a/l Samy", guardianPhone: "015-4567 8901" },
   },
 
   // Course 5: Entrepreneurship (s13, s14, s15)
@@ -238,6 +250,7 @@ export const students: Student[] = [
        [{ name: "Statistical Reasoning", status: "developing" }, { name: "Applied Data Interpretation", status: "developing" }, { name: "Disciplinary Vocabulary", status: "mastered" }]],
       ["Good entrepreneurial thinking.", "Needs more analytical depth."]),
     notifications: [],
+    profile: { phone: "011-4567 8901", email: "siewmei.wong@student.edu.my", address: "No. 30, Jalan Anggerik, Seremban", semester: 3, intake: "June 2022", guardian: "Wong Ah Keat", guardianPhone: "016-5678 9012" },
   },
   {
     id: "s14", name: "Amirul bin Zakaria", matricNo: "01DPB22F1014", course: "DPB1015",
@@ -247,6 +260,7 @@ export const students: Student[] = [
        [{ name: "Statistical Reasoning", status: "intensive" }, { name: "Applied Data Interpretation", status: "developing" }, { name: "Disciplinary Vocabulary", status: "developing" }]],
       ["Fair work, needs more depth.", "Watch AI usage carefully."]),
     notifications: [],
+    profile: { phone: "011-4567 8902", email: "amirul.zakaria@student.edu.my", address: "Blok D, Flat Seri Kembangan", semester: 3, intake: "June 2022", guardian: "Zakaria bin Wahab", guardianPhone: "017-6789 0123" },
   },
   {
     id: "s15", name: "Divya a/p Suresh", matricNo: "01DPB22F1015", course: "DPB1015",
@@ -256,6 +270,7 @@ export const students: Student[] = [
        [{ name: "Statistical Reasoning", status: "mastered" }, { name: "Applied Data Interpretation", status: "developing" }, { name: "Disciplinary Vocabulary", status: "mastered" }]],
       ["Outstanding creativity!", "Well done."]),
     notifications: [],
+    profile: { phone: "011-4567 8903", email: "divya.suresh@student.edu.my", address: "No. 9, Taman Jasmin, Nilai", semester: 3, intake: "June 2022", guardian: "Suresh a/l Kumar", guardianPhone: "018-7890 1234" },
   },
 
   // Course 6: Islamic Banking and Finance (s16, s17, s18)
@@ -267,6 +282,7 @@ export const students: Student[] = [
        [{ name: "Statistical Reasoning", status: "developing" }, { name: "Applied Data Interpretation", status: "mastered" }, { name: "Disciplinary Vocabulary", status: "developing" }]],
       ["Good understanding of Islamic finance principles.", "Keep it up."]),
     notifications: [],
+    profile: { phone: "011-5678 9012", email: "syafiqah.omar@student.edu.my", address: "No. 14, Jalan Cempaka, Bangi", semester: 3, intake: "June 2022", guardian: "Omar bin Yaakob", guardianPhone: "019-8901 2345" },
   },
   {
     id: "s17", name: "Chen Wei Lin", matricNo: "01DPB22F1017", course: "DPB3046",
@@ -276,6 +292,7 @@ export const students: Student[] = [
        [{ name: "Statistical Reasoning", status: "developing" }, { name: "Applied Data Interpretation", status: "intensive" }, { name: "Disciplinary Vocabulary", status: "developing" }]],
       ["Reduce AI reliance.", "More practice needed."]),
     notifications: [{ id: "n11", message: "Warning: AI usage above threshold", date: "2026-04-02", read: false, type: "general" }],
+    profile: { phone: "011-5678 9013", email: "weilin.chen@student.edu.my", address: "No. 20, Taman Bukit, Serdang", semester: 3, intake: "June 2022", guardian: "Chen Ah Beng", guardianPhone: "012-9012 3456" },
   },
   {
     id: "s18", name: "Arif bin Mohd Noor", matricNo: "01DPB22F1018", course: "DPB3046",
@@ -285,6 +302,7 @@ export const students: Student[] = [
        [{ name: "Statistical Reasoning", status: "developing" }, { name: "Applied Data Interpretation", status: "developing" }, { name: "Disciplinary Vocabulary", status: "mastered" }]],
       ["Solid grasp of concepts.", "Continue revising."]),
     notifications: [],
+    profile: { phone: "011-5678 9014", email: "arif.noor@student.edu.my", address: "No. 6, Kampung Melayu, Semenyih", semester: 3, intake: "June 2022", guardian: "Mohd Noor bin Ismail", guardianPhone: "013-0123 4567" },
   },
 ];
 
