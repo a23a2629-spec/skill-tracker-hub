@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Student, appointments, Appointment } from "@/data/mockData";
-import { CalendarDays, Bell, BookOpen, Brain, UserCheck, TrendingUp, Clock, PlusCircle } from "lucide-react";
+import { CalendarDays, Bell, BookOpen, Brain, UserCheck, TrendingUp, Clock, PlusCircle, User } from "lucide-react";
 import StatCard from "./StatCard";
 import StatusBadge from "./StatusBadge";
+import StudentProfile from "./StudentProfile";
 
 interface Props {
   student: Student;
@@ -10,6 +11,7 @@ interface Props {
 
 const StudentDashboard = ({ student }: Props) => {
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
   const [studentAppointments, setStudentAppointments] = useState<Appointment[]>(
     appointments.filter(a => a.studentId === student.id)
   );
@@ -56,16 +58,25 @@ const StudentDashboard = ({ student }: Props) => {
             {student.matricNo} • Here's your learning progress overview
           </p>
         </div>
-        <button onClick={() => setShowNotifications(!showNotifications)}
-          className="relative p-3 rounded-lg bg-secondary hover:bg-accent transition-colors">
-          <Bell size={20} />
-          {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-status-intensive text-status-intensive-foreground text-xs flex items-center justify-center font-bold">
-              {unreadCount}
-            </span>
-          )}
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setShowProfile(!showProfile)}
+            className="p-3 rounded-lg bg-secondary hover:bg-accent transition-colors">
+            <User size={20} />
+          </button>
+          <button onClick={() => setShowNotifications(!showNotifications)}
+            className="relative p-3 rounded-lg bg-secondary hover:bg-accent transition-colors">
+            <Bell size={20} />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-status-intensive text-status-intensive-foreground text-xs flex items-center justify-center font-bold">
+                {unreadCount}
+              </span>
+            )}
+          </button>
+        </div>
       </div>
+
+      {/* Profile Panel */}
+      {showProfile && <StudentProfile student={student} />}
 
       {/* Notifications Panel */}
       {showNotifications && (
