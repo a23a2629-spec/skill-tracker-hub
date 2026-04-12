@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { students } from "@/data/mockData";
+import { students, appointments, Appointment } from "@/data/mockData";
 import StudentDashboard from "@/components/StudentDashboard";
 import LecturerDashboard from "@/components/LecturerDashboard";
 import { GraduationCap, User, BookOpen } from "lucide-react";
@@ -8,10 +8,18 @@ const Index = () => {
   const [view, setView] = useState<"student" | "lecturer">("student");
   const [selectedStudentId, setSelectedStudentId] = useState(students[0].id);
   const selectedStudent = students.find((s) => s.id === selectedStudentId)!;
+  const [allAppointments, setAllAppointments] = useState<Appointment[]>(appointments);
+
+  const handleAddAppointment = (apt: Appointment) => {
+    setAllAppointments(prev => [...prev, apt]);
+  };
+
+  const handleUpdateAppointmentStatus = (id: string, status: Appointment["status"]) => {
+    setAllAppointments(prev => prev.map(a => a.id === id ? { ...a, status } : a));
+  };
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Top Navigation */}
       <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -25,7 +33,6 @@ const Index = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Role Toggle */}
             <div className="flex bg-secondary rounded-lg p-1">
               <button
                 onClick={() => setView("student")}
@@ -49,7 +56,6 @@ const Index = () => {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-6">
-        {/* Student selector (only in student view) */}
         {view === "student" && (
           <div className="mb-6">
             <label className="text-xs text-muted-foreground mb-2 block">Viewing as student:</label>
@@ -68,9 +74,18 @@ const Index = () => {
         )}
 
         {view === "student" ? (
-          <StudentDashboard student={selectedStudent} />
+          <StudentDashboard
+            student={selectedStudent}
+            appointments={allAppointments.filter(a => a.studentId === selectedStudent.id)}
+            onAddAppointment={handleAddAppointment}
+            onUpdateStatus={handleUpdateAppointmentStatus}
+          />
         ) : (
-          <LecturerDashboard />
+          <LecturerDashboard
+            appointments={allAppointments}
+            onAddAppointment={handleAddAppointment}
+            onUpdateStatus={handleUpdateAppointmentStatus}
+          />
         )}
       </main>
     </div>
