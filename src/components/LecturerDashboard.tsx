@@ -402,7 +402,47 @@ const LecturerDashboard = ({ appointments: lecturerAppointments, onAddAppointmen
       {/* APPOINTMENTS TAB */}
       {activeTab === "appointments" && (
         <div className="space-y-4">
-          <h3 className="font-semibold text-lg flex items-center gap-2"><CalendarDays size={18} /> Student Appointments</h3>
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-lg flex items-center gap-2"><CalendarDays size={18} /> Student Appointments</h3>
+            <button onClick={() => setShowLecturerBooking(!showLecturerBooking)}
+              className="text-xs px-3 py-1.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-1">
+              <PlusCircle size={14} /> Set Appointment
+            </button>
+          </div>
+
+          {showLecturerBooking && (
+            <div className="glass-card p-4 space-y-3">
+              <p className="text-sm font-medium">Set Appointment with Student</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <select className="text-sm px-3 py-2 rounded-lg bg-background border border-border focus:border-primary focus:outline-none"
+                  value={lecturerBookingForm.studentId} onChange={e => setLecturerBookingForm(p => ({ ...p, studentId: e.target.value }))}>
+                  <option value="">Select student</option>
+                  {students.map(s => <option key={s.id} value={s.id}>{s.name} ({s.matricNo})</option>)}
+                </select>
+                <input type="date" className="text-sm px-3 py-2 rounded-lg bg-background border border-border focus:border-primary focus:outline-none"
+                  value={lecturerBookingForm.date} onChange={e => setLecturerBookingForm(p => ({ ...p, date: e.target.value }))} />
+                <select className="text-sm px-3 py-2 rounded-lg bg-background border border-border focus:border-primary focus:outline-none"
+                  value={lecturerBookingForm.time} onChange={e => setLecturerBookingForm(p => ({ ...p, time: e.target.value }))}>
+                  <option value="">Select time</option>
+                  <option value="9:00 AM">9:00 AM</option>
+                  <option value="10:00 AM">10:00 AM</option>
+                  <option value="11:00 AM">11:00 AM</option>
+                  <option value="2:00 PM">2:00 PM</option>
+                  <option value="3:00 PM">3:00 PM</option>
+                  <option value="4:00 PM">4:00 PM</option>
+                </select>
+                <input type="text" placeholder="Reason for appointment..."
+                  className="text-sm px-3 py-2 rounded-lg bg-background border border-border focus:border-primary focus:outline-none"
+                  value={lecturerBookingForm.reason} onChange={e => setLecturerBookingForm(p => ({ ...p, reason: e.target.value }))} />
+              </div>
+              <button onClick={handleLecturerBookAppointment}
+                disabled={!lecturerBookingForm.studentId || !lecturerBookingForm.date || !lecturerBookingForm.time || !lecturerBookingForm.reason}
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed">
+                Set Appointment
+              </button>
+            </div>
+          )}
+
           {lecturerAppointments.length === 0 ? (
             <p className="text-sm text-muted-foreground">No appointments scheduled.</p>
           ) : (
@@ -412,6 +452,9 @@ const LecturerDashboard = ({ appointments: lecturerAppointments, onAddAppointmen
                   <p className="font-medium text-sm">{apt.studentName}</p>
                   <p className="text-xs text-muted-foreground">{apt.date} at {apt.time}</p>
                   <p className="text-xs mt-1">{apt.reason}</p>
+                  {apt.createdBy === "lecturer" && (
+                    <span className="text-[10px] text-primary font-medium">Set by you</span>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <span className={`text-xs px-3 py-1 rounded-full font-semibold ${
@@ -420,10 +463,10 @@ const LecturerDashboard = ({ appointments: lecturerAppointments, onAddAppointmen
                     apt.status === "completed" ? "bg-secondary text-secondary-foreground" :
                     "bg-status-intensive text-status-intensive-foreground"
                   }`}>{apt.status.charAt(0).toUpperCase() + apt.status.slice(1)}</span>
-                  {apt.status === "pending" && (
+                  {apt.status === "pending" && apt.createdBy === "student" && (
                     <>
                       <button onClick={() => handleAppointmentStatus(apt.id, "confirmed")}
-                        className="text-xs px-2 py-1 bg-status-mastered text-status-mastered-foreground rounded hover:opacity-90">Confirm</button>
+                        className="text-xs px-2 py-1 bg-status-mastered text-status-mastered-foreground rounded hover:opacity-90">Accept</button>
                       <button onClick={() => handleAppointmentStatus(apt.id, "cancelled")}
                         className="text-xs px-2 py-1 bg-status-intensive text-status-intensive-foreground rounded hover:opacity-90">Decline</button>
                     </>
