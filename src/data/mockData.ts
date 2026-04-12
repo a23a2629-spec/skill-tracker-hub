@@ -61,6 +61,7 @@ export interface Appointment {
   time: string;
   reason: string;
   status: "pending" | "confirmed" | "completed" | "cancelled";
+  createdBy: "student" | "lecturer";
 }
 
 export const courses: Course[] = [
