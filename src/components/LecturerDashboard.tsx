@@ -56,7 +56,27 @@ const LecturerDashboard = ({ appointments: lecturerAppointments, onAddAppointmen
   };
 
   const handleAppointmentStatus = (id: string, status: Appointment["status"]) => {
-    setLecturerAppointments(prev => prev.map(a => a.id === id ? { ...a, status } : a));
+    onUpdateStatus(id, status);
+  };
+
+  const handleLecturerBookAppointment = () => {
+    if (!lecturerBookingForm.studentId || !lecturerBookingForm.date || !lecturerBookingForm.time || !lecturerBookingForm.reason) return;
+    const student = students.find(s => s.id === lecturerBookingForm.studentId);
+    if (!student) return;
+    const newApt: Appointment = {
+      id: `apt-l-${Date.now()}`,
+      studentId: student.id,
+      studentName: student.name,
+      lecturerName: "Dr. Zainab",
+      date: lecturerBookingForm.date,
+      time: lecturerBookingForm.time,
+      reason: lecturerBookingForm.reason,
+      status: "pending",
+      createdBy: "lecturer",
+    };
+    onAddAppointment(newApt);
+    setLecturerBookingForm({ studentId: "", date: "", time: "", reason: "" });
+    setShowLecturerBooking(false);
   };
 
   // Chart data
