@@ -1,5 +1,16 @@
 export type SkillStatus = "mastered" | "developing" | "intensive";
 
+export interface StudentProfile {
+  phone: string;
+  email: string;
+  address: string;
+  semester: number;
+  intake: string;
+  guardian: string;
+  guardianPhone: string;
+  avatar?: string;
+}
+
 export interface Student {
   id: string;
   name: string;
@@ -10,6 +21,7 @@ export interface Student {
   averageScore: number;
   skills: SkillAssessment[];
   notifications: Notification[];
+  profile: StudentProfile;
 }
 
 export interface SkillAssessment {
