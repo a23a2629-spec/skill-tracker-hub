@@ -5,7 +5,13 @@ import StatCard from "./StatCard";
 import StatusBadge from "./StatusBadge";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 
-const LecturerDashboard = () => {
+interface Props {
+  appointments: Appointment[];
+  onAddAppointment: (apt: Appointment) => void;
+  onUpdateStatus: (id: string, status: Appointment["status"]) => void;
+}
+
+const LecturerDashboard = ({ appointments: lecturerAppointments, onAddAppointment, onUpdateStatus }: Props) => {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [expandedStudent, setExpandedStudent] = useState<string | null>(null);
   const [comments, setComments] = useState<Record<string, string>>({});
@@ -13,7 +19,8 @@ const LecturerDashboard = () => {
   const [activeTab, setActiveTab] = useState<"overview" | "students" | "create" | "appointments">("overview");
   const [newAssessment, setNewAssessment] = useState({ title: "", dueDate: "", maxScore: "100", courseId: "" });
   const [createdAssessments, setCreatedAssessments] = useState<{ title: string; dueDate: string; maxScore: number; courseCode: string }[]>([]);
-  const [lecturerAppointments, setLecturerAppointments] = useState<Appointment[]>(appointments);
+  const [showLecturerBooking, setShowLecturerBooking] = useState(false);
+  const [lecturerBookingForm, setLecturerBookingForm] = useState({ studentId: "", date: "", time: "", reason: "" });
 
   const displayStudents = selectedCourse
     ? students.filter((s) => selectedCourse.students.includes(s.id))
