@@ -52,6 +52,15 @@ export interface Course {
   students: string[];
 }
 
+export interface ExternalProblem {
+  id: string;
+  studentId: string;
+  category: "financial" | "health" | "family" | "mental" | "academic" | "other";
+  description: string;
+  date: string;
+  severity: "low" | "medium" | "high";
+}
+
 export interface Appointment {
   id: string;
   studentId: string;
