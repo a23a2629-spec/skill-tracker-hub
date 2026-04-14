@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { students, courses, Course, Student, SkillStatus, appointments, Appointment } from "@/data/mockData";
-import { Users, BookOpen, AlertTriangle, TrendingUp, MessageSquare, ChevronDown, ChevronUp, PlusCircle, CalendarDays, Eye } from "lucide-react";
+import { students, courses, Course, Student, SkillStatus, appointments, Appointment, ExternalProblem } from "@/data/mockData";
+import { Users, BookOpen, AlertTriangle, TrendingUp, MessageSquare, ChevronDown, ChevronUp, PlusCircle, CalendarDays, Eye, AlertCircle } from "lucide-react";
 import StatCard from "./StatCard";
 import StatusBadge from "./StatusBadge";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
@@ -9,14 +9,15 @@ interface Props {
   appointments: Appointment[];
   onAddAppointment: (apt: Appointment) => void;
   onUpdateStatus: (id: string, status: Appointment["status"]) => void;
+  problems: ExternalProblem[];
 }
 
-const LecturerDashboard = ({ appointments: lecturerAppointments, onAddAppointment, onUpdateStatus }: Props) => {
+const LecturerDashboard = ({ appointments: lecturerAppointments, onAddAppointment, onUpdateStatus, problems }: Props) => {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [expandedStudent, setExpandedStudent] = useState<string | null>(null);
   const [comments, setComments] = useState<Record<string, string>>({});
   const [newComment, setNewComment] = useState("");
-  const [activeTab, setActiveTab] = useState<"overview" | "students" | "create" | "appointments">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "students" | "create" | "appointments" | "problems">("overview");
   const [newAssessment, setNewAssessment] = useState({ title: "", dueDate: "", maxScore: "100", courseId: "" });
   const [createdAssessments, setCreatedAssessments] = useState<{ title: string; dueDate: string; maxScore: number; courseCode: string }[]>([]);
   const [showLecturerBooking, setShowLecturerBooking] = useState(false);
@@ -115,7 +116,7 @@ const LecturerDashboard = ({ appointments: lecturerAppointments, onAddAppointmen
 
       {/* Tabs */}
       <div className="flex gap-2 flex-wrap border-b border-border pb-3">
-        {(["overview", "students", "create", "appointments"] as const).map(tab => (
+        {(["overview", "students", "create", "appointments", "problems"] as const).map(tab => (
           <button key={tab} onClick={() => setActiveTab(tab)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-1.5 ${
               activeTab === tab ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-accent"
@@ -124,6 +125,7 @@ const LecturerDashboard = ({ appointments: lecturerAppointments, onAddAppointmen
             {tab === "students" && <Users size={14} />}
             {tab === "create" && <PlusCircle size={14} />}
             {tab === "appointments" && <CalendarDays size={14} />}
+            {tab === "problems" && <AlertCircle size={14} />}
             {tab.charAt(0).toUpperCase() + tab.slice(1)}
           </button>
         ))}
@@ -474,6 +476,68 @@ const LecturerDashboard = ({ appointments: lecturerAppointments, onAddAppointmen
                 </div>
               </div>
             ))
+          )}
+        </div>
+      )}
+
+      {/* PROBLEMS TAB */}
+      {activeTab === "problems" && (
+        <div className="space-y-4">
+          <h3 className="font-semibold text-lg flex items-center gap-2"><AlertCircle size={18} className="text-status-developing" /> Student External Problems</h3>
+          {problems.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No external problems reported by students.</p>
+          ) : (
+            (() => {
+              const grouped = problems.reduce((acc, p) => {
+                if (!acc[p.studentId]) acc[p.studentId] = [];
+                acc[p.studentId].push(p);
+                return acc;
+              }, {} as Record<string, typeof problems>);
+              
+              const categoryLabels: Record<string, string> = {
+                financial: "💰 Financial", health: "🏥 Health", family: "👨‍👩‍👧 Family",
+                mental: "🧠 Mental Health", academic: "📚 Academic", other: "📝 Other",
+              };
+              const severityColors: Record<string, string> = {
+                low: "bg-status-mastered text-status-mastered-foreground",
+                medium: "bg-status-developing text-status-developing-foreground",
+                high: "bg-status-intensive text-status-intensive-foreground",
+              };
+
+              return Object.entries(grouped).map(([sid, probs]) => {
+                const s = students.find(st => st.id === sid);
+                if (!s) return null;
+                return (
+                  <div key={sid} className="glass-card p-5 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">{s.name.charAt(0)}</div>
+                      <div>
+                        <p className="font-semibold text-sm">{s.name}</p>
+                        <p className="text-xs text-muted-foreground">{s.matricNo} • {s.course}</p>
+                      </div>
+                      <span className={`ml-auto text-xs px-2 py-1 rounded-full font-semibold ${severityColors[probs.sort((a, b) => {
+                        const order = { high: 0, medium: 1, low: 2 };
+                        return order[a.severity] - order[b.severity];
+                      })[0].severity]}`}>
+                        {probs.length} issue{probs.length > 1 ? "s" : ""}
+                      </span>
+                    </div>
+                    {probs.map(p => (
+                      <div key={p.id} className="flex items-start justify-between p-3 bg-secondary/50 rounded-lg">
+                        <div>
+                          <p className="font-medium text-sm">{categoryLabels[p.category] || p.category}</p>
+                          <p className="text-xs mt-1">{p.description}</p>
+                          <p className="text-xs text-muted-foreground mt-1">{p.date}</p>
+                        </div>
+                        <span className={`text-xs px-2 py-1 rounded-full font-semibold shrink-0 ${severityColors[p.severity]}`}>
+                          {p.severity.charAt(0).toUpperCase() + p.severity.slice(1)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              });
+            })()
           )}
         </div>
       )}

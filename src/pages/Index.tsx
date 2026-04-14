@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { students, appointments, Appointment } from "@/data/mockData";
+import { students, appointments, Appointment, externalProblems, ExternalProblem } from "@/data/mockData";
 import StudentDashboard from "@/components/StudentDashboard";
 import LecturerDashboard from "@/components/LecturerDashboard";
+import ThemeToggle from "@/components/ThemeToggle";
 import { GraduationCap, User, BookOpen } from "lucide-react";
 
 const Index = () => {
@@ -9,6 +10,7 @@ const Index = () => {
   const [selectedStudentId, setSelectedStudentId] = useState(students[0].id);
   const selectedStudent = students.find((s) => s.id === selectedStudentId)!;
   const [allAppointments, setAllAppointments] = useState<Appointment[]>(appointments);
+  const [allProblems, setAllProblems] = useState<ExternalProblem[]>(externalProblems);
 
   const handleAddAppointment = (apt: Appointment) => {
     setAllAppointments(prev => [...prev, apt]);
@@ -16,6 +18,10 @@ const Index = () => {
 
   const handleUpdateAppointmentStatus = (id: string, status: Appointment["status"]) => {
     setAllAppointments(prev => prev.map(a => a.id === id ? { ...a, status } : a));
+  };
+
+  const handleAddProblem = (problem: ExternalProblem) => {
+    setAllProblems(prev => [...prev, problem]);
   };
 
   return (
@@ -33,6 +39,7 @@ const Index = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <div className="flex bg-secondary rounded-lg p-1">
               <button
                 onClick={() => setView("student")}
@@ -79,12 +86,15 @@ const Index = () => {
             appointments={allAppointments.filter(a => a.studentId === selectedStudent.id)}
             onAddAppointment={handleAddAppointment}
             onUpdateStatus={handleUpdateAppointmentStatus}
+            problems={allProblems.filter(p => p.studentId === selectedStudent.id)}
+            onAddProblem={handleAddProblem}
           />
         ) : (
           <LecturerDashboard
             appointments={allAppointments}
             onAddAppointment={handleAddAppointment}
             onUpdateStatus={handleUpdateAppointmentStatus}
+            problems={allProblems}
           />
         )}
       </main>
