@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Student, Appointment } from "@/data/mockData";
-import { CalendarDays, Bell, BookOpen, Brain, UserCheck, TrendingUp, Clock, PlusCircle, User, Check, X } from "lucide-react";
+import { Student, Appointment, ExternalProblem } from "@/data/mockData";
+import { CalendarDays, Bell, BookOpen, Brain, UserCheck, TrendingUp, Clock, PlusCircle, User, Check, X, AlertCircle } from "lucide-react";
 import StatCard from "./StatCard";
 import StatusBadge from "./StatusBadge";
 import StudentProfile from "./StudentProfile";
@@ -10,9 +10,11 @@ interface Props {
   appointments: Appointment[];
   onAddAppointment: (apt: Appointment) => void;
   onUpdateStatus: (id: string, status: Appointment["status"]) => void;
+  problems: ExternalProblem[];
+  onAddProblem: (problem: ExternalProblem) => void;
 }
 
-const StudentDashboard = ({ student, appointments: studentAppointments, onAddAppointment, onUpdateStatus }: Props) => {
+const StudentDashboard = ({ student, appointments: studentAppointments, onAddAppointment, onUpdateStatus, problems, onAddProblem }: Props) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showBooking, setShowBooking] = useState(false);
@@ -226,6 +228,9 @@ const StudentDashboard = ({ student, appointments: studentAppointments, onAddApp
         )}
       </div>
 
+      {/* External Problems */}
+      <ExternalProblemsSection problems={problems} studentId={student.id} onAddProblem={onAddProblem} />
+
       {/* Completed Assessments */}
       <div className="space-y-4">
         <h3 className="font-semibold text-lg">Assessment Results</h3>
@@ -267,6 +272,101 @@ const StudentDashboard = ({ student, appointments: studentAppointments, onAddApp
           </div>
         ))}
       </div>
+    </div>
+  );
+};
+
+const categoryLabels: Record<ExternalProblem["category"], string> = {
+  financial: "💰 Financial",
+  health: "🏥 Health",
+  family: "👨‍👩‍👧 Family",
+  mental: "🧠 Mental Health",
+  academic: "📚 Academic",
+  other: "📝 Other",
+};
+
+const severityColors: Record<ExternalProblem["severity"], string> = {
+  low: "bg-status-mastered text-status-mastered-foreground",
+  medium: "bg-status-developing text-status-developing-foreground",
+  high: "bg-status-intensive text-status-intensive-foreground",
+};
+
+const ExternalProblemsSection = ({ problems, studentId, onAddProblem }: { problems: ExternalProblem[]; studentId: string; onAddProblem: (p: ExternalProblem) => void }) => {
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ category: "" as ExternalProblem["category"] | "", description: "", severity: "" as ExternalProblem["severity"] | "" });
+
+  const handleSubmit = () => {
+    if (!form.category || !form.description || !form.severity) return;
+    onAddProblem({
+      id: `ep-${Date.now()}`,
+      studentId,
+      category: form.category as ExternalProblem["category"],
+      description: form.description,
+      date: new Date().toISOString().split("T")[0],
+      severity: form.severity as ExternalProblem["severity"],
+    });
+    setForm({ category: "", description: "", severity: "" });
+    setShowForm(false);
+  };
+
+  return (
+    <div className="glass-card p-5 space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="font-semibold flex items-center gap-2"><AlertCircle size={18} className="text-status-developing" /> External Problems</h3>
+        <button onClick={() => setShowForm(!showForm)}
+          className="text-xs px-3 py-1.5 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-1">
+          <PlusCircle size={14} /> Report Problem
+        </button>
+      </div>
+
+      {showForm && (
+        <div className="p-4 bg-secondary/50 rounded-lg space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <select className="text-sm px-3 py-2 rounded-lg bg-background border border-border focus:border-primary focus:outline-none"
+              value={form.category} onChange={e => setForm(p => ({ ...p, category: e.target.value as any }))}>
+              <option value="">Select category</option>
+              <option value="financial">Financial</option>
+              <option value="health">Health</option>
+              <option value="family">Family</option>
+              <option value="mental">Mental Health</option>
+              <option value="academic">Academic</option>
+              <option value="other">Other</option>
+            </select>
+            <select className="text-sm px-3 py-2 rounded-lg bg-background border border-border focus:border-primary focus:outline-none"
+              value={form.severity} onChange={e => setForm(p => ({ ...p, severity: e.target.value as any }))}>
+              <option value="">Severity</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+          <textarea placeholder="Describe your problem..."
+            className="w-full text-sm px-3 py-2 rounded-lg bg-background border border-border focus:border-primary focus:outline-none min-h-[80px]"
+            value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
+          <button onClick={handleSubmit}
+            disabled={!form.category || !form.description || !form.severity}
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed">
+            Submit Report
+          </button>
+        </div>
+      )}
+
+      {problems.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No external problems reported.</p>
+      ) : (
+        problems.map(p => (
+          <div key={p.id} className="flex items-start justify-between p-3 bg-secondary/50 rounded-lg">
+            <div>
+              <p className="font-medium text-sm">{categoryLabels[p.category]}</p>
+              <p className="text-xs mt-1">{p.description}</p>
+              <p className="text-xs text-muted-foreground mt-1">{p.date}</p>
+            </div>
+            <span className={`text-xs px-2 py-1 rounded-full font-semibold ${severityColors[p.severity]}`}>
+              {p.severity.charAt(0).toUpperCase() + p.severity.slice(1)}
+            </span>
+          </div>
+        ))
+      )}
     </div>
   );
 };

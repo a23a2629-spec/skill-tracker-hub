@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { students, courses, Course, Student, SkillStatus, appointments, Appointment } from "@/data/mockData";
-import { Users, BookOpen, AlertTriangle, TrendingUp, MessageSquare, ChevronDown, ChevronUp, PlusCircle, CalendarDays, Eye } from "lucide-react";
+import { students, courses, Course, Student, SkillStatus, appointments, Appointment, ExternalProblem } from "@/data/mockData";
+import { Users, BookOpen, AlertTriangle, TrendingUp, MessageSquare, ChevronDown, ChevronUp, PlusCircle, CalendarDays, Eye, AlertCircle } from "lucide-react";
 import StatCard from "./StatCard";
 import StatusBadge from "./StatusBadge";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
@@ -9,6 +9,7 @@ interface Props {
   appointments: Appointment[];
   onAddAppointment: (apt: Appointment) => void;
   onUpdateStatus: (id: string, status: Appointment["status"]) => void;
+  problems: ExternalProblem[];
 }
 
 const LecturerDashboard = ({ appointments: lecturerAppointments, onAddAppointment, onUpdateStatus }: Props) => {
