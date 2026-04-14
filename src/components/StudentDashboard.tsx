@@ -82,7 +82,7 @@ const StudentDashboard = ({ student, appointments: studentAppointments, onAddApp
       </div>
 
       {/* Profile Panel */}
-      {showProfile && <StudentProfile student={student} />}
+      {showProfile && <StudentProfile student={student} problems={problems} />}
 
       {/* Notifications Panel */}
       {showNotifications && (
