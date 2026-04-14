@@ -8,46 +8,32 @@
   :root {
     --background: 220 25% 10%;
     --foreground: 210 40% 96%;
-
     --card: 220 25% 14%;
     --card-foreground: 210 40% 96%;
-
     --popover: 220 25% 14%;
     --popover-foreground: 210 40% 96%;
-
     --primary: 210 80% 55%;
     --primary-foreground: 0 0% 100%;
-
     --secondary: 220 20% 20%;
     --secondary-foreground: 210 40% 96%;
-
     --muted: 220 20% 18%;
     --muted-foreground: 215 15% 55%;
-
     --accent: 220 20% 22%;
     --accent-foreground: 210 40% 96%;
-
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-
     --border: 220 20% 22%;
     --input: 220 20% 22%;
     --ring: 210 80% 55%;
-
     --radius: 0.75rem;
-
-    /* Status colors */
     --status-mastered: 142 71% 45%;
     --status-mastered-foreground: 0 0% 100%;
     --status-developing: 45 93% 47%;
     --status-developing-foreground: 0 0% 10%;
     --status-intensive: 0 84% 60%;
     --status-intensive-foreground: 0 0% 100%;
-
-    /* Accent glow */
     --glow-primary: 210 80% 55%;
     --glow-green: 142 71% 45%;
-
     --sidebar-background: 220 25% 8%;
     --sidebar-foreground: 210 40% 90%;
     --sidebar-primary: 210 80% 55%;
@@ -56,6 +42,44 @@
     --sidebar-accent-foreground: 210 40% 96%;
     --sidebar-border: 220 20% 18%;
     --sidebar-ring: 210 80% 55%;
+  }
+
+  :root.light {
+    --background: 0 0% 98%;
+    --foreground: 220 20% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 15%;
+    --primary: 210 80% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 15% 93%;
+    --secondary-foreground: 220 20% 20%;
+    --muted: 220 15% 95%;
+    --muted-foreground: 215 15% 45%;
+    --accent: 220 15% 90%;
+    --accent-foreground: 220 20% 15%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 15% 85%;
+    --input: 220 15% 85%;
+    --ring: 210 80% 50%;
+    --status-mastered: 142 71% 40%;
+    --status-mastered-foreground: 0 0% 100%;
+    --status-developing: 45 93% 42%;
+    --status-developing-foreground: 0 0% 10%;
+    --status-intensive: 0 84% 55%;
+    --status-intensive-foreground: 0 0% 100%;
+    --glow-primary: 210 80% 50%;
+    --glow-green: 142 71% 40%;
+    --sidebar-background: 0 0% 97%;
+    --sidebar-foreground: 220 20% 20%;
+    --sidebar-primary: 210 80% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 15% 92%;
+    --sidebar-accent-foreground: 220 20% 15%;
+    --sidebar-border: 220 15% 88%;
+    --sidebar-ring: 210 80% 50%;
   }
 }
 
