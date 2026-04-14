@@ -338,3 +338,11 @@ export function getStatusLabel(status: SkillStatus): string {
     case "intensive": return "Intensive";
   }
 }
+
+export const externalProblems: ExternalProblem[] = [
+  { id: "ep1", studentId: "s2", category: "financial", description: "Unable to afford textbooks and study materials for this semester.", date: "2026-03-15", severity: "high" },
+  { id: "ep2", studentId: "s4", category: "family", description: "Family issues affecting focus and attendance.", date: "2026-03-20", severity: "high" },
+  { id: "ep3", studentId: "s8", category: "mental", description: "Experiencing anxiety during exams and presentations.", date: "2026-04-01", severity: "medium" },
+  { id: "ep4", studentId: "s12", category: "health", description: "Chronic headaches making it hard to concentrate in class.", date: "2026-03-28", severity: "medium" },
+  { id: "ep5", studentId: "s14", category: "academic", description: "Struggling to keep up with coursework due to weak foundation.", date: "2026-04-05", severity: "low" },
+];
