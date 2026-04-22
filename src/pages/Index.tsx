@@ -95,27 +95,8 @@ const Index = () => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        {session.role === "lecturer" && (
-          <div className="mb-6">
-            <label className="text-xs text-muted-foreground mb-2 block">Viewing student profile:</label>
-            <select
-              value={selectedStudentId}
-              onChange={(e) => setSelectedStudentId(e.target.value)}
-              className="px-4 py-2 rounded-lg bg-secondary border border-border text-sm focus:outline-none focus:border-primary"
-              data-testid="select-student-lecturer-view"
-            >
-              {students.map((s) => (
-                <option key={s.id} value={s.id}>{s.name} ({s.matricNo})</option>
-              ))}
-            </select>
-            <p className="text-[10px] text-muted-foreground mt-1">
-              You are signed in as a lecturer. The dashboard below shows aggregate data; selecting a student is for context only.
-            </p>
-          </div>
-        )}
-
-        {session.role === "student" ? (
+      {session.role === "student" ? (
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
           <StudentDashboard
             student={selectedStudent}
             appointments={allAppointments.filter(a => a.studentId === selectedStudent.id)}
@@ -124,15 +105,17 @@ const Index = () => {
             problems={allProblems.filter(p => p.studentId === selectedStudent.id)}
             onAddProblem={handleAddProblem}
           />
-        ) : (
-          <LecturerDashboard
-            appointments={allAppointments}
-            onAddAppointment={handleAddAppointment}
-            onUpdateStatus={handleUpdateAppointmentStatus}
-            problems={allProblems}
-          />
-        )}
-      </main>
+        </main>
+      ) : (
+        <LecturerDashboard
+          appointments={allAppointments}
+          onAddAppointment={handleAddAppointment}
+          onUpdateStatus={handleUpdateAppointmentStatus}
+          problems={allProblems}
+          lecturerName={session.name}
+          onLogout={handleLogout}
+        />
+      )}
     </div>
   );
 };
