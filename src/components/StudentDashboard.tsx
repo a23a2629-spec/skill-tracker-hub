@@ -5,10 +5,11 @@ import {
   Check, X, AlertCircle, Sparkles, Activity, LayoutDashboard, Users, Phone,
   AtSign, FileText, BarChart3, Settings as SettingsIcon, LogOut, Menu, ChevronRight,
   Search, StickyNote, Mail, Calendar, Briefcase, Target, ClipboardList, Heart,
-  GraduationCap, MapPin, ShieldCheck, Award, Zap, Circle,
+  GraduationCap, MapPin, ShieldCheck, Award, Zap, Circle, User as UserIcon,
 } from "lucide-react";
 import { ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Area, AreaChart } from "recharts";
 import StatusBadge from "./StatusBadge";
+import StudentProfile from "./StudentProfile";
 
 interface Props {
   student: Student;
@@ -21,11 +22,12 @@ interface Props {
 }
 
 type Section =
-  | "dashboard" | "students" | "contacts" | "cases" | "meetings"
+  | "dashboard" | "profile" | "students" | "contacts" | "cases" | "meetings"
   | "analytics" | "reports" | "ai" | "settings";
 
 const navItems: { key: Section; label: string; icon: React.ElementType }[] = [
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { key: "profile", label: "My Profile", icon: UserIcon },
   { key: "students", label: "Students", icon: Users },
   { key: "contacts", label: "Contacts", icon: AtSign },
   { key: "cases", label: "Cases", icon: AlertCircle },
@@ -51,6 +53,7 @@ const StudentDashboard = ({
 
   const sectionMeta: Record<Section, { title: string; subtitle: string }> = {
     dashboard: { title: "Student Record", subtitle: "Your personal CRM-style overview" },
+    profile: { title: "My Profile", subtitle: "Your full academic & personal record" },
     students: { title: "My Cohort", subtitle: "Classmates and peers in your course" },
     contacts: { title: "Contacts", subtitle: "Your lecturers, advisors and support staff" },
     cases: { title: "Cases", subtitle: "Reported issues and ongoing support tickets" },
@@ -148,6 +151,11 @@ const StudentDashboard = ({
               onUpdateStatus={onUpdateStatus}
               problems={problems}
             />
+          )}
+          {active === "profile" && (
+            <SectionShell>
+              <StudentProfile student={student} problems={problems} />
+            </SectionShell>
           )}
           {active === "students" && <CohortSection student={student} />}
           {active === "contacts" && <ContactsSection />}
