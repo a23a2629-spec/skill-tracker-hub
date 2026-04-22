@@ -4,7 +4,7 @@ import StudentDashboard from "@/components/StudentDashboard";
 import LecturerDashboard from "@/components/LecturerDashboard";
 import ThemeToggle from "@/components/ThemeToggle";
 import Login, { AuthSession } from "@/components/Login";
-import { GraduationCap, LogOut, UserCircle2 } from "lucide-react";
+import { GraduationCap, LogOut, UserCircle2, Search, Bell } from "lucide-react";
 
 const SESSION_KEY = "skills-tracker-session";
 
@@ -40,22 +40,45 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-t-[3px] border-t-brand bg-card border-b border-border sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-md bg-brand/10">
-              <GraduationCap size={22} className="text-brand" />
+      <header className="bg-card/80 backdrop-blur-xl border-b border-border/60 sticky top-0 z-50 shadow-[0_1px_3px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.06)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-4">
+          {/* Logo */}
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="w-10 h-10 rounded-xl gradient-brand flex items-center justify-center shadow-lg shadow-primary/20">
+              <GraduationCap size={20} className="text-white" />
             </div>
-            <div>
-              <h1 className="font-semibold text-sm sm:text-base text-foreground">In-Campus Skills Gap Tracker</h1>
-              <p className="text-[10px] sm:text-xs text-muted-foreground">Early Detection • Smarter Intervention</p>
+            <div className="hidden md:block">
+              <h1 className="font-bold text-sm leading-tight text-foreground">Skills Gap Tracker</h1>
+              <p className="text-[10px] text-muted-foreground">Early Detection · Smarter Intervention</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* Search bar */}
+          <div className="flex-1 max-w-md mx-auto hidden sm:block">
+            <div className="relative">
+              <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Search students, modules, records…"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-secondary/70 border border-transparent text-sm placeholder:text-muted-foreground focus:outline-none focus:bg-card focus:border-primary/40 focus:ring-4 focus:ring-primary/10 transition-all"
+              />
+            </div>
+          </div>
+
+          {/* Right side */}
+          <div className="flex items-center gap-2 ml-auto">
             <ThemeToggle />
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md border border-border">
-              <UserCircle2 size={16} className="text-primary" />
+            <button
+              className="relative w-10 h-10 rounded-xl bg-secondary/70 hover:bg-secondary flex items-center justify-center transition-colors"
+              aria-label="Notifications"
+            >
+              <Bell size={17} className="text-foreground/80" />
+              <span className="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-[hsl(var(--status-intensive))] ring-2 ring-card" />
+            </button>
+            <div className="hidden sm:flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-xl border border-border/70 bg-card">
+              <div className="w-8 h-8 rounded-lg gradient-brand flex items-center justify-center text-white text-xs font-bold">
+                {session.name.split(" ").map(n => n[0]).slice(0, 2).join("")}
+              </div>
               <div className="text-left">
                 <p className="text-xs font-semibold leading-tight">{session.name}</p>
                 <p className="text-[10px] text-muted-foreground capitalize">{session.role}</p>
@@ -63,16 +86,16 @@ const Index = () => {
             </div>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-md border border-border text-foreground hover:bg-secondary transition-colors text-xs font-medium"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border/70 text-foreground hover:bg-secondary transition-colors text-xs font-medium"
               data-testid="button-logout"
             >
-              <LogOut size={14} /> <span className="hidden sm:inline">Logout</span>
+              <LogOut size={14} /> <span className="hidden lg:inline">Logout</span>
             </button>
           </div>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-6">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {session.role === "lecturer" && (
           <div className="mb-6">
             <label className="text-xs text-muted-foreground mb-2 block">Viewing student profile:</label>

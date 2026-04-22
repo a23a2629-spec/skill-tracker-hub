@@ -6,26 +6,28 @@
 
 @layer base {
   :root {
-    --background: 210 25% 96%;
-    --foreground: 215 25% 17%;
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 17%;
+    --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 17%;
-    --primary: 210 90% 48%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 221 83% 53%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 25% 94%;
-    --secondary-foreground: 215 25% 22%;
-    --muted: 210 25% 96%;
-    --muted-foreground: 215 15% 45%;
-    --accent: 210 25% 90%;
-    --accent-foreground: 215 25% 17%;
+    --primary-soft: 221 83% 96%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 17%;
+    --accent-cyan: 199 89% 48%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 210 40% 93%;
+    --accent-foreground: 222 47% 11%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 215 20% 88%;
-    --input: 215 20% 88%;
-    --ring: 210 90% 48%;
-    --radius: 0.5rem;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 221 83% 53%;
+    --radius: 1rem;
     --status-mastered: 142 65% 38%;
     --status-mastered-foreground: 0 0% 100%;
     --status-developing: 38 92% 48%;
@@ -95,16 +97,44 @@
 
 @layer utilities {
   .glass-card {
-    @apply bg-card border border-border rounded-lg;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.04);
+    @apply bg-card border border-border/60 rounded-2xl;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -12px rgba(15, 23, 42, 0.08);
   }
   :root.dark .glass-card {
     @apply bg-card/80 backdrop-blur-sm border-border/50;
     box-shadow: none;
   }
   .hub-card {
-    @apply bg-card border border-border rounded-lg;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.04);
+    @apply bg-card border border-border/60 rounded-2xl;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -12px rgba(15, 23, 42, 0.08);
+  }
+  .premium-card {
+    @apply bg-card border border-border/60 rounded-2xl transition-all duration-300;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 32px -16px rgba(15, 23, 42, 0.12);
+  }
+  .premium-card:hover {
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 20px 40px -20px rgba(37, 99, 235, 0.18);
+  }
+  .gradient-brand {
+    background-image: linear-gradient(135deg, hsl(221 83% 53%) 0%, hsl(199 89% 48%) 100%);
+  }
+  .text-gradient-brand {
+    background-image: linear-gradient(135deg, hsl(221 83% 53%) 0%, hsl(199 89% 48%) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .ring-glow-primary {
+    box-shadow: 0 0 0 4px hsl(221 83% 53% / 0.12), 0 8px 24px -8px hsl(221 83% 53% / 0.4);
+  }
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  .animate-shimmer {
+    background: linear-gradient(90deg, transparent, hsl(221 83% 53% / 0.15), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 2.5s ease-in-out infinite;
   }
   .status-mastered { background-color: hsl(var(--status-mastered)); color: hsl(var(--status-mastered-foreground)); }
   .status-developing { background-color: hsl(var(--status-developing)); color: hsl(var(--status-developing-foreground)); }

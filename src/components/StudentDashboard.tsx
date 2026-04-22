@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Student, Appointment, ExternalProblem } from "@/data/mockData";
-import { CalendarDays, Bell, BookOpen, Brain, UserCheck, TrendingUp, Clock, PlusCircle, User, Check, X, AlertCircle } from "lucide-react";
+import { CalendarDays, Bell, BookOpen, Brain, UserCheck, TrendingUp, Clock, PlusCircle, User, Check, X, AlertCircle, Sparkles, Activity } from "lucide-react";
+import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Area, AreaChart } from "recharts";
 import StatCard from "./StatCard";
 import StatusBadge from "./StatusBadge";
 import StudentProfile from "./StudentProfile";
@@ -83,6 +84,12 @@ const StudentDashboard = ({ student, appointments: studentAppointments, onAddApp
 
       {/* Profile Panel */}
       {showProfile && <StudentProfile student={student} problems={problems} />}
+
+      {/* AI Insight + Performance Chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <AIInsightCard student={student} />
+        <PerformanceChart student={student} />
+      </div>
 
       {/* Notifications Panel */}
       {showNotifications && (
@@ -228,6 +235,9 @@ const StudentDashboard = ({ student, appointments: studentAppointments, onAddApp
         )}
       </div>
 
+      {/* Recent Activity Timeline */}
+      <ActivityTimeline student={student} appointments={studentAppointments} />
+
       {/* External Problems */}
       <ExternalProblemsSection problems={problems} studentId={student.id} onAddProblem={onAddProblem} />
 
@@ -366,6 +376,179 @@ const ExternalProblemsSection = ({ problems, studentId, onAddProblem }: { proble
             </span>
           </div>
         ))
+      )}
+    </div>
+  );
+};
+
+// ── AI Insight Card ─────────────────────────────────────────────────────
+const AIInsightCard = ({ student }: { student: Student }) => {
+  const insights: { tone: "positive" | "warning" | "info"; text: string }[] = [];
+  if (student.attendance >= 90) insights.push({ tone: "positive", text: `Excellent attendance at ${student.attendance}%. Keep it up.` });
+  else if (student.attendance < 75) insights.push({ tone: "warning", text: `Attendance at ${student.attendance}% is below target — schedule a check-in.` });
+  if (student.averageScore >= 75) insights.push({ tone: "positive", text: `Strong average score of ${student.averageScore}% — performing above cohort.` });
+  else if (student.averageScore < 50) insights.push({ tone: "warning", text: `Average score ${student.averageScore}% suggests intensive support may help.` });
+  if (student.aiPercentage > 25) insights.push({ tone: "warning", text: `AI usage at ${student.aiPercentage}% exceeds the recommended threshold.` });
+  else insights.push({ tone: "info", text: `AI usage of ${student.aiPercentage}% is within acceptable range.` });
+
+  const toneCls = {
+    positive: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+    warning: "bg-orange-500/10 text-orange-600 border-orange-500/20",
+    info: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  };
+
+  return (
+    <div className="lg:col-span-1 premium-card p-5 relative overflow-hidden">
+      <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-gradient-to-br from-primary/20 to-[hsl(var(--accent-cyan))]/20 blur-2xl pointer-events-none" />
+      <div className="relative">
+        <div className="flex items-center gap-2.5 mb-4">
+          <div className="w-9 h-9 rounded-xl gradient-brand flex items-center justify-center shadow-lg shadow-primary/30">
+            <Sparkles size={16} className="text-white" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold tracking-tight">AI Insight Summary</h3>
+            <p className="text-[10px] text-muted-foreground">Generated from latest activity</p>
+          </div>
+        </div>
+        <div className="space-y-2">
+          {insights.slice(0, 3).map((ins, i) => (
+            <div key={i} className={`text-xs p-2.5 rounded-xl border ${toneCls[ins.tone]} leading-relaxed`}>
+              {ins.text}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── Performance Chart ─────────────────────────────────────────────────────
+const PerformanceChart = ({ student }: { student: Student }) => {
+  const completed = student.skills.filter(s => s.completed);
+  const data = completed.length > 0
+    ? completed.map((s, i) => ({
+        name: s.title.length > 12 ? s.title.slice(0, 12) + "…" : s.title,
+        score: Math.round((s.score / s.maxScore) * 100),
+        idx: i + 1,
+      }))
+    : Array.from({ length: 6 }).map((_, i) => ({
+        name: `W${i + 1}`,
+        score: 60 + Math.round(Math.sin(i) * 15 + i * 3),
+        idx: i + 1,
+      }));
+
+  return (
+    <div className="lg:col-span-2 premium-card p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+            <TrendingUp size={16} className="text-primary" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold tracking-tight">Performance Trend</h3>
+            <p className="text-[10px] text-muted-foreground">Assessment scores over time</p>
+          </div>
+        </div>
+        <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-600 font-semibold">
+          {student.averageScore}% avg
+        </span>
+      </div>
+      <div className="h-44 -ml-2">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+            <defs>
+              <linearGradient id="grad-score" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="hsl(221 83% 53%)" stopOpacity={0.35} />
+                <stop offset="100%" stopColor="hsl(221 83% 53%)" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+            <XAxis dataKey="name" tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }} axisLine={false} tickLine={false} domain={[0, 100]} />
+            <Tooltip
+              contentStyle={{
+                background: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
+                borderRadius: 12,
+                fontSize: 12,
+                boxShadow: "0 8px 24px -12px rgba(15,23,42,0.18)",
+              }}
+            />
+            <Area type="monotone" dataKey="score" stroke="hsl(221 83% 53%)" strokeWidth={2.5} fill="url(#grad-score)" />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+};
+
+// ── Activity Timeline ─────────────────────────────────────────────────────
+const ActivityTimeline = ({ student, appointments }: { student: Student; appointments: Appointment[] }) => {
+  type Event = { date: string; title: string; subtitle: string; tone: "primary" | "mastered" | "developing" | "intensive" };
+  const events: Event[] = [];
+
+  student.skills.filter(s => s.completed).slice(0, 3).forEach(s => {
+    events.push({
+      date: s.date,
+      title: `Completed ${s.title}`,
+      subtitle: `Scored ${s.score}/${s.maxScore} · ${s.status}`,
+      tone: s.status === "mastered" ? "mastered" : s.status === "developing" ? "developing" : "intensive",
+    });
+  });
+  appointments.slice(0, 2).forEach(a => {
+    events.push({
+      date: a.date,
+      title: `Appointment with ${a.lecturerName}`,
+      subtitle: `${a.time} · ${a.status}`,
+      tone: "primary",
+    });
+  });
+  student.notifications.slice(0, 2).forEach(n => {
+    events.push({ date: n.date, title: n.message, subtitle: n.type, tone: "developing" });
+  });
+
+  events.sort((a, b) => (a.date < b.date ? 1 : -1));
+  const top = events.slice(0, 6);
+
+  const toneCls = {
+    primary: "bg-primary text-primary-foreground",
+    mastered: "bg-emerald-500 text-white",
+    developing: "bg-amber-500 text-white",
+    intensive: "bg-red-500 text-white",
+  };
+
+  return (
+    <div className="premium-card p-5">
+      <div className="flex items-center gap-2.5 mb-5">
+        <div className="w-9 h-9 rounded-xl bg-[hsl(var(--accent-cyan))]/10 flex items-center justify-center">
+          <Activity size={16} className="text-[hsl(var(--accent-cyan))]" />
+        </div>
+        <div>
+          <h3 className="text-sm font-bold tracking-tight">Recent Activity</h3>
+          <p className="text-[10px] text-muted-foreground">Latest events across your profile</p>
+        </div>
+      </div>
+
+      {top.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No recent activity to show.</p>
+      ) : (
+        <div className="relative pl-6">
+          <div className="absolute left-2 top-1 bottom-1 w-px bg-gradient-to-b from-primary/40 via-border to-transparent" />
+          <div className="space-y-4">
+            {top.map((e, i) => (
+              <div key={i} className="relative">
+                <div className={`absolute -left-[18px] top-1 w-3 h-3 rounded-full ${toneCls[e.tone]} ring-4 ring-card`} />
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-foreground leading-tight">{e.title}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{e.subtitle}</p>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground whitespace-nowrap font-medium">{e.date}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

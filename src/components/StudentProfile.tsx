@@ -77,84 +77,124 @@ export default function StudentProfile({ student, problems, onProfileUpdate }: P
   const handleCancel = () => { setForm({ phone: p.phone, email: p.email, address: p.address }); setAvatar(p.avatar); setEditing(false); };
 
   return (
-    <div className="glass-card p-5 space-y-4">
-      {/* ── Header ─────────────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-4">
-          <div className="relative group shrink-0">
-            {avatar
-              ? <img src={avatar} alt={student.name} className="w-16 h-16 rounded-full object-cover border-2 border-primary/30" />
-              : <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xl font-bold">{initials}</div>}
-            {editing && (
-              <button onClick={() => fileRef.current?.click()}
-                className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <Camera size={18} className="text-white" />
-              </button>
-            )}
-            <input ref={fileRef} type="file" accept="image/*" className="hidden"
-              onChange={e => { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = ev => setAvatar(ev.target?.result as string); r.readAsDataURL(f); }} />
-          </div>
-          <div>
-            <h3 className="font-bold text-lg leading-tight">{student.name}</h3>
-            <p className="text-xs text-muted-foreground">{student.matricNo} · {p.studentId}</p>
-            <p className="text-xs text-primary font-medium mt-0.5">{courseName}</p>
-            <div className="flex items-center gap-2 mt-1 flex-wrap">
-              <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${enrollStatusCls[p.enrollmentStatus]}`}>{p.enrollmentStatus}</span>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${trustColors[report.trustIndex].bg} ${trustColors[report.trustIndex].text}`}>
-                Trust: {report.trustIndex} ({report.trustScore}%)
-              </span>
+    <div className="premium-card p-6 sm:p-8 space-y-6">
+      {/* ── Header / Profile Card ─────────────────────────────────────── */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/[0.06] via-card to-[hsl(var(--accent-cyan))]/[0.06] border border-border/60 p-5 sm:p-6">
+        <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-20 -left-10 w-48 h-48 rounded-full bg-[hsl(var(--accent-cyan))]/10 blur-3xl pointer-events-none" />
+
+        <div className="relative flex items-start justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-5">
+            <div className="relative group shrink-0">
+              <div className="absolute inset-0 rounded-2xl gradient-brand opacity-80 blur-md" />
+              {avatar
+                ? <img src={avatar} alt={student.name} className="relative w-20 h-20 rounded-2xl object-cover ring-4 ring-card shadow-lg" />
+                : <div className="relative w-20 h-20 rounded-2xl gradient-brand flex items-center justify-center text-white text-2xl font-bold ring-4 ring-card shadow-lg">{initials}</div>}
+              {editing && (
+                <button onClick={() => fileRef.current?.click()}
+                  className="absolute inset-0 rounded-2xl bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Camera size={20} className="text-white" />
+                </button>
+              )}
+              <input ref={fileRef} type="file" accept="image/*" className="hidden"
+                onChange={e => { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = ev => setAvatar(ev.target?.result as string); r.readAsDataURL(f); }} />
+            </div>
+            <div className="min-w-0">
+              <h3 className="font-bold text-xl sm:text-2xl leading-tight tracking-tight text-foreground">{student.name}</h3>
+              <p className="text-xs text-muted-foreground mt-1 font-medium">
+                {student.matricNo} <span className="opacity-50">·</span> {p.studentId}
+              </p>
+              <p className="text-xs text-muted-foreground/90 mt-0.5">{courseName}</p>
+              <div className="flex items-center gap-1.5 mt-3 flex-wrap">
+                <span className="text-[10px] px-2.5 py-1 rounded-full font-semibold bg-emerald-500/15 text-emerald-600 ring-1 ring-emerald-500/20 inline-flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  {p.enrollmentStatus}
+                </span>
+                <span className="text-[10px] px-2.5 py-1 rounded-full font-semibold bg-blue-500/15 text-blue-600 ring-1 ring-blue-500/20">
+                  Trust: {report.trustIndex} · {report.trustScore}%
+                </span>
+                {alertCount > 0 && (
+                  <span className="text-[10px] px-2.5 py-1 rounded-full bg-orange-500/15 text-orange-600 ring-1 ring-orange-500/20 font-semibold inline-flex items-center gap-1">
+                    <AlertTriangle size={10} /> {alertCount} Risk Alert{alertCount > 1 ? "s" : ""}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
+          <div className="flex gap-2 items-start">
+            {editing ? (
+              <>
+                <button onClick={handleSave} className="p-2.5 rounded-xl bg-emerald-500/15 text-emerald-600 hover:bg-emerald-500/25 transition-all hover:scale-105"><Check size={16} /></button>
+                <button onClick={handleCancel} className="p-2.5 rounded-xl bg-red-500/15 text-red-600 hover:bg-red-500/25 transition-all hover:scale-105"><X size={16} /></button>
+              </>
+            ) : (
+              <button onClick={() => setEditing(true)} className="p-2.5 rounded-xl bg-card border border-border/70 hover:border-primary/40 hover:text-primary transition-all hover:scale-105 shadow-sm"><Pencil size={16} /></button>
+            )}
+          </div>
         </div>
-        <div className="flex gap-2 items-start">
-          {alertCount > 0 && (
-            <span className="text-[10px] px-2 py-1 rounded-full bg-status-intensive/20 text-status-intensive font-bold flex items-center gap-1">
-              <AlertTriangle size={10} /> {alertCount} Alert{alertCount > 1 ? "s" : ""}
-            </span>
-          )}
-          {editing ? (
-            <>
-              <button onClick={handleSave} className="p-2 rounded-lg bg-status-mastered/20 text-status-mastered hover:bg-status-mastered/30 transition-colors"><Check size={16} /></button>
-              <button onClick={handleCancel} className="p-2 rounded-lg bg-status-intensive/20 text-status-intensive hover:bg-status-intensive/30 transition-colors"><X size={16} /></button>
-            </>
-          ) : (
-            <button onClick={() => setEditing(true)} className="p-2 rounded-lg bg-secondary hover:bg-accent transition-colors"><Pencil size={16} /></button>
-          )}
+
+        {/* Risk Score Progress Bar */}
+        <div className="relative mt-5 pt-5 border-t border-border/60">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Student Risk Score</p>
+            <p className="text-xs font-bold text-foreground">{100 - report.trustScore}<span className="text-muted-foreground font-medium">/100</span></p>
+          </div>
+          <div className="h-2 bg-secondary/80 rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-700 ${
+                report.trustScore >= 80 ? "bg-gradient-to-r from-emerald-400 to-emerald-600"
+                : report.trustScore >= 60 ? "bg-gradient-to-r from-amber-400 to-orange-500"
+                : "bg-gradient-to-r from-orange-500 to-red-600"
+              }`}
+              style={{ width: `${100 - report.trustScore}%` }}
+            />
+          </div>
+          <p className="text-[10px] text-muted-foreground mt-2">
+            {report.trustScore >= 80 ? "✓ Low risk — student is performing well across domains."
+            : report.trustScore >= 60 ? "⚠ Moderate risk — some areas need attention."
+            : "⚠ Elevated risk — counselor review recommended."}
+          </p>
         </div>
       </div>
 
-      {/* ── Quick Action Row (HubSpot-style) ─────────────────────────── */}
-      <div className="flex items-center gap-2 py-2 border-y border-border">
+      {/* ── Quick Action Cards ─────────────────────────────────────── */}
+      <div className="grid grid-cols-5 gap-2 sm:gap-3">
         {[
-          { icon: Mail, label: "Email" },
-          { icon: Phone, label: "Call" },
-          { icon: Calendar, label: "Meet" },
-          { icon: FileText, label: "Note" },
-          { icon: BookOpen, label: "Log" },
-        ].map(({ icon: Icon, label }) => (
-          <button key={label} className="flex flex-col items-center gap-1 px-3 py-1.5 rounded-md hover:bg-secondary transition-colors text-muted-foreground">
-            <Icon size={16} className="text-primary" />
-            <span className="text-[10px] font-medium">{label}</span>
+          { icon: Mail, label: "Email", tone: "from-blue-500/10 to-blue-500/5 text-blue-600" },
+          { icon: Phone, label: "Call", tone: "from-emerald-500/10 to-emerald-500/5 text-emerald-600" },
+          { icon: Calendar, label: "Meet", tone: "from-violet-500/10 to-violet-500/5 text-violet-600" },
+          { icon: FileText, label: "Note", tone: "from-amber-500/10 to-amber-500/5 text-amber-600" },
+          { icon: BookOpen, label: "Log", tone: "from-cyan-500/10 to-cyan-500/5 text-cyan-600" },
+        ].map(({ icon: Icon, label, tone }) => (
+          <button
+            key={label}
+            className={`group relative flex flex-col items-center justify-center gap-1.5 py-3.5 px-2 rounded-2xl bg-gradient-to-br ${tone} border border-border/50 hover:border-primary/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/10`}
+          >
+            <Icon size={18} className="transition-transform duration-200 group-hover:scale-110" />
+            <span className="text-[11px] font-semibold text-foreground/80">{label}</span>
           </button>
         ))}
       </div>
 
-      {/* ── Tab Bar (underline style) ───────────────────────────────── */}
-      <div className="flex gap-1 flex-wrap border-b border-border -mx-5 px-5">
+      {/* ── Tab Bar (Pill style) ───────────────────────────────── */}
+      <div className="flex gap-1.5 p-1.5 rounded-2xl bg-secondary/60 border border-border/40 overflow-x-auto">
         {tabConfig.map(({ key, label, icon: Icon }) => {
           const isInteg = key === "integrity";
           const hasIssue = isInteg && (alertCount + warnCount) > 0;
           const isActive = activeTab === key;
           return (
-            <button key={key} onClick={() => setActiveTab(key)}
-              className={`relative px-3 py-2.5 text-xs font-semibold transition-all flex items-center gap-1.5 -mb-px border-b-2 ${
+            <button
+              key={key}
+              onClick={() => setActiveTab(key)}
+              className={`relative flex-1 min-w-fit px-3 sm:px-4 py-2 text-xs font-semibold transition-all duration-300 flex items-center justify-center gap-1.5 rounded-xl whitespace-nowrap ${
                 isActive
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
-              }`}>
-              <Icon size={13} /> {label}
+                  ? "gradient-brand text-white shadow-lg shadow-primary/30"
+                  : "text-muted-foreground hover:text-foreground hover:bg-card/60"
+              }`}
+            >
+              <Icon size={13} /> <span className="hidden sm:inline">{label}</span>
               {hasIssue && (
-                <span className={`w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center text-white ${alertCount > 0 ? "bg-status-intensive" : "bg-status-developing"}`}>
+                <span className={`w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center text-white ${alertCount > 0 ? "bg-red-500" : "bg-orange-500"} ${isActive ? "ring-2 ring-white/40" : ""}`}>
                   {alertCount + warnCount}
                 </span>
               )}
@@ -513,18 +553,20 @@ export default function StudentProfile({ student, problems, onProfileUpdate }: P
 function Section({ icon: Icon, title, children, badge }: { icon: React.ElementType; title: string; children: React.ReactNode; badge?: React.ReactNode }) {
   const [open, setOpen] = useState(true);
   return (
-    <div className="border border-border rounded-xl overflow-hidden">
-      <button onClick={() => setOpen(o => !o)} className="w-full flex items-center justify-between px-4 py-2.5 bg-secondary/40 hover:bg-secondary/60 transition-colors">
-        <div className="flex items-center gap-2">
-          <Icon size={14} className="text-primary" />
-          <span className="text-xs font-semibold">{title}</span>
+    <div className="bg-card border border-border/60 rounded-2xl overflow-hidden shadow-[0_1px_2px_rgba(15,23,42,0.04),0_4px_16px_-12px_rgba(15,23,42,0.06)] transition-all hover:shadow-[0_1px_2px_rgba(15,23,42,0.04),0_8px_24px_-16px_rgba(37,99,235,0.18)]">
+      <button onClick={() => setOpen(o => !o)} className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-secondary/40 transition-colors">
+        <div className="flex items-center gap-2.5">
+          <span className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Icon size={14} className="text-primary" />
+          </span>
+          <span className="text-sm font-semibold tracking-tight">{title}</span>
         </div>
         <div className="flex items-center gap-2">
           {badge}
-          {open ? <ChevronUp size={14} className="text-muted-foreground" /> : <ChevronDown size={14} className="text-muted-foreground" />}
+          {open ? <ChevronUp size={15} className="text-muted-foreground" /> : <ChevronDown size={15} className="text-muted-foreground" />}
         </div>
       </button>
-      {open && <div className="p-3 space-y-2">{children}</div>}
+      {open && <div className="px-5 pb-5 pt-1 space-y-2.5 border-t border-border/40">{children}</div>}
     </div>
   );
 }
@@ -535,11 +577,13 @@ function Grid({ children }: { children: React.ReactNode }) {
 
 function InfoRow({ icon: Icon, label, value, valueClass = "" }: { icon: React.ElementType; label: string; value: string; valueClass?: string }) {
   return (
-    <div className="flex items-start gap-2 p-2 bg-secondary/50 rounded-lg">
-      <Icon size={13} className="text-muted-foreground mt-0.5 shrink-0" />
-      <div className="min-w-0">
-        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</p>
-        <p className={`text-sm break-words ${valueClass}`}>{value}</p>
+    <div className="flex items-start gap-3 p-3 bg-secondary/40 rounded-xl border border-transparent hover:border-primary/20 hover:bg-secondary/60 transition-all">
+      <span className="w-7 h-7 rounded-lg bg-card border border-border/60 flex items-center justify-center shrink-0 mt-0.5">
+        <Icon size={13} className="text-muted-foreground" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">{label}</p>
+        <p className={`text-sm break-words mt-0.5 font-medium ${valueClass}`}>{value}</p>
       </div>
     </div>
   );
