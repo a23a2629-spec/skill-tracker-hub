@@ -1,0 +1,222 @@
+Redesign my Student Profile Dashboard (first screen) using HUBSPOT STYLE UI with a modern sidebar layout.
+
+GOAL:
+Make my "In-Campus Skills Gap Tracker" look inspired by HubSpot CRM:
+clean, professional, data-focused, user-friendly, premium, structured, and efficient.
+
+Use HubSpot design language:
+- Clean white interface
+- Orange + blue accents
+- Smart CRM layout
+- Clear hierarchy
+- Professional cards
+- Spacious spacing
+- Friendly but enterprise look
+
+==================================================
+LAYOUT STRUCTURE
+==================================================
+
+Use 3-part layout:
+
+1. LEFT SIDEBAR
+2. TOP HEADER
+3. MAIN CONTENT AREA
+
+--------------------------------------------------
+1. LEFT SIDEBAR (HubSpot Inspired)
+--------------------------------------------------
+
+Slim clean sidebar.
+
+Top:
+- Logo
+- In-Campus Skills Gap Tracker
+
+Menu Items with icons:
+- Dashboard
+- Students
+- Contacts
+- Cases
+- Meetings
+- Analytics
+- Reports
+- AI Insights
+- Settings
+
+Bottom:
+- Lecturer profile mini card
+- Logout
+
+Style:
+- White sidebar
+- Light borders
+- Orange active indicator
+- Hover background
+- Professional icons
+- Collapsible mode
+
+--------------------------------------------------
+2. TOP HEADER
+--------------------------------------------------
+
+HubSpot style top bar:
+
+Left:
+Student Record
+
+Center:
+Search bar:
+Search students, records, notes...
+
+Right:
+- Notification bell
+- Add Note button
+- Schedule Meeting button
+- Profile avatar
+
+Sticky clean header with subtle border.
+
+--------------------------------------------------
+3. MAIN CONTENT AREA
+--------------------------------------------------
+
+--------------------------------------------------
+A. STUDENT HERO PROFILE CARD
+--------------------------------------------------
+
+Large CRM contact card style.
+
+Show:
+- Student avatar
+- Full name
+- Student ID
+- Course / Faculty
+- Email
+- Phone
+- Semester
+
+Badges:
+- Active
+- High Trust
+- Medium Risk
+
+Buttons:
+- Email
+- Call
+- Add Note
+- Schedule Meeting
+
+--------------------------------------------------
+B. CRM INFO GRID
+--------------------------------------------------
+
+Two-column structured cards:
+
+LEFT:
+Contact Information
+Academic Performance
+Attendance
+Documents
+
+RIGHT:
+AI Risk Score
+Recent Activities
+Tasks To Do
+Upcoming Meetings
+
+--------------------------------------------------
+C. TABS (HubSpot CRM Style)
+--------------------------------------------------
+
+Tabs below profile:
+
+Overview
+Academic
+Financial
+Health
+Activities
+Integrity
+Timeline
+
+Use:
+- underline active tab
+- smooth hover
+- clean CRM style
+
+--------------------------------------------------
+D. ACTIVITY TIMELINE
+--------------------------------------------------
+
+HubSpot timeline style:
+
+- Meeting completed
+- Note added
+- Low attendance alert
+- Counselling recommended
+- Email sent
+
+--------------------------------------------------
+E. RIGHT ACTION PANEL
+--------------------------------------------------
+
+Sticky side panel:
+
+Next Best Action:
+“Schedule intervention session”
+
+AI Recommendation:
+“Attendance dropped 12% this month”
+
+Tasks:
+- Follow up
+- Review grades
+- Contact advisor
+
+--------------------------------------------------
+4. DESIGN STYLE
+--------------------------------------------------
+
+Use HubSpot inspired colors:
+
+Primary Orange: #FF7A59
+Blue Accent: #2563EB
+Background: #F5F8FA
+Card White: #FFFFFF
+Border: #E5E7EB
+Text Dark: #213343
+
+Use:
+- Tailwind CSS
+- Rounded-xl cards
+- Clean borders
+- Soft shadows
+- Spacious layout
+- Minimal icons
+- Smooth transitions
+
+--------------------------------------------------
+5. RESPONSIVE
+--------------------------------------------------
+
+Desktop:
+Sidebar + content + side panel
+
+Tablet:
+Collapse side panel
+
+Mobile:
+Drawer sidebar
+
+--------------------------------------------------
+6. FINAL GOAL
+--------------------------------------------------
+
+Make it feel like HubSpot CRM built for universities.
+
+Professional.
+Smart.
+Easy to use.
+Presentation worthy.
+
+Looks expensive and trustworthy.
