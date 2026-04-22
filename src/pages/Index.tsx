@@ -40,21 +40,21 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-t-[3px] border-t-brand bg-card border-b border-border sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/20">
-              <GraduationCap size={24} className="text-primary" />
+            <div className="p-2 rounded-md bg-brand/10">
+              <GraduationCap size={22} className="text-brand" />
             </div>
             <div>
-              <h1 className="font-bold text-sm sm:text-base">In-Campus Skills Gap Tracker</h1>
+              <h1 className="font-semibold text-sm sm:text-base text-foreground">In-Campus Skills Gap Tracker</h1>
               <p className="text-[10px] sm:text-xs text-muted-foreground">Early Detection • Smarter Intervention</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md border border-border">
               <UserCircle2 size={16} className="text-primary" />
               <div className="text-left">
                 <p className="text-xs font-semibold leading-tight">{session.name}</p>
@@ -63,7 +63,7 @@ const Index = () => {
             </div>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-accent transition-colors text-xs font-medium"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-md border border-border text-foreground hover:bg-secondary transition-colors text-xs font-medium"
               data-testid="button-logout"
             >
               <LogOut size={14} /> <span className="hidden sm:inline">Logout</span>

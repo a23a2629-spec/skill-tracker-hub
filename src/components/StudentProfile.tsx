@@ -123,17 +123,38 @@ export default function StudentProfile({ student, problems, onProfileUpdate }: P
         </div>
       </div>
 
-      {/* ── Tab Bar ──────────────────────────────────────────────────────── */}
-      <div className="flex gap-1.5 flex-wrap border-b border-border pb-3">
+      {/* ── Quick Action Row (HubSpot-style) ─────────────────────────── */}
+      <div className="flex items-center gap-2 py-2 border-y border-border">
+        {[
+          { icon: Mail, label: "Email" },
+          { icon: Phone, label: "Call" },
+          { icon: Calendar, label: "Meet" },
+          { icon: FileText, label: "Note" },
+          { icon: BookOpen, label: "Log" },
+        ].map(({ icon: Icon, label }) => (
+          <button key={label} className="flex flex-col items-center gap-1 px-3 py-1.5 rounded-md hover:bg-secondary transition-colors text-muted-foreground">
+            <Icon size={16} className="text-primary" />
+            <span className="text-[10px] font-medium">{label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* ── Tab Bar (underline style) ───────────────────────────────── */}
+      <div className="flex gap-1 flex-wrap border-b border-border -mx-5 px-5">
         {tabConfig.map(({ key, label, icon: Icon }) => {
           const isInteg = key === "integrity";
           const hasIssue = isInteg && (alertCount + warnCount) > 0;
+          const isActive = activeTab === key;
           return (
             <button key={key} onClick={() => setActiveTab(key)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${activeTab === key ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground hover:bg-accent"}`}>
-              <Icon size={12} /> {label}
+              className={`relative px-3 py-2.5 text-xs font-semibold transition-all flex items-center gap-1.5 -mb-px border-b-2 ${
+                isActive
+                  ? "border-primary text-primary"
+                  : "border-transparent text-muted-foreground hover:text-foreground hover:border-border"
+              }`}>
+              <Icon size={13} /> {label}
               {hasIssue && (
-                <span className={`w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center ${alertCount > 0 ? "bg-status-intensive text-white" : "bg-status-developing text-white"}`}>
+                <span className={`w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center text-white ${alertCount > 0 ? "bg-status-intensive" : "bg-status-developing"}`}>
                   {alertCount + warnCount}
                 </span>
               )}
