@@ -6,8 +6,8 @@ import {
 import {
   Users, BookOpen, AlertTriangle, TrendingUp, MessageSquare, ChevronUp, PlusCircle,
   CalendarDays, AlertCircle, LayoutDashboard, BarChart3, FileText, Sparkles,
-  Settings as SettingsIcon, LogOut, Search, Bell, Download, Menu, X as XIcon,
-  ChevronRight, ArrowLeft, GraduationCap, Circle, Trash2, UserPlus,
+  Settings as SettingsIcon, LogOut, Menu, X as XIcon,
+  ChevronRight, ArrowLeft, GraduationCap, Circle, Trash2, UserPlus, Pencil,
 } from "lucide-react";
 import StatusBadge from "./StatusBadge";
 import StudentProfile from "./StudentProfile";
@@ -68,12 +68,17 @@ const LecturerDashboard = ({
   const [studentsList, setStudentsList] = useState<Student[]>(initialStudents);
   const [showAddStudent, setShowAddStudent] = useState(false);
   const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
+  const [editStudentId, setEditStudentId] = useState<string | null>(null);
 
   const handleAddStudent = (s: Student) => setStudentsList(prev => [s, ...prev]);
   const handleRemoveStudent = (id: string) => {
     setStudentsList(prev => prev.filter(s => s.id !== id));
     setConfirmRemoveId(null);
     if (viewingStudentId === id) setViewingStudentId(null);
+  };
+  const handleUpdateStudent = (updated: Student) => {
+    setStudentsList(prev => prev.map(s => s.id === updated.id ? updated : s));
+    setEditStudentId(null);
   };
 
   const displayStudents = selectedCourse
@@ -219,23 +224,6 @@ const LecturerDashboard = ({
               <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">{meta.title}</h1>
               <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">{meta.subtitle}</p>
             </div>
-            <div className="hidden md:flex items-center gap-2 ml-auto">
-              <div className="relative">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Search…"
-                  className="pl-9 pr-3 py-2 w-56 rounded-xl bg-secondary/70 text-sm border border-transparent focus:bg-card focus:border-primary/40 focus:ring-4 focus:ring-primary/10 focus:outline-none transition"
-                />
-              </div>
-              <button className="w-10 h-10 rounded-xl bg-secondary/70 hover:bg-secondary flex items-center justify-center transition relative">
-                <Bell size={16} />
-                <span className="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-red-500 ring-2 ring-card" />
-              </button>
-              <button className="px-3 py-2 rounded-xl gradient-brand text-white text-xs font-semibold flex items-center gap-1.5 shadow-lg shadow-primary/30 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all">
-                <Download size={14} /> Export
-              </button>
-            </div>
           </div>
         </div>
 
@@ -248,6 +236,7 @@ const LecturerDashboard = ({
               students={studentsList}
               problems={externalProblems.filter(p => p.studentId === viewingStudentId)}
               onBack={() => setViewingStudentId(null)}
+              onEdit={() => setEditStudentId(viewingStudentId)}
             />
           ) : (
             <>
@@ -276,6 +265,7 @@ const LecturerDashboard = ({
                   onView={setViewingStudentId}
                   onAdd={() => setShowAddStudent(true)}
                   onRequestRemove={setConfirmRemoveId}
+                  onRequestEdit={setEditStudentId}
                 />
               )}
 
@@ -336,6 +326,14 @@ const LecturerDashboard = ({
           student={studentsList.find(s => s.id === confirmRemoveId)!}
           onCancel={() => setConfirmRemoveId(null)}
           onConfirm={() => handleRemoveStudent(confirmRemoveId)}
+        />
+      )}
+
+      {editStudentId && (
+        <EditStudentModal
+          student={studentsList.find(s => s.id === editStudentId)!}
+          onClose={() => setEditStudentId(null)}
+          onSave={handleUpdateStudent}
         />
       )}
     </div>
@@ -698,7 +696,7 @@ const chartTooltipStyle = {
 };
 
 // ── Students Section ────────────────────────────────────────────────────
-function StudentsSection({ selectedCourse, setSelectedCourse, displayStudents, onView, onAdd, onRequestRemove }: any) {
+function StudentsSection({ selectedCourse, setSelectedCourse, displayStudents, onView, onAdd, onRequestRemove, onRequestEdit }: any) {
   return (
     <div className="space-y-5">
       <CourseFilter selectedCourse={selectedCourse} setSelectedCourse={setSelectedCourse} />
@@ -730,7 +728,7 @@ function StudentsSection({ selectedCourse, setSelectedCourse, displayStudents, o
                 <th className="px-3 py-3 text-center font-semibold">AI %</th>
                 <th className="px-3 py-3 text-center font-semibold">Avg Score</th>
                 <th className="px-3 py-3 text-center font-semibold">Status</th>
-                <th className="px-3 py-3 text-center font-semibold">Actions</th>
+                <th className="px-3 py-3 text-center font-semibold w-32">Actions</th>
                 <th className="px-5 py-3 text-right font-semibold"></th>
               </tr>
             </thead>
@@ -758,14 +756,24 @@ function StudentsSection({ selectedCourse, setSelectedCourse, displayStudents, o
                   <td className="px-3 py-3 text-center text-sm font-bold">{student.averageScore}%</td>
                   <td className="px-3 py-3 text-center"><StatusBadge status={getOverallStatus(student.averageScore)} /></td>
                   <td className="px-3 py-3 text-center" onClick={e => e.stopPropagation()}>
-                    <button
-                      onClick={() => onRequestRemove(student.id)}
-                      className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground hover:bg-red-500/10 hover:text-red-500 transition"
-                      title="Remove student"
-                      aria-label="Remove student"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    <div className="inline-flex items-center gap-1">
+                      <button
+                        onClick={() => onRequestEdit(student.id)}
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary transition"
+                        title="Edit student"
+                        aria-label="Edit student"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
+                        onClick={() => onRequestRemove(student.id)}
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground hover:bg-red-500/10 hover:text-red-500 transition"
+                        title="Remove student"
+                        aria-label="Remove student"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   </td>
                   <td className="px-5 py-3 text-right">
                     <ChevronRight size={15} className="text-muted-foreground inline group-hover:text-primary group-hover:translate-x-0.5 transition" />
@@ -781,17 +789,25 @@ function StudentsSection({ selectedCourse, setSelectedCourse, displayStudents, o
 }
 
 // ── Single student profile view (for lecturer) ─────────────────────────
-function StudentProfileView({ studentId, students, problems, onBack }: { studentId: string; students: Student[]; problems: ExternalProblem[]; onBack: () => void }) {
+function StudentProfileView({ studentId, students, problems, onBack, onEdit }: { studentId: string; students: Student[]; problems: ExternalProblem[]; onBack: () => void; onEdit: () => void }) {
   const student = students.find(s => s.id === studentId);
   if (!student) return null;
   return (
     <div className="space-y-4">
-      <button
-        onClick={onBack}
-        className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition"
-      >
-        <ArrowLeft size={15} /> Back to all students
-      </button>
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <button
+          onClick={onBack}
+          className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition"
+        >
+          <ArrowLeft size={15} /> Back to all students
+        </button>
+        <button
+          onClick={onEdit}
+          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl gradient-brand text-white text-xs font-semibold shadow-lg shadow-primary/30 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all"
+        >
+          <Pencil size={14} /> Edit Student Profile
+        </button>
+      </div>
       <StudentProfile student={student} problems={problems} />
     </div>
   );
@@ -1401,6 +1417,155 @@ function makeBlankProfile(form: { name: string; matricNo: string; email: string;
     disciplinaryRecord: "Clean", violations: 0,
     documentsUploaded: [],
   };
+}
+
+// ── Edit Student Modal ─────────────────────────────────────────────────
+function EditStudentModal({
+  student, onClose, onSave,
+}: {
+  student: Student;
+  onClose: () => void;
+  onSave: (s: Student) => void;
+}) {
+  const [form, setForm] = useState({
+    name: student.name,
+    matricNo: student.matricNo,
+    course: student.course,
+    email: student.profile?.email ?? "",
+    phone: student.profile?.phone ?? "",
+    advisor: student.profile?.advisor ?? "",
+    semester: String(student.profile?.semester ?? 1),
+    registrationStatus: (student.profile?.registrationStatus ?? "Registered") as "Registered" | "Deferral" | "Withdrawn",
+    enrollmentStatus: (student.profile?.enrollmentStatus ?? "Active") as "Active" | "At-Risk" | "Probation" | "Academic Warning",
+    attendance: String(student.attendance),
+    averageScore: String(student.averageScore),
+    aiPercentage: String(student.aiPercentage),
+  });
+  const [error, setError] = useState("");
+
+  const submit = () => {
+    if (!form.name.trim() || !form.matricNo.trim()) {
+      setError("Name and matric number are required.");
+      return;
+    }
+    const updated: Student = {
+      ...student,
+      name: form.name.trim(),
+      matricNo: form.matricNo.trim().toUpperCase(),
+      course: form.course,
+      attendance: clampNum(form.attendance, 0, 100, student.attendance),
+      averageScore: clampNum(form.averageScore, 0, 100, student.averageScore),
+      aiPercentage: clampNum(form.aiPercentage, 0, 100, student.aiPercentage),
+      profile: {
+        ...student.profile,
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        advisor: form.advisor.trim() || "—",
+        semester: clampNum(form.semester, 1, 12, student.profile?.semester ?? 1),
+        registrationStatus: form.registrationStatus,
+        enrollmentStatus: form.enrollmentStatus,
+      },
+    };
+    onSave(updated);
+  };
+
+  const initials = student.name.split(" ").map(n => n[0]).slice(0, 2).join("");
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div
+        className="relative w-full max-w-lg bg-card border border-border rounded-2xl shadow-2xl p-6 max-h-[90vh] overflow-y-auto"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl gradient-brand flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-primary/30">
+              {initials}
+            </div>
+            <div>
+              <h3 className="text-base font-bold tracking-tight">Edit Student Profile</h3>
+              <p className="text-xs text-muted-foreground">Update {student.name}'s details</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg hover:bg-secondary flex items-center justify-center transition">
+            <XIcon size={16} />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Field label="Full name" required>
+            <input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} className="modal-input" />
+          </Field>
+          <Field label="Matric number" required>
+            <input value={form.matricNo} onChange={e => setForm(p => ({ ...p, matricNo: e.target.value }))} className="modal-input" />
+          </Field>
+          <Field label="Course">
+            <select value={form.course} onChange={e => setForm(p => ({ ...p, course: e.target.value }))} className="modal-input">
+              {courses.map(c => <option key={c.id} value={c.code}>{c.code} — {c.name}</option>)}
+            </select>
+          </Field>
+          <Field label="Semester">
+            <input type="number" min={1} max={12} value={form.semester}
+              onChange={e => setForm(p => ({ ...p, semester: e.target.value }))} className="modal-input" />
+          </Field>
+          <Field label="Email">
+            <input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} className="modal-input" />
+          </Field>
+          <Field label="Phone">
+            <input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} className="modal-input" />
+          </Field>
+          <Field label="Advisor">
+            <input value={form.advisor} onChange={e => setForm(p => ({ ...p, advisor: e.target.value }))} className="modal-input" />
+          </Field>
+          <Field label="Registration status">
+            <select value={form.registrationStatus} onChange={e => setForm(p => ({ ...p, registrationStatus: e.target.value as typeof p.registrationStatus }))} className="modal-input">
+              <option value="Registered">Registered</option>
+              <option value="Deferral">Deferral</option>
+              <option value="Withdrawn">Withdrawn</option>
+            </select>
+          </Field>
+          <Field label="Enrollment status">
+            <select value={form.enrollmentStatus} onChange={e => setForm(p => ({ ...p, enrollmentStatus: e.target.value as typeof p.enrollmentStatus }))} className="modal-input">
+              <option value="Active">Active</option>
+              <option value="At-Risk">At-Risk</option>
+              <option value="Probation">Probation</option>
+              <option value="Academic Warning">Academic Warning</option>
+            </select>
+          </Field>
+          <Field label="Attendance %">
+            <input type="number" min={0} max={100} value={form.attendance}
+              onChange={e => setForm(p => ({ ...p, attendance: e.target.value }))} className="modal-input" />
+          </Field>
+          <Field label="Average score %">
+            <input type="number" min={0} max={100} value={form.averageScore}
+              onChange={e => setForm(p => ({ ...p, averageScore: e.target.value }))} className="modal-input" />
+          </Field>
+          <Field label="AI usage %">
+            <input type="number" min={0} max={100} value={form.aiPercentage}
+              onChange={e => setForm(p => ({ ...p, aiPercentage: e.target.value }))} className="modal-input" />
+          </Field>
+        </div>
+
+        {error && (
+          <div className="mt-3 px-3 py-2 rounded-lg bg-red-500/10 text-red-600 text-xs border border-red-500/20">
+            {error}
+          </div>
+        )}
+
+        <div className="mt-5 flex items-center justify-end gap-2">
+          <button onClick={onClose} className="px-4 py-2 rounded-xl border border-border text-sm font-semibold hover:bg-secondary transition">
+            Cancel
+          </button>
+          <button onClick={submit} className="px-4 py-2 rounded-xl gradient-brand text-white text-sm font-semibold shadow-lg shadow-primary/30 hover:shadow-primary/40 transition flex items-center gap-1.5">
+            <Pencil size={14} /> Save Changes
+          </button>
+        </div>
+      </div>
+      <style>{`.modal-input { width: 100%; padding: 0.5rem 0.75rem; border-radius: 0.625rem; background: hsl(var(--background)); border: 1px solid hsl(var(--border)); font-size: 0.8125rem; outline: none; transition: all 0.15s; }
+.modal-input:focus { border-color: hsl(var(--primary)); box-shadow: 0 0 0 3px hsl(var(--primary) / 0.15); }`}</style>
+    </div>
+  );
 }
 
 export default LecturerDashboard;
