@@ -1,13 +1,13 @@
 import { useState } from "react";
 import {
-  students, courses, Course, SkillStatus,
+  students, students as initialStudents, courses, Course, SkillStatus, Student,
   Appointment, ExternalProblem, externalProblems,
 } from "@/data/mockData";
 import {
   Users, BookOpen, AlertTriangle, TrendingUp, MessageSquare, ChevronUp, PlusCircle,
   CalendarDays, AlertCircle, LayoutDashboard, BarChart3, FileText, Sparkles,
   Settings as SettingsIcon, LogOut, Search, Bell, Download, Menu, X as XIcon,
-  ChevronRight, ArrowLeft, GraduationCap, Circle,
+  ChevronRight, ArrowLeft, GraduationCap, Circle, Trash2, UserPlus,
 } from "lucide-react";
 import StatusBadge from "./StatusBadge";
 import StudentProfile from "./StudentProfile";
@@ -65,10 +65,20 @@ const LecturerDashboard = ({
   const [lecturerBookingForm, setLecturerBookingForm] = useState({ studentId: "", date: "", time: "", reason: "" });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [studentsList, setStudentsList] = useState<Student[]>(initialStudents);
+  const [showAddStudent, setShowAddStudent] = useState(false);
+  const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
+
+  const handleAddStudent = (s: Student) => setStudentsList(prev => [s, ...prev]);
+  const handleRemoveStudent = (id: string) => {
+    setStudentsList(prev => prev.filter(s => s.id !== id));
+    setConfirmRemoveId(null);
+    if (viewingStudentId === id) setViewingStudentId(null);
+  };
 
   const displayStudents = selectedCourse
-    ? students.filter((s) => selectedCourse.students.includes(s.id))
-    : students;
+    ? studentsList.filter((s) => selectedCourse.students.includes(s.id))
+    : studentsList;
 
   const avgAttendance = Math.round(displayStudents.reduce((a, s) => a + s.attendance, 0) / displayStudents.length);
   const avgScore = Math.round(displayStudents.reduce((a, s) => a + s.averageScore, 0) / displayStudents.length);
@@ -96,7 +106,7 @@ const LecturerDashboard = ({
 
   const handleLecturerBookAppointment = () => {
     if (!lecturerBookingForm.studentId || !lecturerBookingForm.date || !lecturerBookingForm.time || !lecturerBookingForm.reason) return;
-    const student = students.find(s => s.id === lecturerBookingForm.studentId);
+    const student = studentsList.find(s => s.id === lecturerBookingForm.studentId);
     if (!student) return;
     const newApt: Appointment = {
       id: `apt-l-${Date.now()}`,
@@ -133,7 +143,7 @@ const LecturerDashboard = ({
     "DPA1014": "SAA", "DPB1015": "SAE", "DPB3046": "SAB",
   };
   const courseBarData = courses.map(c => {
-    const cs = students.filter(s => c.students.includes(s.id));
+    const cs = studentsList.filter(s => c.students.includes(s.id));
     return {
       name: courseShortNames[c.code] || c.code,
       avg: cs.length ? Math.round(cs.reduce((a, s) => a + s.averageScore, 0) / cs.length) : 0,
@@ -235,6 +245,7 @@ const LecturerDashboard = ({
           {viewingStudentId && active === "students" ? (
             <StudentProfileView
               studentId={viewingStudentId}
+              students={studentsList}
               problems={externalProblems.filter(p => p.studentId === viewingStudentId)}
               onBack={() => setViewingStudentId(null)}
             />
@@ -263,6 +274,8 @@ const LecturerDashboard = ({
                   setSelectedCourse={setSelectedCourse}
                   displayStudents={displayStudents}
                   onView={setViewingStudentId}
+                  onAdd={() => setShowAddStudent(true)}
+                  onRequestRemove={setConfirmRemoveId}
                 />
               )}
 
@@ -309,6 +322,22 @@ const LecturerDashboard = ({
           )}
         </div>
       </div>
+
+      {showAddStudent && (
+        <AddStudentModal
+          existingIds={studentsList.map(s => s.id)}
+          onClose={() => setShowAddStudent(false)}
+          onCreate={(s) => { handleAddStudent(s); setShowAddStudent(false); }}
+        />
+      )}
+
+      {confirmRemoveId && (
+        <ConfirmRemoveModal
+          student={studentsList.find(s => s.id === confirmRemoveId)!}
+          onCancel={() => setConfirmRemoveId(null)}
+          onConfirm={() => handleRemoveStudent(confirmRemoveId)}
+        />
+      )}
     </div>
   );
 };
@@ -669,19 +698,27 @@ const chartTooltipStyle = {
 };
 
 // ── Students Section ────────────────────────────────────────────────────
-function StudentsSection({ selectedCourse, setSelectedCourse, displayStudents, onView }: any) {
+function StudentsSection({ selectedCourse, setSelectedCourse, displayStudents, onView, onAdd, onRequestRemove }: any) {
   return (
     <div className="space-y-5">
       <CourseFilter selectedCourse={selectedCourse} setSelectedCourse={setSelectedCourse} />
       <div className="premium-card overflow-hidden">
-        <div className="px-5 py-4 border-b border-border/60 flex items-center justify-between">
+        <div className="px-5 py-4 border-b border-border/60 flex items-center justify-between gap-3 flex-wrap">
           <div>
             <h3 className="text-sm font-bold tracking-tight">
               {selectedCourse ? selectedCourse.name : "All Students"}
             </h3>
             <p className="text-[10px] text-muted-foreground">Click any row to open the full student profile</p>
           </div>
-          <span className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-semibold">{displayStudents.length} students</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary font-semibold">{displayStudents.length} students</span>
+            <button
+              onClick={onAdd}
+              className="px-3 py-1.5 rounded-xl gradient-brand text-white text-xs font-semibold flex items-center gap-1.5 shadow-md shadow-primary/30 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all"
+            >
+              <UserPlus size={13} /> Add Student
+            </button>
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -693,6 +730,7 @@ function StudentsSection({ selectedCourse, setSelectedCourse, displayStudents, o
                 <th className="px-3 py-3 text-center font-semibold">AI %</th>
                 <th className="px-3 py-3 text-center font-semibold">Avg Score</th>
                 <th className="px-3 py-3 text-center font-semibold">Status</th>
+                <th className="px-3 py-3 text-center font-semibold">Actions</th>
                 <th className="px-5 py-3 text-right font-semibold"></th>
               </tr>
             </thead>
@@ -719,6 +757,16 @@ function StudentsSection({ selectedCourse, setSelectedCourse, displayStudents, o
                   <td className={`px-3 py-3 text-center text-xs font-medium ${student.aiPercentage > 25 ? "text-red-500" : ""}`}>{student.aiPercentage}%</td>
                   <td className="px-3 py-3 text-center text-sm font-bold">{student.averageScore}%</td>
                   <td className="px-3 py-3 text-center"><StatusBadge status={getOverallStatus(student.averageScore)} /></td>
+                  <td className="px-3 py-3 text-center" onClick={e => e.stopPropagation()}>
+                    <button
+                      onClick={() => onRequestRemove(student.id)}
+                      className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground hover:bg-red-500/10 hover:text-red-500 transition"
+                      title="Remove student"
+                      aria-label="Remove student"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </td>
                   <td className="px-5 py-3 text-right">
                     <ChevronRight size={15} className="text-muted-foreground inline group-hover:text-primary group-hover:translate-x-0.5 transition" />
                   </td>
@@ -733,7 +781,7 @@ function StudentsSection({ selectedCourse, setSelectedCourse, displayStudents, o
 }
 
 // ── Single student profile view (for lecturer) ─────────────────────────
-function StudentProfileView({ studentId, problems, onBack }: { studentId: string; problems: ExternalProblem[]; onBack: () => void }) {
+function StudentProfileView({ studentId, students, problems, onBack }: { studentId: string; students: Student[]; problems: ExternalProblem[]; onBack: () => void }) {
   const student = students.find(s => s.id === studentId);
   if (!student) return null;
   return (
@@ -1155,6 +1203,204 @@ function SettingsSection({ lecturerName }: { lecturerName: string }) {
       </div>
     </div>
   );
+}
+
+// ── Add Student Modal ──────────────────────────────────────────────────
+function AddStudentModal({
+  existingIds, onClose, onCreate,
+}: {
+  existingIds: string[];
+  onClose: () => void;
+  onCreate: (s: Student) => void;
+}) {
+  const [form, setForm] = useState({
+    name: "", matricNo: "", course: courses[0].code,
+    email: "", phone: "", attendance: "90", averageScore: "70", aiPercentage: "10",
+  });
+  const [error, setError] = useState("");
+
+  const submit = () => {
+    if (!form.name.trim() || !form.matricNo.trim()) {
+      setError("Name and matric number are required.");
+      return;
+    }
+    const id = `s-new-${Date.now()}`;
+    if (existingIds.includes(id)) {
+      setError("Could not generate a unique ID. Try again.");
+      return;
+    }
+    const newStudent: Student = {
+      id, name: form.name.trim(), matricNo: form.matricNo.trim().toUpperCase(),
+      course: form.course,
+      attendance: clampNum(form.attendance, 0, 100, 90),
+      aiPercentage: clampNum(form.aiPercentage, 0, 100, 10),
+      averageScore: clampNum(form.averageScore, 0, 100, 70),
+      skills: [], notifications: [],
+      profile: makeBlankProfile(form),
+    };
+    onCreate(newStudent);
+  };
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div
+        className="relative w-full max-w-lg bg-card border border-border rounded-2xl shadow-2xl p-6"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl gradient-brand flex items-center justify-center shadow-lg shadow-primary/30">
+              <UserPlus size={18} className="text-white" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold tracking-tight">Add New Student</h3>
+              <p className="text-xs text-muted-foreground">Enrol a student into a course</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg hover:bg-secondary flex items-center justify-center transition">
+            <XIcon size={16} />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Field label="Full name" required>
+            <input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+              className="modal-input" placeholder="e.g. Ahmad Farhan" />
+          </Field>
+          <Field label="Matric number" required>
+            <input value={form.matricNo} onChange={e => setForm(p => ({ ...p, matricNo: e.target.value }))}
+              className="modal-input" placeholder="e.g. 01DPB22F1099" />
+          </Field>
+          <Field label="Course">
+            <select value={form.course} onChange={e => setForm(p => ({ ...p, course: e.target.value }))} className="modal-input">
+              {courses.map(c => <option key={c.id} value={c.code}>{c.code} — {c.name}</option>)}
+            </select>
+          </Field>
+          <Field label="Email">
+            <input type="email" value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
+              className="modal-input" placeholder="name@student.edu" />
+          </Field>
+          <Field label="Phone">
+            <input value={form.phone} onChange={e => setForm(p => ({ ...p, phone: e.target.value }))}
+              className="modal-input" placeholder="011-234 5678" />
+          </Field>
+          <Field label="Attendance %">
+            <input type="number" min={0} max={100} value={form.attendance}
+              onChange={e => setForm(p => ({ ...p, attendance: e.target.value }))} className="modal-input" />
+          </Field>
+          <Field label="Average score %">
+            <input type="number" min={0} max={100} value={form.averageScore}
+              onChange={e => setForm(p => ({ ...p, averageScore: e.target.value }))} className="modal-input" />
+          </Field>
+          <Field label="AI usage %">
+            <input type="number" min={0} max={100} value={form.aiPercentage}
+              onChange={e => setForm(p => ({ ...p, aiPercentage: e.target.value }))} className="modal-input" />
+          </Field>
+        </div>
+
+        {error && (
+          <div className="mt-3 px-3 py-2 rounded-lg bg-red-500/10 text-red-600 text-xs border border-red-500/20">
+            {error}
+          </div>
+        )}
+
+        <div className="mt-5 flex items-center justify-end gap-2">
+          <button onClick={onClose} className="px-4 py-2 rounded-xl border border-border text-sm font-semibold hover:bg-secondary transition">
+            Cancel
+          </button>
+          <button onClick={submit} className="px-4 py-2 rounded-xl gradient-brand text-white text-sm font-semibold shadow-lg shadow-primary/30 hover:shadow-primary/40 transition flex items-center gap-1.5">
+            <UserPlus size={14} /> Add Student
+          </button>
+        </div>
+      </div>
+      <style>{`.modal-input { width: 100%; padding: 0.5rem 0.75rem; border-radius: 0.625rem; background: hsl(var(--background)); border: 1px solid hsl(var(--border)); font-size: 0.8125rem; outline: none; transition: all 0.15s; }
+.modal-input:focus { border-color: hsl(var(--primary)); box-shadow: 0 0 0 3px hsl(var(--primary) / 0.15); }`}</style>
+    </div>
+  );
+}
+
+// ── Confirm Remove Modal ───────────────────────────────────────────────
+function ConfirmRemoveModal({
+  student, onCancel, onConfirm,
+}: {
+  student: Student;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  const initials = student.name.split(" ").map(n => n[0]).slice(0, 2).join("");
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" onClick={onCancel}>
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div className="relative w-full max-w-md bg-card border border-border rounded-2xl shadow-2xl p-6" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-11 h-11 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+            <Trash2 size={18} className="text-red-500" />
+          </div>
+          <div>
+            <h3 className="text-base font-bold tracking-tight">Remove student?</h3>
+            <p className="text-xs text-muted-foreground">This will remove them from the lecturer's roster.</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-3 p-3 rounded-xl bg-secondary/60 border border-border/60 mb-4">
+          <div className="w-10 h-10 rounded-lg gradient-brand flex items-center justify-center text-white text-xs font-bold">{initials}</div>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold truncate">{student.name}</p>
+            <p className="text-[11px] text-muted-foreground">{student.matricNo} · {student.course}</p>
+          </div>
+        </div>
+        <div className="flex items-center justify-end gap-2">
+          <button onClick={onCancel} className="px-4 py-2 rounded-xl border border-border text-sm font-semibold hover:bg-secondary transition">Cancel</button>
+          <button onClick={onConfirm} className="px-4 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition flex items-center gap-1.5">
+            <Trash2 size={14} /> Remove
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Field({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) {
+  return (
+    <label className="block">
+      <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-bold block mb-1">
+        {label} {required && <span className="text-red-500">*</span>}
+      </span>
+      {children}
+    </label>
+  );
+}
+
+function clampNum(v: string, min: number, max: number, fallback: number): number {
+  const n = Number(v);
+  if (Number.isNaN(n)) return fallback;
+  return Math.max(min, Math.min(max, Math.round(n)));
+}
+
+function makeBlankProfile(form: { name: string; matricNo: string; email: string; phone: string }): Student["profile"] {
+  return {
+    dateOfBirth: "2005-01-01", gender: "Male", nationality: "Malaysian", race: "—", religion: "—",
+    icNumber: "—", studentId: form.matricNo.toUpperCase(), identityVerified: "Pending",
+    phone: form.phone || "—", email: form.email || `${form.matricNo.toLowerCase()}@student.edu.my`,
+    address: "—", postcode: "—", state: "—",
+    guardian: "—", guardianPhone: "—", guardianRelation: "Father", guardianEmail: "—",
+    previousSchool: "—", previousQualification: "SPM", previousResults: "—", achievements: [],
+    academicVerified: "Pending",
+    program: "Diploma", faculty: "Faculty of Business & Commerce", levelOfStudy: "Diploma",
+    intake: "June 2026", semester: 1, financialAid: "None",
+    registrationStatus: "Registered", enrollmentStatus: "Active", advisor: "—", campus: "Main Campus",
+    cgpa: 0, gpa: 0, hostel: false,
+    monthlyHouseholdIncome: 0, incomeCategory: "M40", paymentStatus: "Pending", sponsorAmount: 0, financialVerified: "Pending",
+    fatherName: "—", fatherOccupation: "—", fatherIncome: 0,
+    motherName: "—", motherOccupation: "—", motherIncome: 0,
+    siblings: 0, householdSize: 1, parentMaritalStatus: "Married", familyVerified: "Pending",
+    bloodType: "—", medicalConditions: [], allergies: [], disabilityStatus: "None",
+    healthInsurance: "None", healthVerified: "Pending",
+    counselingStatus: "None", mentalHealthVerified: "Pending",
+    technicalSkills: [], softSkills: [], careerGoal: "—", cocurricular: [],
+    disciplinaryRecord: "Clean", violations: 0,
+    documentsUploaded: [],
+  };
 }
 
 export default LecturerDashboard;
