@@ -1,0 +1,147 @@
+```text id="p7d4x1"
+Update my Lecturer Dashboard management section with a simple professional system for managing FACULTY and COURSE only.
+
+GOAL:
+Allow lecturers/admin to easily ADD or DELETE Faculty and Course records inside the dashboard.
+
+Use modern HubSpot-style admin UI:
+clean, simple, professional, organized.
+
+==================================================
+1. MANAGEMENT SECTION
+==================================================
+
+Create a new sidebar menu item:
+
+Academic Management
+
+Inside it create 2 tabs:
+
+- Faculty Management
+- Course Management
+
+==================================================
+2. FACULTY MANAGEMENT
+==================================================
+
+Show list of faculties in card/table format.
+
+Example:
+- Faculty of Business & Management
+- Faculty of Technology
+- Faculty of Hospitality
+
+Each row should have:
+
+Faculty Name
+Total Courses
+Created Date
+Actions:
+[Edit] [Delete]
+
+Top right button:
+
++ Add Faculty
+
+When clicked open modal:
+
+Add New Faculty
+- Faculty Name
+- Short Code
+- Save Button
+
+==================================================
+3. COURSE MANAGEMENT
+==================================================
+
+Show list of courses.
+
+Example:
+
+Diploma in Logistics and Distribution
+Faculty: Faculty of Business & Management
+
+Diploma in Commerce
+Faculty: Faculty of Business & Management
+
+Diploma in Accounting
+Faculty: Faculty of Business & Management
+
+Each row should have:
+
+Course Name
+Faculty
+Students Count
+Actions:
+[Edit] [Delete]
+
+Top right button:
+
++ Add Course
+
+Modal form:
+
+Add New Course
+- Course Name
+- Select Faculty Dropdown
+- Course Code
+- Save Button
+
+==================================================
+4. DELETE SYSTEM
+==================================================
+
+When delete clicked:
+
+Show confirmation modal:
+
+Are you sure you want to delete this faculty/course?
+
+[Cancel] [Delete]
+
+Prevent accidental deletion.
+
+==================================================
+5. UI STYLE
+==================================================
+
+Use HubSpot inspired style:
+
+- White clean cards
+- Orange primary buttons
+- Light grey borders
+- Rounded-xl cards
+- Modern tables
+- Search bar
+- Filter dropdown
+- Smooth hover effects
+
+==================================================
+6. EXTRA FEATURES
+==================================================
+
+Add search:
+
+Search faculty...
+Search course...
+
+Pagination if many records.
+
+Toast notifications:
+
+Faculty added successfully
+Course deleted successfully
+
+==================================================
+7. FINAL GOAL
+==================================================
+
+Make it look like a real university admin system.
+
+Simple.
+Clean.
+Professional.
+
+Most important:
+Lecturer/Admin can ADD and DELETE Faculty and Course easily.
+```

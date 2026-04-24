@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   students, students as initialStudents, courses, Course, SkillStatus, Student,
   Appointment, ExternalProblem, externalProblems,
@@ -8,6 +8,7 @@ import {
   CalendarDays, AlertCircle, LayoutDashboard, BarChart3, FileText, Sparkles,
   Settings as SettingsIcon, LogOut, Menu, X as XIcon,
   ChevronRight, ArrowLeft, GraduationCap, Circle, Trash2, UserPlus, Pencil,
+  Building2, Search as SearchIcon, CheckCircle2, Layers,
 } from "lucide-react";
 import StatusBadge from "./StatusBadge";
 import StudentProfile from "./StudentProfile";
@@ -27,7 +28,7 @@ interface Props {
 
 type Section =
   | "dashboard" | "students" | "analytics" | "appointments"
-  | "cases" | "reports" | "ai" | "settings";
+  | "cases" | "reports" | "ai" | "academic" | "settings";
 
 const navItems: { key: Section; label: string; icon: React.ElementType }[] = [
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -37,7 +38,34 @@ const navItems: { key: Section; label: string; icon: React.ElementType }[] = [
   { key: "cases", label: "Cases / Problems", icon: AlertCircle },
   { key: "reports", label: "Reports", icon: FileText },
   { key: "ai", label: "AI Insights", icon: Sparkles },
+  { key: "academic", label: "Academic Management", icon: Building2 },
   { key: "settings", label: "Settings", icon: SettingsIcon },
+];
+
+export interface Faculty {
+  id: string;
+  name: string;
+  code: string;
+  createdDate: string;
+}
+
+const seedFaculties: Faculty[] = [
+  { id: "f1", name: "Faculty of Business & Management", code: "FBM", createdDate: "2024-01-15" },
+  { id: "f2", name: "Faculty of Technology", code: "FOT", createdDate: "2024-01-15" },
+  { id: "f3", name: "Faculty of Hospitality", code: "FOH", createdDate: "2024-03-20" },
+];
+
+interface ManagedCourse extends Course {
+  facultyId: string;
+}
+
+const seedManagedCourses: ManagedCourse[] = [
+  { id: "c1", name: "Logistic and Distribution", code: "DPB3012", students: ["s1", "s2", "s3"], facultyId: "f1" },
+  { id: "c2", name: "Commerce", code: "DPB2022", students: ["s4", "s5", "s6"], facultyId: "f1" },
+  { id: "c3", name: "Retailing", code: "DPB2033", students: ["s7", "s8", "s9"], facultyId: "f1" },
+  { id: "c4", name: "Accounting", code: "DPA1014", students: ["s10", "s11", "s12"], facultyId: "f1" },
+  { id: "c5", name: "Entrepreneurship", code: "DPB1015", students: ["s13", "s14", "s15"], facultyId: "f1" },
+  { id: "c6", name: "Islamic Banking and Finance", code: "DPB3046", students: ["s16", "s17", "s18"], facultyId: "f1" },
 ];
 
 const getOverallStatus = (score: number): SkillStatus => {
@@ -79,6 +107,15 @@ const LecturerDashboard = ({
   const handleUpdateStudent = (updated: Student) => {
     setStudentsList(prev => prev.map(s => s.id === updated.id ? updated : s));
     setEditStudentId(null);
+  };
+
+  // Academic management state
+  const [facultiesList, setFacultiesList] = useState<Faculty[]>(seedFaculties);
+  const [coursesList, setCoursesList] = useState<ManagedCourse[]>(seedManagedCourses);
+  const [toast, setToast] = useState<{ msg: string; tone: "success" | "danger" } | null>(null);
+  const showToast = (msg: string, tone: "success" | "danger" = "success") => {
+    setToast({ msg, tone });
+    setTimeout(() => setToast(null), 2800);
   };
 
   const displayStudents = selectedCourse
@@ -163,6 +200,7 @@ const LecturerDashboard = ({
     cases: { title: "Cases & Problems", subtitle: "Reported issues that need attention" },
     reports: { title: "Reports", subtitle: "Create assessments and view records" },
     ai: { title: "AI Insights", subtitle: "Smart summaries generated from cohort data" },
+    academic: { title: "Academic Management", subtitle: "Manage faculties and courses across the institution" },
     settings: { title: "Settings", subtitle: "Manage your preferences" },
   };
 
@@ -307,6 +345,16 @@ const LecturerDashboard = ({
 
               {active === "ai" && <AIInsightsSection displayStudents={displayStudents} avgScore={avgScore} avgAttendance={avgAttendance} avgAI={avgAI} />}
 
+              {active === "academic" && (
+                <AcademicManagementSection
+                  faculties={facultiesList}
+                  setFaculties={setFacultiesList}
+                  courses={coursesList}
+                  setCourses={setCoursesList}
+                  showToast={showToast}
+                />
+              )}
+
               {active === "settings" && <SettingsSection lecturerName={lecturerName} />}
             </>
           )}
@@ -335,6 +383,20 @@ const LecturerDashboard = ({
           onClose={() => setEditStudentId(null)}
           onSave={handleUpdateStudent}
         />
+      )}
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-[80] animate-in slide-in-from-bottom-4 fade-in duration-200">
+          <div className={`flex items-center gap-3 px-4 py-3 rounded-xl shadow-2xl border backdrop-blur-md ${
+            toast.tone === "success"
+              ? "bg-emerald-500/95 border-emerald-400 text-white"
+              : "bg-red-500/95 border-red-400 text-white"
+          }`}>
+            {toast.tone === "success" ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+            <p className="text-sm font-semibold">{toast.msg}</p>
+          </div>
+        </div>
       )}
     </div>
   );
@@ -1564,6 +1626,526 @@ function EditStudentModal({
       </div>
       <style>{`.modal-input { width: 100%; padding: 0.5rem 0.75rem; border-radius: 0.625rem; background: hsl(var(--background)); border: 1px solid hsl(var(--border)); font-size: 0.8125rem; outline: none; transition: all 0.15s; }
 .modal-input:focus { border-color: hsl(var(--primary)); box-shadow: 0 0 0 3px hsl(var(--primary) / 0.15); }`}</style>
+    </div>
+  );
+}
+
+// ── Academic Management Section ────────────────────────────────────────
+type AcademicTab = "faculty" | "course";
+
+function AcademicManagementSection({
+  faculties, setFaculties, courses, setCourses, showToast,
+}: {
+  faculties: Faculty[];
+  setFaculties: React.Dispatch<React.SetStateAction<Faculty[]>>;
+  courses: ManagedCourse[];
+  setCourses: React.Dispatch<React.SetStateAction<ManagedCourse[]>>;
+  showToast: (msg: string, tone?: "success" | "danger") => void;
+}) {
+  const [tab, setTab] = useState<AcademicTab>("faculty");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 6;
+
+  // Modal state
+  const [showFacultyModal, setShowFacultyModal] = useState(false);
+  const [editingFaculty, setEditingFaculty] = useState<Faculty | null>(null);
+  const [showCourseModal, setShowCourseModal] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<ManagedCourse | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<
+    { kind: "faculty" | "course"; id: string; name: string } | null
+  >(null);
+  const [facultyFilter, setFacultyFilter] = useState<string>("");
+
+  // Reset page when search/tab changes
+  useEffect(() => { setPage(1); }, [search, tab, facultyFilter]);
+
+  // ── Faculty CRUD ────────────────────────────────────────────────────
+  const facultyCount = (fid: string) => courses.filter(c => c.facultyId === fid).length;
+
+  const filteredFaculties = faculties.filter(f =>
+    f.name.toLowerCase().includes(search.toLowerCase()) ||
+    f.code.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const filteredCourses = courses
+    .filter(c => !facultyFilter || c.facultyId === facultyFilter)
+    .filter(c =>
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      c.code.toLowerCase().includes(search.toLowerCase())
+    );
+
+  const list: any[] = tab === "faculty" ? filteredFaculties : filteredCourses;
+  const totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pageItems = list.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  const saveFaculty = (data: { name: string; code: string }) => {
+    if (editingFaculty) {
+      setFaculties(prev => prev.map(f => f.id === editingFaculty.id ? { ...f, ...data } : f));
+      showToast("Faculty updated successfully");
+    } else {
+      const newF: Faculty = {
+        id: `f-${Date.now()}`, ...data,
+        createdDate: new Date().toISOString().slice(0, 10),
+      };
+      setFaculties(prev => [newF, ...prev]);
+      showToast("Faculty added successfully");
+    }
+    setShowFacultyModal(false);
+    setEditingFaculty(null);
+  };
+
+  const saveCourse = (data: { name: string; code: string; facultyId: string }) => {
+    if (editingCourse) {
+      setCourses(prev => prev.map(c => c.id === editingCourse.id ? { ...c, ...data } : c));
+      showToast("Course updated successfully");
+    } else {
+      const newC: ManagedCourse = {
+        id: `c-${Date.now()}`, ...data, students: [],
+      };
+      setCourses(prev => [newC, ...prev]);
+      showToast("Course added successfully");
+    }
+    setShowCourseModal(false);
+    setEditingCourse(null);
+  };
+
+  const performDelete = () => {
+    if (!confirmDelete) return;
+    if (confirmDelete.kind === "faculty") {
+      // also remove courses under this faculty
+      setCourses(prev => prev.filter(c => c.facultyId !== confirmDelete.id));
+      setFaculties(prev => prev.filter(f => f.id !== confirmDelete.id));
+      showToast("Faculty deleted successfully");
+    } else {
+      setCourses(prev => prev.filter(c => c.id !== confirmDelete.id));
+      showToast("Course deleted successfully");
+    }
+    setConfirmDelete(null);
+  };
+
+  return (
+    <div className="space-y-5">
+      {/* Tabs */}
+      <div className="flex items-center gap-1 p-1 bg-secondary/60 rounded-xl border border-border w-fit">
+        {[
+          { key: "faculty", label: "Faculty Management", icon: Building2 },
+          { key: "course", label: "Course Management", icon: Layers },
+        ].map(t => {
+          const Icon = t.icon;
+          const active = tab === (t.key as AcademicTab);
+          return (
+            <button
+              key={t.key}
+              onClick={() => { setTab(t.key as AcademicTab); setSearch(""); }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition ${
+                active
+                  ? "bg-card text-foreground shadow-sm border border-border"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Icon size={14} /> {t.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Toolbar */}
+      <div className="premium-card p-4 sm:p-5">
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="relative flex-1 min-w-[200px] max-w-md">
+            <SearchIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder={tab === "faculty" ? "Search faculty…" : "Search course…"}
+              className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-secondary/70 border border-transparent text-sm focus:bg-card focus:border-primary/40 focus:ring-4 focus:ring-primary/10 focus:outline-none transition"
+            />
+          </div>
+          {tab === "course" && (
+            <select
+              value={facultyFilter}
+              onChange={e => setFacultyFilter(e.target.value)}
+              className="px-3 py-2.5 rounded-xl bg-secondary/70 border border-transparent text-sm focus:bg-card focus:border-primary/40 focus:ring-4 focus:ring-primary/10 focus:outline-none transition"
+            >
+              <option value="">All Faculties</option>
+              {faculties.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+            </select>
+          )}
+          <div className="ml-auto">
+            {tab === "faculty" ? (
+              <button
+                onClick={() => { setEditingFaculty(null); setShowFacultyModal(true); }}
+                className="px-4 py-2.5 rounded-xl text-white text-xs font-semibold flex items-center gap-2 shadow-lg transition-all hover:-translate-y-0.5"
+                style={{ background: "linear-gradient(135deg, #FF7A59, #FF5C35)", boxShadow: "0 8px 20px -8px rgba(255,92,53,0.55)" }}
+              >
+                <PlusCircle size={14} /> Add Faculty
+              </button>
+            ) : (
+              <button
+                onClick={() => { setEditingCourse(null); setShowCourseModal(true); }}
+                className="px-4 py-2.5 rounded-xl text-white text-xs font-semibold flex items-center gap-2 shadow-lg transition-all hover:-translate-y-0.5"
+                style={{ background: "linear-gradient(135deg, #FF7A59, #FF5C35)", boxShadow: "0 8px 20px -8px rgba(255,92,53,0.55)" }}
+              >
+                <PlusCircle size={14} /> Add Course
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="premium-card overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left bg-secondary/50 text-[11px] uppercase tracking-wider text-muted-foreground border-b border-border">
+                {tab === "faculty" ? (
+                  <>
+                    <th className="px-5 py-3 font-semibold">Faculty</th>
+                    <th className="px-3 py-3 font-semibold">Code</th>
+                    <th className="px-3 py-3 text-center font-semibold">Total Courses</th>
+                    <th className="px-3 py-3 font-semibold">Created Date</th>
+                    <th className="px-5 py-3 text-right font-semibold w-32">Actions</th>
+                  </>
+                ) : (
+                  <>
+                    <th className="px-5 py-3 font-semibold">Course</th>
+                    <th className="px-3 py-3 font-semibold">Code</th>
+                    <th className="px-3 py-3 font-semibold">Faculty</th>
+                    <th className="px-3 py-3 text-center font-semibold">Students</th>
+                    <th className="px-5 py-3 text-right font-semibold w-32">Actions</th>
+                  </>
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              {pageItems.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-5 py-12 text-center">
+                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                      {tab === "faculty" ? <Building2 size={28} /> : <Layers size={28} />}
+                      <p className="text-sm font-medium">No {tab === "faculty" ? "faculties" : "courses"} found</p>
+                      <p className="text-xs">Try adjusting your search or add a new {tab === "faculty" ? "faculty" : "course"}.</p>
+                    </div>
+                  </td>
+                </tr>
+              ) : tab === "faculty" ? (
+                pageItems.map((f: Faculty) => (
+                  <tr key={f.id} className="border-b border-border/50 hover:bg-secondary/40 transition">
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                          <Building2 size={15} />
+                        </div>
+                        <p className="text-sm font-semibold text-foreground">{f.name}</p>
+                      </div>
+                    </td>
+                    <td className="px-3 py-3"><span className="px-2 py-1 rounded-md bg-secondary text-[11px] font-mono font-semibold">{f.code}</span></td>
+                    <td className="px-3 py-3 text-center text-sm font-bold">{facultyCount(f.id)}</td>
+                    <td className="px-3 py-3 text-xs text-muted-foreground">{f.createdDate}</td>
+                    <td className="px-5 py-3 text-right">
+                      <div className="inline-flex items-center gap-1">
+                        <button
+                          onClick={() => { setEditingFaculty(f); setShowFacultyModal(true); }}
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary transition"
+                          title="Edit"
+                        ><Pencil size={14} /></button>
+                        <button
+                          onClick={() => setConfirmDelete({ kind: "faculty", id: f.id, name: f.name })}
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground hover:bg-red-500/10 hover:text-red-500 transition"
+                          title="Delete"
+                        ><Trash2 size={14} /></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                pageItems.map((c: ManagedCourse) => {
+                  const fac = faculties.find(f => f.id === c.facultyId);
+                  return (
+                    <tr key={c.id} className="border-b border-border/50 hover:bg-secondary/40 transition">
+                      <td className="px-5 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-lg bg-secondary text-foreground/70 flex items-center justify-center shrink-0">
+                            <BookOpen size={15} />
+                          </div>
+                          <p className="text-sm font-semibold text-foreground">{c.name}</p>
+                        </div>
+                      </td>
+                      <td className="px-3 py-3"><span className="px-2 py-1 rounded-md bg-secondary text-[11px] font-mono font-semibold">{c.code}</span></td>
+                      <td className="px-3 py-3 text-xs text-muted-foreground">{fac?.name ?? "—"}</td>
+                      <td className="px-3 py-3 text-center text-sm font-bold">{c.students.length}</td>
+                      <td className="px-5 py-3 text-right">
+                        <div className="inline-flex items-center gap-1">
+                          <button
+                            onClick={() => { setEditingCourse(c); setShowCourseModal(true); }}
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary transition"
+                            title="Edit"
+                          ><Pencil size={14} /></button>
+                          <button
+                            onClick={() => setConfirmDelete({ kind: "course", id: c.id, name: c.name })}
+                            className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-muted-foreground hover:bg-red-500/10 hover:text-red-500 transition"
+                            title="Delete"
+                          ><Trash2 size={14} /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        {list.length > PAGE_SIZE && (
+          <div className="px-5 py-3 border-t border-border flex items-center justify-between bg-secondary/30">
+            <p className="text-xs text-muted-foreground">
+              Showing <span className="font-semibold text-foreground">{(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, list.length)}</span> of <span className="font-semibold text-foreground">{list.length}</span>
+            </p>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={safePage === 1}
+                className="w-8 h-8 rounded-lg border border-border text-xs font-semibold hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center justify-center"
+              ><ArrowLeft size={13} /></button>
+              <span className="px-3 text-xs font-semibold">{safePage} / {totalPages}</span>
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={safePage === totalPages}
+                className="w-8 h-8 rounded-lg border border-border text-xs font-semibold hover:bg-secondary disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center justify-center"
+              ><ChevronRight size={13} /></button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Modals */}
+      {showFacultyModal && (
+        <FacultyModal
+          initial={editingFaculty}
+          onClose={() => { setShowFacultyModal(false); setEditingFaculty(null); }}
+          onSave={saveFaculty}
+        />
+      )}
+      {showCourseModal && (
+        <CourseModal
+          initial={editingCourse}
+          faculties={faculties}
+          onClose={() => { setShowCourseModal(false); setEditingCourse(null); }}
+          onSave={saveCourse}
+        />
+      )}
+      {confirmDelete && (
+        <ConfirmDeleteModal
+          kind={confirmDelete.kind}
+          name={confirmDelete.name}
+          onCancel={() => setConfirmDelete(null)}
+          onConfirm={performDelete}
+        />
+      )}
+    </div>
+  );
+}
+
+// ── Faculty Modal ──────────────────────────────────────────────────────
+function FacultyModal({
+  initial, onClose, onSave,
+}: {
+  initial: Faculty | null;
+  onClose: () => void;
+  onSave: (data: { name: string; code: string }) => void;
+}) {
+  const [name, setName] = useState(initial?.name ?? "");
+  const [code, setCode] = useState(initial?.code ?? "");
+  const [error, setError] = useState("");
+
+  const submit = () => {
+    if (!name.trim() || !code.trim()) {
+      setError("Name and short code are required.");
+      return;
+    }
+    onSave({ name: name.trim(), code: code.trim().toUpperCase() });
+  };
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div className="relative w-full max-w-md bg-card border border-border rounded-2xl shadow-2xl p-6" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-lg" style={{ background: "linear-gradient(135deg, #FF7A59, #FF5C35)" }}>
+              <Building2 size={18} />
+            </div>
+            <div>
+              <h3 className="text-base font-bold tracking-tight">{initial ? "Edit Faculty" : "Add New Faculty"}</h3>
+              <p className="text-xs text-muted-foreground">{initial ? "Update faculty details" : "Create a new academic faculty"}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg hover:bg-secondary flex items-center justify-center transition">
+            <XIcon size={16} />
+          </button>
+        </div>
+
+        <div className="space-y-3">
+          <Field label="Faculty name" required>
+            <input value={name} onChange={e => setName(e.target.value)} className="modal-input" placeholder="e.g. Faculty of Engineering" />
+          </Field>
+          <Field label="Short code" required>
+            <input value={code} onChange={e => setCode(e.target.value)} className="modal-input" placeholder="e.g. FOE" maxLength={8} />
+          </Field>
+        </div>
+
+        {error && (
+          <div className="mt-3 px-3 py-2 rounded-lg bg-red-500/10 text-red-600 text-xs border border-red-500/20">
+            {error}
+          </div>
+        )}
+
+        <div className="mt-5 flex items-center justify-end gap-2">
+          <button onClick={onClose} className="px-4 py-2 rounded-xl border border-border text-sm font-semibold hover:bg-secondary transition">
+            Cancel
+          </button>
+          <button
+            onClick={submit}
+            className="px-4 py-2 rounded-xl text-white text-sm font-semibold shadow-lg flex items-center gap-1.5 transition hover:-translate-y-0.5"
+            style={{ background: "linear-gradient(135deg, #FF7A59, #FF5C35)", boxShadow: "0 8px 20px -8px rgba(255,92,53,0.55)" }}
+          >
+            <CheckCircle2 size={14} /> {initial ? "Save Changes" : "Save Faculty"}
+          </button>
+        </div>
+      </div>
+      <style>{`.modal-input { width: 100%; padding: 0.5rem 0.75rem; border-radius: 0.625rem; background: hsl(var(--background)); border: 1px solid hsl(var(--border)); font-size: 0.8125rem; outline: none; transition: all 0.15s; }
+.modal-input:focus { border-color: hsl(var(--primary)); box-shadow: 0 0 0 3px hsl(var(--primary) / 0.15); }`}</style>
+    </div>
+  );
+}
+
+// ── Course Modal ───────────────────────────────────────────────────────
+function CourseModal({
+  initial, faculties, onClose, onSave,
+}: {
+  initial: ManagedCourse | null;
+  faculties: Faculty[];
+  onClose: () => void;
+  onSave: (data: { name: string; code: string; facultyId: string }) => void;
+}) {
+  const [name, setName] = useState(initial?.name ?? "");
+  const [code, setCode] = useState(initial?.code ?? "");
+  const [facultyId, setFacultyId] = useState(initial?.facultyId ?? (faculties[0]?.id ?? ""));
+  const [error, setError] = useState("");
+
+  const submit = () => {
+    if (!name.trim() || !code.trim() || !facultyId) {
+      setError("Name, code and faculty are all required.");
+      return;
+    }
+    onSave({ name: name.trim(), code: code.trim().toUpperCase(), facultyId });
+  };
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div className="relative w-full max-w-md bg-card border border-border rounded-2xl shadow-2xl p-6" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-lg" style={{ background: "linear-gradient(135deg, #FF7A59, #FF5C35)" }}>
+              <BookOpen size={18} />
+            </div>
+            <div>
+              <h3 className="text-base font-bold tracking-tight">{initial ? "Edit Course" : "Add New Course"}</h3>
+              <p className="text-xs text-muted-foreground">{initial ? "Update course details" : "Create a new course offering"}</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg hover:bg-secondary flex items-center justify-center transition">
+            <XIcon size={16} />
+          </button>
+        </div>
+
+        <div className="space-y-3">
+          <Field label="Course name" required>
+            <input value={name} onChange={e => setName(e.target.value)} className="modal-input" placeholder="e.g. Diploma in Marketing" />
+          </Field>
+          <Field label="Faculty" required>
+            <select value={facultyId} onChange={e => setFacultyId(e.target.value)} className="modal-input">
+              {faculties.length === 0 && <option value="">No faculties yet</option>}
+              {faculties.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
+            </select>
+          </Field>
+          <Field label="Course code" required>
+            <input value={code} onChange={e => setCode(e.target.value)} className="modal-input" placeholder="e.g. DPM2024" maxLength={12} />
+          </Field>
+        </div>
+
+        {error && (
+          <div className="mt-3 px-3 py-2 rounded-lg bg-red-500/10 text-red-600 text-xs border border-red-500/20">
+            {error}
+          </div>
+        )}
+
+        <div className="mt-5 flex items-center justify-end gap-2">
+          <button onClick={onClose} className="px-4 py-2 rounded-xl border border-border text-sm font-semibold hover:bg-secondary transition">
+            Cancel
+          </button>
+          <button
+            onClick={submit}
+            className="px-4 py-2 rounded-xl text-white text-sm font-semibold shadow-lg flex items-center gap-1.5 transition hover:-translate-y-0.5"
+            style={{ background: "linear-gradient(135deg, #FF7A59, #FF5C35)", boxShadow: "0 8px 20px -8px rgba(255,92,53,0.55)" }}
+          >
+            <CheckCircle2 size={14} /> {initial ? "Save Changes" : "Save Course"}
+          </button>
+        </div>
+      </div>
+      <style>{`.modal-input { width: 100%; padding: 0.5rem 0.75rem; border-radius: 0.625rem; background: hsl(var(--background)); border: 1px solid hsl(var(--border)); font-size: 0.8125rem; outline: none; transition: all 0.15s; }
+.modal-input:focus { border-color: hsl(var(--primary)); box-shadow: 0 0 0 3px hsl(var(--primary) / 0.15); }`}</style>
+    </div>
+  );
+}
+
+// ── Confirm Delete (Faculty/Course) ────────────────────────────────────
+function ConfirmDeleteModal({
+  kind, name, onCancel, onConfirm,
+}: {
+  kind: "faculty" | "course";
+  name: string;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" onClick={onCancel}>
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div className="relative w-full max-w-md bg-card border border-border rounded-2xl shadow-2xl p-6" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-11 h-11 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+            <Trash2 size={18} className="text-red-500" />
+          </div>
+          <div>
+            <h3 className="text-base font-bold tracking-tight">Delete {kind === "faculty" ? "Faculty" : "Course"}?</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">This action cannot be undone.</p>
+          </div>
+        </div>
+        <p className="text-sm text-foreground/80 mb-1">
+          Are you sure you want to delete <span className="font-semibold">{name}</span>?
+        </p>
+        {kind === "faculty" && (
+          <p className="text-xs text-red-600 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2 mt-2">
+            Warning: All courses under this faculty will also be deleted.
+          </p>
+        )}
+        <div className="mt-5 flex items-center justify-end gap-2">
+          <button onClick={onCancel} className="px-4 py-2 rounded-xl border border-border text-sm font-semibold hover:bg-secondary transition">
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition flex items-center gap-1.5 shadow-lg shadow-red-500/30"
+          >
+            <Trash2 size={14} /> Delete
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
