@@ -157,52 +157,6 @@ export default function StudentProfile({ student, problems, onProfileUpdate }: P
         </div>
       </div>
 
-      {/* ── Quick Action Cards ─────────────────────────────────────── */}
-      <div className="grid grid-cols-5 gap-2 sm:gap-3">
-        {[
-          { icon: Mail, label: "Email", tone: "from-blue-500/10 to-blue-500/5 text-blue-600" },
-          { icon: Phone, label: "Call", tone: "from-emerald-500/10 to-emerald-500/5 text-emerald-600" },
-          { icon: Calendar, label: "Meet", tone: "from-violet-500/10 to-violet-500/5 text-violet-600" },
-          { icon: FileText, label: "Note", tone: "from-amber-500/10 to-amber-500/5 text-amber-600" },
-          { icon: BookOpen, label: "Log", tone: "from-cyan-500/10 to-cyan-500/5 text-cyan-600" },
-        ].map(({ icon: Icon, label, tone }) => (
-          <button
-            key={label}
-            className={`group relative flex flex-col items-center justify-center gap-1.5 py-3.5 px-2 rounded-2xl bg-gradient-to-br ${tone} border border-border/50 hover:border-primary/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/10`}
-          >
-            <Icon size={18} className="transition-transform duration-200 group-hover:scale-110" />
-            <span className="text-[11px] font-semibold text-foreground/80">{label}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* ── Tab Bar (Pill style) ───────────────────────────────── */}
-      <div className="flex gap-1.5 p-1.5 rounded-2xl bg-secondary/60 border border-border/40 overflow-x-auto">
-        {tabConfig.map(({ key, label, icon: Icon }) => {
-          const isInteg = key === "integrity";
-          const hasIssue = isInteg && (alertCount + warnCount) > 0;
-          const isActive = activeTab === key;
-          return (
-            <button
-              key={key}
-              onClick={() => setActiveTab(key)}
-              className={`relative flex-1 min-w-fit px-3 sm:px-4 py-2 text-xs font-semibold transition-all duration-300 flex items-center justify-center gap-1.5 rounded-xl whitespace-nowrap ${
-                isActive
-                  ? "gradient-brand text-white shadow-lg shadow-primary/30"
-                  : "text-muted-foreground hover:text-foreground hover:bg-card/60"
-              }`}
-            >
-              <Icon size={13} /> <span className="hidden sm:inline">{label}</span>
-              {hasIssue && (
-                <span className={`w-4 h-4 rounded-full text-[9px] font-bold flex items-center justify-center text-white ${alertCount > 0 ? "bg-red-500" : "bg-orange-500"} ${isActive ? "ring-2 ring-white/40" : ""}`}>
-                  {alertCount + warnCount}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
-
       {/* ════════════════════════════════════════════════════════════════ */}
       {/* TAB: PERSONAL (Modules 1, 2, 3, 4)                            */}
       {/* ════════════════════════════════════════════════════════════════ */}
