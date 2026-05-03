@@ -161,48 +161,6 @@ const Index = () => {
           <div className="flex items-center gap-2 ml-auto">
             <ThemeToggle />
 
-            {/* Notifications */}
-            <div ref={notifRef} className="relative">
-              <button
-                onClick={() => { setNotifOpen(o => !o); setProfileOpen(false); }}
-                className="relative w-10 h-10 rounded-xl bg-secondary/70 hover:bg-secondary flex items-center justify-center transition-colors"
-                aria-label="Notifications"
-                data-testid="button-notifications"
-              >
-                <Bell size={17} className="text-foreground/80" />
-                {headerNotifs.length > 0 && (
-                  <span className="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-[hsl(var(--status-intensive))] ring-2 ring-card" />
-                )}
-              </button>
-              {notifOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-card border border-border rounded-xl shadow-2xl overflow-hidden z-50">
-                  <div className="px-4 py-3 border-b border-border/60 flex items-center justify-between">
-                    <p className="text-sm font-bold">Notifications</p>
-                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
-                      {headerNotifs.length} new
-                    </span>
-                  </div>
-                  {headerNotifs.length === 0 ? (
-                    <div className="px-4 py-8 text-center">
-                      <CheckCircle2 size={28} className="mx-auto text-muted-foreground/60 mb-2" />
-                      <p className="text-xs text-muted-foreground">You're all caught up</p>
-                    </div>
-                  ) : (
-                    <ul className="max-h-96 overflow-y-auto">
-                      {headerNotifs.map(n => (
-                        <li key={n.id} className="px-4 py-3 hover:bg-secondary/70 transition border-b border-border/40 last:border-0">
-                          <p className="text-xs font-semibold text-foreground leading-snug">{n.title}</p>
-                          {n.body && <p className="text-[11px] text-muted-foreground mt-0.5 leading-snug">{n.body}</p>}
-                          {n.ts && <p className="text-[10px] text-muted-foreground/70 mt-1">{n.ts}</p>}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Profile chip */}
             <div ref={profileRef} className="relative hidden sm:block">
               <button
                 onClick={() => { setProfileOpen(o => !o); setNotifOpen(false); }}

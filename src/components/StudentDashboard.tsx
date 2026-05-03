@@ -113,28 +113,6 @@ const StudentDashboard = ({
               <h1 className="text-lg sm:text-xl font-bold text-[#213343] tracking-tight">{meta.title}</h1>
               <p className="text-xs text-[#516F90] mt-0.5">{meta.subtitle}</p>
             </div>
-            <div className="hidden md:flex items-center gap-2 ml-auto">
-              <div className="relative">
-                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#7C98B6]" />
-                <input
-                  type="text"
-                  placeholder="Search students, records, notes…"
-                  className="pl-9 pr-3 py-2 w-64 rounded-md bg-white border border-[#E5E7EB] text-sm text-[#213343] focus:border-[#FF7A59] focus:ring-2 focus:ring-[#FF7A59]/15 focus:outline-none transition"
-                />
-              </div>
-              <button className="w-9 h-9 rounded-md bg-white border border-[#E5E7EB] hover:bg-[#F5F8FA] flex items-center justify-center transition relative">
-                <Bell size={15} className="text-[#516F90]" />
-                {student.notifications.filter(n => !n.read).length > 0 && (
-                  <span className="absolute top-1.5 right-2 w-2 h-2 rounded-full bg-[#FF7A59] ring-2 ring-white" />
-                )}
-              </button>
-              <button className="px-3 py-2 rounded-md border border-[#E5E7EB] bg-white hover:bg-[#F5F8FA] text-xs font-semibold text-[#213343] flex items-center gap-1.5 transition">
-                <StickyNote size={13} /> Add Note
-              </button>
-              <button className="px-3 py-2 rounded-md bg-[#FF7A59] hover:bg-[#FF8F73] text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition">
-                <Calendar size={13} /> Schedule Meeting
-              </button>
-            </div>
           </div>
         </div>
 
@@ -295,12 +273,6 @@ function DashboardSection({
                 <ContactRow icon={MapPin} label="Faculty" value="Business" />
               </div>
             </div>
-          </div>
-          <div className="flex flex-wrap gap-2 mt-5 pt-5 border-t border-[#E5E7EB]">
-            <ActionBtn icon={Mail} label="Email" />
-            <ActionBtn icon={Phone} label="Call" />
-            <ActionBtn icon={StickyNote} label="Add Note" />
-            <ActionBtn icon={Calendar} label="Schedule Meeting" primary />
           </div>
         </div>
 
