@@ -1,0 +1,79 @@
+Design a complete student profile that includes the following modules:
+1. Personal Information
+Include basic identity details such as name, DOB, nationality, photo, and basic demographics.
+2. Identification Details
+Include IC/Passport, student ID, and verification status.
+3. Contact Information
+Include phone numbers, email, and address.
+4. Emergency Contact
+Include guardian or emergency contact details.
+5. Academic Background
+Include previous education, certificates, results, and achievements.
+6. University Program Details
+Include course, faculty, level of study, intake, and scholarship status.
+7. Enrollment Information
+Include registration status, advisor, and campus details.
+8. Academic Performance
+Include GPA, CGPA, attendance, and subject records.
+9. Financial Information
+Include income declaration, sponsorship, and payment status.
+10. Family Background
+Include household details, parental occupation, and dependency status.
+11. Health Information
+Include medical conditions, allergies, disability support needs, and insurance.
+12. Mental Health Support Module
+Include counseling requests and support tracking (high privacy).
+13. Accommodation Details
+Include hostel or housing information.
+14. Skills & Interests
+Include technical skills, soft skills, and career goals.
+15. Disciplinary Records
+Include warnings, violations, and case status.
+16. Documents Section
+Include uploaded official documents (transcripts, certificates, ID, etc.).
+🔐 External Verification & Integrity Layer (IMPORTANT)
+Add a dedicated system module that performs verification and consistency checks across all sensitive categories:
+Include:
+A. Financial Verification
+Income proof validation
+Tax document check
+Scholarship eligibility cross-check
+Consistency between income and financial aid request
+B. Academic Verification
+Transcript authenticity check
+Exam board validation
+Certificate verification
+Academic consistency analysis
+C. Health Verification
+Medical report validation from clinics/hospitals
+Insurance verification
+Disability registration check
+D. Family Background Verification
+Government or social welfare confirmation
+Guardianship validation
+Household data consistency check
+E. Mental Health Verification (Strict Privacy)
+Counselor or licensed psychologist confirmation
+Appointment or referral validation
+Restricted access control
+🧠 Integrity System Features
+Include:
+Overall Student Trust Index (High / Medium / Low)
+Cross-domain consistency engine (detect mismatches across data)
+External source validation system (government, hospitals, institutions)
+System flags:
+Verified
+Pending Verification
+Inconsistent / Needs Review
+⚖️ Ethical Constraints
+The system must:
+NOT assume students are lying automatically
+NOT reject students without human review
+NOT use emotional or facial profiling
+Respect privacy, especially for health and mental health data
+🎯 Output Format
+Return:
+Clean structured system design
+Organized sections (like a database schema or product specification)
+Clear labels for each module
+Professional tone suitable for a university AI system proposal

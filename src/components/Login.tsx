@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { students } from "@/data/mockData";
-import { GraduationCap, User, BookOpen, Lock, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { getRegisteredStudents, getRegisteredLecturers, getStudentPassword } from "@/lib/userRegistry";
+import { User, BookOpen, Lock, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 export type AuthSession =
   | { role: "student"; studentId: string; name: string }
@@ -8,9 +9,10 @@ export type AuthSession =
 
 interface Props {
   onLogin: (session: AuthSession) => void;
+  onShowSignup: () => void;
 }
 
-const LECTURERS = [
+const DEMO_LECTURERS = [
   { username: "zainab",   password: "lecturer123", name: "Dr. Zainab binti Mohd Noor" },
   { username: "rashidah", password: "lecturer123", name: "Pn. Rashidah binti Rahim" },
   { username: "hairul",   password: "lecturer123", name: "Prof. Madya Dr. Hairul" },
@@ -20,7 +22,7 @@ const LECTURERS = [
 
 const STUDENT_DEFAULT_PASSWORD = "student123";
 
-export default function Login({ onLogin }: Props) {
+export default function Login({ onLogin, onShowSignup }: Props) {
   const [role, setRole] = useState<"student" | "lecturer">("student");
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
@@ -32,18 +34,45 @@ export default function Login({ onLogin }: Props) {
     setError("");
 
     if (role === "student") {
-      const student = students.find(
+      // Check mock students first
+      const mockStudent = students.find(
         s => s.matricNo.toLowerCase() === identifier.trim().toLowerCase()
           || s.profile.icNumber === identifier.trim(),
       );
-      if (!student) { setError("Matric Number or IC not found. Please check and try again."); return; }
-      if (password !== STUDENT_DEFAULT_PASSWORD) { setError("Incorrect password. Use 'student123' for the demo account."); return; }
-      onLogin({ role: "student", studentId: student.id, name: student.name });
+      if (mockStudent) {
+        if (password !== STUDENT_DEFAULT_PASSWORD) {
+          setError("Incorrect password."); return;
+        }
+        onLogin({ role: "student", studentId: mockStudent.id, name: mockStudent.name });
+        return;
+      }
+
+      // Check registered students
+      const regStudents = getRegisteredStudents();
+      const regStudent = regStudents.find(
+        s => s.matricNo.toLowerCase() === identifier.trim().toLowerCase()
+          || s.profile.icNumber === identifier.trim(),
+      );
+      if (!regStudent) { setError("Matric Number or IC not found. Please check and try again."); return; }
+      const storedPass = getStudentPassword(regStudent.id);
+      if (password !== storedPass) { setError("Incorrect password."); return; }
+      onLogin({ role: "student", studentId: regStudent.id, name: regStudent.name });
+
     } else {
-      const lect = LECTURERS.find(l => l.username.toLowerCase() === identifier.trim().toLowerCase());
-      if (!lect) { setError("Lecturer username not found."); return; }
-      if (lect.password !== password) { setError("Incorrect password. Use 'lecturer123' for the demo account."); return; }
-      onLogin({ role: "lecturer", name: lect.name });
+      // Check demo lecturers
+      const demoLect = DEMO_LECTURERS.find(l => l.username.toLowerCase() === identifier.trim().toLowerCase());
+      if (demoLect) {
+        if (demoLect.password !== password) { setError("Incorrect password."); return; }
+        onLogin({ role: "lecturer", name: demoLect.name });
+        return;
+      }
+
+      // Check registered lecturers
+      const regLecturers = getRegisteredLecturers();
+      const regLect = regLecturers.find(l => l.username === identifier.trim().toLowerCase());
+      if (!regLect) { setError("Lecturer username not found."); return; }
+      if (regLect.password !== password) { setError("Incorrect password."); return; }
+      onLogin({ role: "lecturer", name: regLect.name });
     }
   };
 
@@ -61,15 +90,9 @@ export default function Login({ onLogin }: Props) {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Brand */}
-        <div className="flex items-center justify-center gap-3 mb-6">
-          <div className="p-3 rounded-xl bg-primary/20">
-            <GraduationCap size={28} className="text-primary" />
-          </div>
-          <div>
-            <h1 className="font-bold text-lg">In-Campus Skills Gap Tracker</h1>
-            <p className="text-xs text-muted-foreground">Early Detection · Smarter Intervention</p>
-          </div>
+        {/* Logo */}
+        <div className="flex items-center justify-center mb-6">
+          <img src="/logo.png" alt="In-Campus Skills Gap Tracker" className="h-20 object-contain" />
         </div>
 
         <div className="glass-card p-6 space-y-5">
@@ -189,6 +212,17 @@ export default function Login({ onLogin }: Props) {
               </ul>
             )}
           </div>
+
+          <p className="text-center text-xs text-muted-foreground">
+            New user?{" "}
+            <button
+              onClick={onShowSignup}
+              className="text-primary font-semibold hover:underline"
+              data-testid="button-go-signup"
+            >
+              Create an account
+            </button>
+          </p>
         </div>
 
         <p className="text-center text-[10px] text-muted-foreground mt-4">

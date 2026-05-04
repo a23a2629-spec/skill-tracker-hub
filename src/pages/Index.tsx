@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { students, appointments, Appointment, externalProblems, ExternalProblem } from "@/data/mockData";
+import { getRegisteredStudents, getAllStudents } from "@/lib/userRegistry";
 import StudentDashboard from "@/components/StudentDashboard";
 import LecturerDashboard from "@/components/LecturerDashboard";
 import ThemeToggle from "@/components/ThemeToggle";
 import Login, { AuthSession } from "@/components/Login";
-import { GraduationCap, LogOut, Search, Bell, ChevronDown, UserCircle2, Mail, CheckCircle2 } from "lucide-react";
+import Signup from "@/components/Signup";
+import { LogOut, Search, ChevronDown, UserCircle2, Mail } from "lucide-react";
 
 const SESSION_KEY = "skills-tracker-session";
 
@@ -16,27 +18,29 @@ const Index = () => {
     } catch { return null; }
   });
 
+  const [showSignup, setShowSignup] = useState(false);
+
   useEffect(() => {
     if (session) localStorage.setItem(SESSION_KEY, JSON.stringify(session));
     else localStorage.removeItem(SESSION_KEY);
   }, [session]);
 
-  const [selectedStudentId, setSelectedStudentId] = useState(students[0].id);
+  // All students = mock + registered
+  const allStudents = [...students, ...getRegisteredStudents()];
+
+  const [selectedStudentId, setSelectedStudentId] = useState(allStudents[0].id);
   const [allAppointments, setAllAppointments] = useState<Appointment[]>(appointments);
   const [allProblems, setAllProblems] = useState<ExternalProblem[]>(externalProblems);
 
-  // Resolve current student based on session role
   const activeStudentId = session?.role === "student" ? session.studentId : selectedStudentId;
-  const selectedStudent = students.find((s) => s.id === activeStudentId) ?? students[0];
+  const selectedStudent = allStudents.find((s) => s.id === activeStudentId) ?? allStudents[0];
 
   const handleAddAppointment = (apt: Appointment) => setAllAppointments(prev => [...prev, apt]);
   const handleUpdateAppointmentStatus = (id: string, status: Appointment["status"]) =>
     setAllAppointments(prev => prev.map(a => a.id === id ? { ...a, status } : a));
   const handleAddProblem = (problem: ExternalProblem) => setAllProblems(prev => [...prev, problem]);
-
   const handleLogout = () => setSession(null);
 
-  // Top header dropdown state
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -56,9 +60,18 @@ const Index = () => {
     return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
-  if (!session) return <Login onLogin={setSession} />;
+  if (!session) {
+    if (showSignup) {
+      return (
+        <Signup
+          onBack={() => setShowSignup(false)}
+          onSuccess={() => setShowSignup(false)}
+        />
+      );
+    }
+    return <Login onLogin={setSession} onShowSignup={() => setShowSignup(true)} />;
+  }
 
-  // Build notifications based on role
   type HeaderNotif = { id: string; title: string; body: string; ts: string };
   const headerNotifs: HeaderNotif[] = session.role === "lecturer"
     ? allAppointments
@@ -66,7 +79,7 @@ const Index = () => {
         .slice(0, 6)
         .map(a => ({
           id: a.id,
-          title: `Appointment request · ${students.find(s => s.id === a.studentId)?.name ?? "Student"}`,
+          title: `Appointment request · ${allStudents.find(s => s.id === a.studentId)?.name ?? "Student"}`,
           body: `${a.date} at ${a.time} — ${a.reason}`,
           ts: a.date,
         }))
@@ -77,11 +90,10 @@ const Index = () => {
         ts: n.date ?? n.ts ?? "",
       }));
 
-  // Search results: lecturer searches all students; student searches own modules
   const trimmedQuery = searchQuery.trim().toLowerCase();
   const searchResults = trimmedQuery
     ? (session.role === "lecturer"
-        ? students
+        ? allStudents
             .filter(s =>
               s.name.toLowerCase().includes(trimmedQuery) ||
               s.matricNo.toLowerCase().includes(trimmedQuery) ||
@@ -103,11 +115,9 @@ const Index = () => {
       <header className="bg-card/80 backdrop-blur-xl border-b border-border/60 sticky top-0 z-50 shadow-[0_1px_3px_rgba(15,23,42,0.04),0_8px_24px_-12px_rgba(15,23,42,0.06)]">
         <div className={headerInner}>
           {/* Logo */}
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="w-10 h-10 rounded-xl gradient-brand flex items-center justify-center shadow-lg shadow-primary/20">
-              <GraduationCap size={20} className="text-white" />
-            </div>
-            <div className="hidden md:block">
+          <div className="flex items-center gap-2 shrink-0">
+            <img src="/logo.png" alt="In-Campus Skills Gap Tracker" className="h-10 object-contain" />
+            <div className="hidden lg:block">
               <h1 className="font-bold text-sm leading-tight text-foreground">Skills Gap Tracker</h1>
               <p className="text-[10px] text-muted-foreground">Early Detection · Smarter Intervention</p>
             </div>
@@ -142,7 +152,7 @@ const Index = () => {
                           className="w-full text-left px-4 py-2.5 hover:bg-secondary/70 transition flex items-center gap-3 border-b border-border/40 last:border-0"
                         >
                           <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary text-xs font-bold flex items-center justify-center shrink-0">
-                            {r.label.split(" ").map(w => w[0]).slice(0, 2).join("")}
+                            {r.label.split(" ").map((w: string) => w[0]).slice(0, 2).join("")}
                           </div>
                           <div className="min-w-0">
                             <p className="text-xs font-semibold text-foreground truncate">{r.label}</p>

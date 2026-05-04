@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import {
-  students, students as initialStudents, courses, Course, SkillStatus, Student,
+  students, courses, Course, SkillStatus, Student,
   Appointment, ExternalProblem, externalProblems,
 } from "@/data/mockData";
+import { getRegisteredStudents } from "@/lib/userRegistry";
 import {
   Users, BookOpen, AlertTriangle, TrendingUp, MessageSquare, ChevronUp, PlusCircle,
   CalendarDays, AlertCircle, LayoutDashboard, BarChart3, FileText, Sparkles,
@@ -93,7 +94,7 @@ const LecturerDashboard = ({
   const [lecturerBookingForm, setLecturerBookingForm] = useState({ studentId: "", date: "", time: "", reason: "" });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-  const [studentsList, setStudentsList] = useState<Student[]>(initialStudents);
+  const [studentsList, setStudentsList] = useState<Student[]>(() => [...students, ...getRegisteredStudents()]);
   const [showAddStudent, setShowAddStudent] = useState(false);
   const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
   const [editStudentId, setEditStudentId] = useState<string | null>(null);
