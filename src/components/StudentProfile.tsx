@@ -195,6 +195,26 @@ export default function StudentProfile({ student, problems, onProfileUpdate }: P
       </div>
 
       {/* ════════════════════════════════════════════════════════════════ */}
+      {/* TAB NAVIGATION BAR                                             */}
+      {/* ════════════════════════════════════════════════════════════════ */}
+      <div className="flex gap-1 overflow-x-auto pb-1 border-b border-border/60 scrollbar-hide">
+        {tabConfig.map(({ key, label, icon: Icon }) => (
+          <button
+            key={key}
+            onClick={() => setActiveTab(key)}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-t-lg text-xs font-semibold whitespace-nowrap transition-all border-b-2 -mb-[1px]
+              ${activeTab === key
+                ? "border-primary text-primary bg-primary/5"
+                : "border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+              }`}
+          >
+            <Icon size={13} />
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {/* ════════════════════════════════════════════════════════════════ */}
       {/* TAB: PERSONAL (Modules 1, 2, 3, 4)                            */}
       {/* ════════════════════════════════════════════════════════════════ */}
       {activeTab === "personal" && (
