@@ -19,6 +19,7 @@ interface Props {
   problems: ExternalProblem[];
   onAddProblem: (problem: ExternalProblem) => void;
   onLogout: () => void;
+  onProfileUpdate?: (update: Partial<Student["profile"]> & { avatar?: string }) => void;
 }
 
 type Section =
@@ -40,7 +41,7 @@ const navItems: { key: Section; label: string; icon: React.ElementType }[] = [
 
 const StudentDashboard = ({
   student, appointments: studentAppointments, onAddAppointment, onUpdateStatus,
-  problems, onAddProblem, onLogout,
+  problems, onAddProblem, onLogout, onProfileUpdate,
 }: Props) => {
   const [active, setActive] = useState<Section>("dashboard");
   const [activeTab, setActiveTab] = useState("overview");
@@ -132,7 +133,7 @@ const StudentDashboard = ({
           )}
           {active === "profile" && (
             <SectionShell>
-              <StudentProfile student={student} problems={problems} />
+              <StudentProfile student={student} problems={problems} onProfileUpdate={onProfileUpdate} />
             </SectionShell>
           )}
           {active === "students" && <CohortSection student={student} />}

@@ -32,14 +32,31 @@ const Index = () => {
   const [allAppointments, setAllAppointments] = useState<Appointment[]>(appointments);
   const [allProblems, setAllProblems] = useState<ExternalProblem[]>(externalProblems);
 
+  // Profile overrides — persisted to localStorage
+  const PROFILE_KEY = "skills-tracker-profile-updates";
+  const [profileOverrides, setProfileOverrides] = useState<Record<string, any>>(() => {
+    try { return JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}"); } catch { return {}; }
+  });
+
   const activeStudentId = session?.role === "student" ? session.studentId : selectedStudentId;
-  const selectedStudent = allStudents.find((s) => s.id === activeStudentId) ?? allStudents[0];
+  const baseStudent = allStudents.find((s) => s.id === activeStudentId) ?? allStudents[0];
+  const override = profileOverrides[baseStudent.id];
+  const selectedStudent = override
+    ? { ...baseStudent, profile: { ...baseStudent.profile, ...override } }
+    : baseStudent;
 
   const handleAddAppointment = (apt: Appointment) => setAllAppointments(prev => [...prev, apt]);
   const handleUpdateAppointmentStatus = (id: string, status: Appointment["status"]) =>
     setAllAppointments(prev => prev.map(a => a.id === id ? { ...a, status } : a));
   const handleAddProblem = (problem: ExternalProblem) => setAllProblems(prev => [...prev, problem]);
   const handleLogout = () => setSession(null);
+
+  const handleProfileUpdate = (update: any) => {
+    const merged = { ...profileOverrides[baseStudent.id], ...update };
+    const next = { ...profileOverrides, [baseStudent.id]: merged };
+    setProfileOverrides(next);
+    localStorage.setItem(PROFILE_KEY, JSON.stringify(next));
+  };
 
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -237,6 +254,7 @@ const Index = () => {
           problems={allProblems.filter(p => p.studentId === selectedStudent.id)}
           onAddProblem={handleAddProblem}
           onLogout={handleLogout}
+          onProfileUpdate={handleProfileUpdate}
         />
       ) : (
         <LecturerDashboard

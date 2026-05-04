@@ -66,15 +66,52 @@ export default function StudentProfile({ student, problems, onProfileUpdate }: P
   const [activeTab, setActiveTab] = useState<Tab>("personal");
   const [editing, setEditing] = useState(false);
   const [avatar, setAvatar] = useState<string | undefined>(p.avatar);
-  const [form, setForm] = useState({ phone: p.phone, email: p.email, address: p.address });
+  const [form, setForm] = useState({
+    // Module 1
+    nationality: p.nationality, race: p.race, religion: p.religion,
+    // Module 3 — Contact
+    phone: p.phone, email: p.email, address: p.address, postcode: p.postcode, state: p.state,
+    // Module 4 — Emergency Contact
+    guardian: p.guardian, guardianPhone: p.guardianPhone, guardianEmail: p.guardianEmail, guardianRelation: p.guardianRelation,
+    // Module 13 — Accommodation
+    hostelBlock: p.hostelBlock ?? "", hostelRoom: p.hostelRoom ?? "",
+    // Module 14 — Skills & Interests
+    careerGoal: p.careerGoal,
+    technicalSkillsStr: p.technicalSkills.join(", "),
+    softSkillsStr: p.softSkills.join(", "),
+    cocurricularStr: p.cocurricular.join(", "),
+  });
+  const setF = (key: string, value: string) => setForm(f => ({ ...f, [key]: value }));
   const fileRef = useRef<HTMLInputElement>(null);
 
   const report = analyzeIntegrity(student, problems);
   const alertCount = report.flags.filter(f => f.type === "alert").length;
   const warnCount = report.flags.filter(f => f.type === "warning").length;
 
-  const handleSave = () => { onProfileUpdate?.({ ...form, avatar }); setEditing(false); };
-  const handleCancel = () => { setForm({ phone: p.phone, email: p.email, address: p.address }); setAvatar(p.avatar); setEditing(false); };
+  const handleSave = () => {
+    const { technicalSkillsStr, softSkillsStr, cocurricularStr, ...rest } = form;
+    onProfileUpdate?.({
+      ...rest, avatar,
+      technicalSkills: technicalSkillsStr.split(",").map(s => s.trim()).filter(Boolean),
+      softSkills: softSkillsStr.split(",").map(s => s.trim()).filter(Boolean),
+      cocurricular: cocurricularStr.split(",").map(s => s.trim()).filter(Boolean),
+    });
+    setEditing(false);
+  };
+  const handleCancel = () => {
+    setForm({
+      nationality: p.nationality, race: p.race, religion: p.religion,
+      phone: p.phone, email: p.email, address: p.address, postcode: p.postcode, state: p.state,
+      guardian: p.guardian, guardianPhone: p.guardianPhone, guardianEmail: p.guardianEmail, guardianRelation: p.guardianRelation,
+      hostelBlock: p.hostelBlock ?? "", hostelRoom: p.hostelRoom ?? "",
+      careerGoal: p.careerGoal,
+      technicalSkillsStr: p.technicalSkills.join(", "),
+      softSkillsStr: p.softSkills.join(", "),
+      cocurricularStr: p.cocurricular.join(", "),
+    });
+    setAvatar(p.avatar);
+    setEditing(false);
+  };
 
   return (
     <div className="premium-card p-6 sm:p-8 space-y-6">
@@ -167,9 +204,19 @@ export default function StudentProfile({ student, problems, onProfileUpdate }: P
               <InfoRow icon={UserRound} label="Full Name" value={student.name} />
               <InfoRow icon={Calendar} label="Date of Birth" value={`${p.dateOfBirth} (Age ${age})`} />
               <InfoRow icon={UserRound} label="Gender" value={p.gender} />
-              <InfoRow icon={Globe} label="Nationality" value={p.nationality} />
-              <InfoRow icon={Globe} label="Race / Ethnicity" value={p.race} />
-              <InfoRow icon={Star} label="Religion" value={p.religion} />
+              {editing ? (
+                <>
+                  <EditRow icon={Globe} label="Nationality" value={form.nationality} onChange={v => setF("nationality", v)} />
+                  <EditRow icon={Globe} label="Race / Ethnicity" value={form.race} onChange={v => setF("race", v)} />
+                  <EditRow icon={Star} label="Religion" value={form.religion} onChange={v => setF("religion", v)} />
+                </>
+              ) : (
+                <>
+                  <InfoRow icon={Globe} label="Nationality" value={p.nationality} />
+                  <InfoRow icon={Globe} label="Race / Ethnicity" value={p.race} />
+                  <InfoRow icon={Star} label="Religion" value={p.religion} />
+                </>
+              )}
             </Grid>
           </Section>
 
@@ -187,9 +234,11 @@ export default function StudentProfile({ student, problems, onProfileUpdate }: P
             <Grid>
               {editing ? (
                 <>
-                  <EditRow icon={Mail} label="Email" value={form.email} onChange={v => setForm(f => ({ ...f, email: v }))} />
-                  <EditRow icon={Phone} label="Phone" value={form.phone} onChange={v => setForm(f => ({ ...f, phone: v }))} />
-                  <div className="sm:col-span-2"><EditRow icon={MapPin} label="Address" value={form.address} onChange={v => setForm(f => ({ ...f, address: v }))} /></div>
+                  <EditRow icon={Mail} label="Email" value={form.email} onChange={v => setF("email", v)} />
+                  <EditRow icon={Phone} label="Phone" value={form.phone} onChange={v => setF("phone", v)} />
+                  <div className="sm:col-span-2"><EditRow icon={MapPin} label="Street Address" value={form.address} onChange={v => setF("address", v)} /></div>
+                  <EditRow icon={MapPin} label="Postcode" value={form.postcode} onChange={v => setF("postcode", v)} />
+                  <EditRow icon={MapPin} label="State" value={form.state} onChange={v => setF("state", v)} />
                 </>
               ) : (
                 <>
@@ -203,10 +252,21 @@ export default function StudentProfile({ student, problems, onProfileUpdate }: P
 
           <Section icon={Users} title="Module 4 — Emergency Contact">
             <Grid>
-              <InfoRow icon={Users} label="Guardian Name" value={p.guardian} />
-              <InfoRow icon={UserRound} label="Relationship" value={p.guardianRelation} />
-              <InfoRow icon={Phone} label="Phone" value={p.guardianPhone} />
-              <InfoRow icon={Mail} label="Email" value={p.guardianEmail} />
+              {editing ? (
+                <>
+                  <EditRow icon={Users} label="Guardian Name" value={form.guardian} onChange={v => setF("guardian", v)} />
+                  <EditRow icon={UserRound} label="Relationship" value={form.guardianRelation} onChange={v => setF("guardianRelation", v)} />
+                  <EditRow icon={Phone} label="Guardian Phone" value={form.guardianPhone} onChange={v => setF("guardianPhone", v)} />
+                  <EditRow icon={Mail} label="Guardian Email" value={form.guardianEmail} onChange={v => setF("guardianEmail", v)} />
+                </>
+              ) : (
+                <>
+                  <InfoRow icon={Users} label="Guardian Name" value={p.guardian} />
+                  <InfoRow icon={UserRound} label="Relationship" value={p.guardianRelation} />
+                  <InfoRow icon={Phone} label="Phone" value={p.guardianPhone} />
+                  <InfoRow icon={Mail} label="Email" value={p.guardianEmail} />
+                </>
+              )}
             </Grid>
           </Section>
         </div>
@@ -366,8 +426,17 @@ export default function StudentProfile({ student, problems, onProfileUpdate }: P
           <Section icon={Home} title="Module 13 — Accommodation Details">
             <Grid>
               <InfoRow icon={Home} label="Hostel Resident" value={p.hostel ? "Yes — On Campus" : "No — Commuter"} />
-              {p.hostel && p.hostelBlock && <InfoRow icon={Building2} label="Block" value={p.hostelBlock} />}
-              {p.hostel && p.hostelRoom && <InfoRow icon={Building2} label="Room" value={p.hostelRoom} />}
+              {editing ? (
+                <>
+                  <EditRow icon={Building2} label="Block (if on campus)" value={form.hostelBlock} onChange={v => setF("hostelBlock", v)} />
+                  <EditRow icon={Building2} label="Room (if on campus)" value={form.hostelRoom} onChange={v => setF("hostelRoom", v)} />
+                </>
+              ) : (
+                <>
+                  {p.hostel && p.hostelBlock && <InfoRow icon={Building2} label="Block" value={p.hostelBlock} />}
+                  {p.hostel && p.hostelRoom && <InfoRow icon={Building2} label="Room" value={p.hostelRoom} />}
+                </>
+              )}
             </Grid>
           </Section>
         </div>
@@ -379,27 +448,37 @@ export default function StudentProfile({ student, problems, onProfileUpdate }: P
       {activeTab === "activities" && (
         <div className="space-y-4">
           <Section icon={Star} title="Module 14 — Skills & Interests">
-            <div className="space-y-3">
-              <div>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1.5">Technical Skills</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {p.technicalSkills.length > 0 ? p.technicalSkills.map((s, i) => <Tag key={i} label={s} color="primary" />) : <p className="text-sm text-muted-foreground">None listed</p>}
-                </div>
+            {editing ? (
+              <div className="space-y-3">
+                <EditRow icon={Star} label="Career Goal" value={form.careerGoal} onChange={v => setF("careerGoal", v)} />
+                <EditRow icon={BookOpen} label="Technical Skills (comma-separated)" value={form.technicalSkillsStr} onChange={v => setF("technicalSkillsStr", v)} />
+                <EditRow icon={Heart} label="Soft Skills (comma-separated)" value={form.softSkillsStr} onChange={v => setF("softSkillsStr", v)} />
+                <EditRow icon={Star} label="Co-Curricular Activities (comma-separated)" value={form.cocurricularStr} onChange={v => setF("cocurricularStr", v)} />
+                <p className="text-[10px] text-muted-foreground">Separate multiple entries with commas, e.g. "Excel, SAP, Python"</p>
               </div>
-              <div>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1.5">Soft Skills</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {p.softSkills.map((s, i) => <Tag key={i} label={s} color="mastered" />)}
+            ) : (
+              <div className="space-y-3">
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1.5">Technical Skills</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {p.technicalSkills.length > 0 ? p.technicalSkills.map((s, i) => <Tag key={i} label={s} color="primary" />) : <p className="text-sm text-muted-foreground">None listed</p>}
+                  </div>
                 </div>
-              </div>
-              <div>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1.5">Co-Curricular Activities</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {p.cocurricular.length > 0 ? p.cocurricular.map((c, i) => <Tag key={i} label={c} color="developing" />) : <p className="text-sm text-muted-foreground">None listed</p>}
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1.5">Soft Skills</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {p.softSkills.length > 0 ? p.softSkills.map((s, i) => <Tag key={i} label={s} color="mastered" />) : <p className="text-sm text-muted-foreground">None listed</p>}
+                  </div>
                 </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1.5">Co-Curricular Activities</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {p.cocurricular.length > 0 ? p.cocurricular.map((c, i) => <Tag key={i} label={c} color="developing" />) : <p className="text-sm text-muted-foreground">None listed</p>}
+                  </div>
+                </div>
+                <InfoRow icon={Star} label="Career Goal" value={p.careerGoal} />
               </div>
-              <InfoRow icon={Star} label="Career Goal" value={p.careerGoal} />
-            </div>
+            )}
           </Section>
 
           <Section icon={AlertCircle} title="Module 15 — Disciplinary Records">
