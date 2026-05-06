@@ -574,7 +574,7 @@ function CourseFilter({ selectedCourse, setSelectedCourse }: {
           }`}
         >
           <span className="hidden sm:inline">{c.name}</span>
-          <span className="sm:hidden">{c.code}</span>
+          <span className="sm:hidden">{({"DPB3012":"SAD","DPB2022":"SAK","DPB2033":"SAR","DPA1014":"SAA","DPB1015":"SAE","DPB3046":"SAB"} as Record<string,string>)[c.code] || c.code}</span>
         </button>
       ))}
     </div>
