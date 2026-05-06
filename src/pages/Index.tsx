@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { students, appointments, Appointment, externalProblems, ExternalProblem } from "@/data/mockData";
+import { students, appointments, Appointment, externalProblems, ExternalProblem, ReportTemplate, ReportSubmission } from "@/data/mockData";
 import { getRegisteredStudents, getAllStudents } from "@/lib/userRegistry";
 import StudentDashboard from "@/components/StudentDashboard";
 import LecturerDashboard from "@/components/LecturerDashboard";
@@ -32,6 +32,15 @@ const Index = () => {
   const [allAppointments, setAllAppointments] = useState<Appointment[]>(appointments);
   const [allProblems, setAllProblems] = useState<ExternalProblem[]>(externalProblems);
 
+  const REPORT_TEMPLATES_KEY = "skills-tracker-report-templates";
+  const REPORT_SUBMISSIONS_KEY = "skills-tracker-report-submissions";
+  const [reportTemplates, setReportTemplates] = useState<ReportTemplate[]>(() => {
+    try { return JSON.parse(localStorage.getItem(REPORT_TEMPLATES_KEY) || "[]"); } catch { return []; }
+  });
+  const [reportSubmissions, setReportSubmissions] = useState<ReportSubmission[]>(() => {
+    try { return JSON.parse(localStorage.getItem(REPORT_SUBMISSIONS_KEY) || "[]"); } catch { return []; }
+  });
+
   // Profile overrides — persisted to localStorage
   const PROFILE_KEY = "skills-tracker-profile-updates";
   const [profileOverrides, setProfileOverrides] = useState<Record<string, any>>(() => {
@@ -50,6 +59,22 @@ const Index = () => {
     setAllAppointments(prev => prev.map(a => a.id === id ? { ...a, status } : a));
   const handleAddProblem = (problem: ExternalProblem) => setAllProblems(prev => [...prev, problem]);
   const handleLogout = () => setSession(null);
+
+  const handleAddTemplate = (t: ReportTemplate) => {
+    const next = [t, ...reportTemplates];
+    setReportTemplates(next);
+    localStorage.setItem(REPORT_TEMPLATES_KEY, JSON.stringify(next));
+  };
+  const handleAddSubmission = (s: ReportSubmission) => {
+    const next = [s, ...reportSubmissions];
+    setReportSubmissions(next);
+    localStorage.setItem(REPORT_SUBMISSIONS_KEY, JSON.stringify(next));
+  };
+  const handleUpdateSubmission = (id: string, patch: Partial<ReportSubmission>) => {
+    const next = reportSubmissions.map(s => s.id === id ? { ...s, ...patch } : s);
+    setReportSubmissions(next);
+    localStorage.setItem(REPORT_SUBMISSIONS_KEY, JSON.stringify(next));
+  };
 
   const handleProfileUpdate = (update: any) => {
     const merged = { ...profileOverrides[baseStudent.id], ...update };
@@ -296,6 +321,9 @@ const Index = () => {
           onProfileUpdate={handleProfileUpdate}
           sectionRequest={studentSectionReq}
           profileTabRequest={studentTabReq}
+          reportTemplates={reportTemplates}
+          reportSubmissions={reportSubmissions}
+          onAddSubmission={handleAddSubmission}
         />
       ) : (
         <LecturerDashboard
@@ -305,6 +333,10 @@ const Index = () => {
           problems={allProblems}
           lecturerName={session.name}
           onLogout={handleLogout}
+          reportTemplates={reportTemplates}
+          reportSubmissions={reportSubmissions}
+          onAddTemplate={handleAddTemplate}
+          onUpdateSubmission={handleUpdateSubmission}
         />
       )}
     </div>

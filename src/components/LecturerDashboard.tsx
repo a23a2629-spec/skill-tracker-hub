@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import {
   students, courses, Course, SkillStatus, Student,
-  Appointment, ExternalProblem, externalProblems,
+  Appointment, ExternalProblem, externalProblems, ReportTemplate, ReportSubmission,
 } from "@/data/mockData";
 import { getRegisteredStudents } from "@/lib/userRegistry";
 import {
@@ -25,6 +25,10 @@ interface Props {
   problems: ExternalProblem[];
   lecturerName: string;
   onLogout: () => void;
+  reportTemplates: ReportTemplate[];
+  reportSubmissions: ReportSubmission[];
+  onAddTemplate: (t: ReportTemplate) => void;
+  onUpdateSubmission: (id: string, patch: Partial<ReportSubmission>) => void;
 }
 
 type Section =
@@ -82,6 +86,10 @@ const LecturerDashboard = ({
   problems,
   lecturerName,
   onLogout,
+  reportTemplates,
+  reportSubmissions,
+  onAddTemplate,
+  onUpdateSubmission,
 }: Props) => {
   const [active, setActive] = useState<Section>("dashboard");
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
@@ -332,15 +340,11 @@ const LecturerDashboard = ({
 
               {active === "reports" && (
                 <ReportsSection
-                  newAssessment={newAssessment}
-                  setNewAssessment={setNewAssessment}
-                  handleCreateAssessment={handleCreateAssessment}
-                  createdAssessments={createdAssessments}
+                  reportTemplates={reportTemplates}
+                  reportSubmissions={reportSubmissions}
+                  onAddTemplate={onAddTemplate}
+                  onUpdateSubmission={onUpdateSubmission}
                   displayStudents={displayStudents}
-                  comments={comments}
-                  newComment={newComment}
-                  setNewComment={setNewComment}
-                  handleAddComment={handleAddComment}
                 />
               )}
 
@@ -1082,106 +1086,172 @@ function CasesSection({ problems }: { problems: ExternalProblem[] }) {
 }
 
 // ── Reports Section ────────────────────────────────────────────────────
-function ReportsSection({
-  newAssessment, setNewAssessment, handleCreateAssessment, createdAssessments,
-  displayStudents, comments, newComment, setNewComment, handleAddComment,
-}: any) {
+function ReportsSection({ reportTemplates, reportSubmissions, onAddTemplate, onUpdateSubmission }: {
+  reportTemplates: ReportTemplate[];
+  reportSubmissions: ReportSubmission[];
+  onAddTemplate: (t: ReportTemplate) => void;
+  onUpdateSubmission: (id: string, patch: Partial<ReportSubmission>) => void;
+  displayStudents?: any[];
+}) {
+  const [form, setForm] = useState({ title: "", description: "", type: "assignment" as ReportTemplate["type"], courseId: "", dueDate: "" });
+  const [reviewingId, setReviewingId] = useState<string | null>(null);
+  const [note, setNote] = useState("");
+
+  const handleCreate = () => {
+    if (!form.title) return;
+    onAddTemplate({
+      id: `tpl-${Date.now()}`,
+      title: form.title,
+      description: form.description,
+      type: form.type,
+      courseId: form.courseId || undefined,
+      dueDate: form.dueDate || undefined,
+      createdDate: new Date().toISOString().slice(0, 10),
+    });
+    setForm({ title: "", description: "", type: "assignment", courseId: "", dueDate: "" });
+  };
+
+  const handleReview = (id: string, status: "reviewed" | "acknowledged") => {
+    onUpdateSubmission(id, { status, lecturerNote: note || undefined });
+    setReviewingId(null);
+    setNote("");
+  };
+
+  const pendingCount = reportSubmissions.filter(s => s.status === "submitted").length;
+
   return (
     <div className="space-y-4">
       <div className="premium-card p-5 space-y-4">
         <div className="flex items-center gap-2.5">
           <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center"><PlusCircle size={16} className="text-primary" /></div>
           <div>
-            <h3 className="text-sm font-bold tracking-tight">Create New Assessment</h3>
-            <p className="text-[10px] text-muted-foreground">Publish to your selected course</p>
+            <h3 className="text-sm font-bold tracking-tight">Create Report Assignment</h3>
+            <p className="text-[10px] text-muted-foreground">Students will see this and can submit a file</p>
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold block mb-1.5">Title</label>
-            <input type="text" placeholder="e.g. Quiz 3 — Transportation Models"
+            <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold block mb-1.5">Title *</label>
+            <input type="text" placeholder="e.g. Week 5 Progress Report"
               className="w-full text-sm px-3 py-2.5 rounded-xl bg-secondary/60 border border-border/60 focus:border-primary/40 focus:outline-none focus:ring-4 focus:ring-primary/10"
-              value={newAssessment.title} onChange={(e: any) => setNewAssessment((p: any) => ({ ...p, title: e.target.value }))} />
+              value={form.title} onChange={e => setForm(p => ({ ...p, title: e.target.value }))} />
           </div>
           <div>
-            <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold block mb-1.5">Course</label>
+            <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold block mb-1.5">Type</label>
             <select className="w-full text-sm px-3 py-2.5 rounded-xl bg-secondary/60 border border-border/60 focus:border-primary/40 focus:outline-none focus:ring-4 focus:ring-primary/10"
-              value={newAssessment.courseId} onChange={(e: any) => setNewAssessment((p: any) => ({ ...p, courseId: e.target.value }))}>
-              <option value="">Select a course</option>
-              {courses.map(c => <option key={c.id} value={c.id}>{c.name} ({c.code})</option>)}
+              value={form.type} onChange={e => setForm(p => ({ ...p, type: e.target.value as ReportTemplate["type"] }))}>
+              <option value="assignment">Assignment</option>
+              <option value="progress">Progress Report</option>
+              <option value="incident">Incident Report</option>
+              <option value="general">General</option>
             </select>
           </div>
           <div>
             <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold block mb-1.5">Due Date</label>
             <input type="date"
               className="w-full text-sm px-3 py-2.5 rounded-xl bg-secondary/60 border border-border/60 focus:border-primary/40 focus:outline-none focus:ring-4 focus:ring-primary/10"
-              value={newAssessment.dueDate} onChange={(e: any) => setNewAssessment((p: any) => ({ ...p, dueDate: e.target.value }))} />
+              value={form.dueDate} onChange={e => setForm(p => ({ ...p, dueDate: e.target.value }))} />
           </div>
           <div>
-            <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold block mb-1.5">Max Score</label>
-            <input type="number"
-              className="w-full text-sm px-3 py-2.5 rounded-xl bg-secondary/60 border border-border/60 focus:border-primary/40 focus:outline-none focus:ring-4 focus:ring-primary/10"
-              value={newAssessment.maxScore} onChange={(e: any) => setNewAssessment((p: any) => ({ ...p, maxScore: e.target.value }))} />
+            <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold block mb-1.5">Course (optional)</label>
+            <select className="w-full text-sm px-3 py-2.5 rounded-xl bg-secondary/60 border border-border/60 focus:border-primary/40 focus:outline-none focus:ring-4 focus:ring-primary/10"
+              value={form.courseId} onChange={e => setForm(p => ({ ...p, courseId: e.target.value }))}>
+              <option value="">All students</option>
+              {courses.map(c => <option key={c.id} value={c.id}>{c.name} ({c.code})</option>)}
+            </select>
+          </div>
+          <div className="sm:col-span-2">
+            <label className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold block mb-1.5">Instructions (optional)</label>
+            <textarea placeholder="Describe what students need to submit…"
+              className="w-full text-sm px-3 py-2.5 rounded-xl bg-secondary/60 border border-border/60 focus:border-primary/40 focus:outline-none focus:ring-4 focus:ring-primary/10 resize-none h-16"
+              value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} />
           </div>
         </div>
-        <button onClick={handleCreateAssessment}
-          disabled={!newAssessment.title || !newAssessment.dueDate || !newAssessment.courseId}
+        <button onClick={handleCreate} disabled={!form.title}
           className="px-4 py-2 gradient-brand text-white rounded-xl text-sm font-medium shadow-lg shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
-          <PlusCircle size={16} /> Create Assessment
+          <PlusCircle size={15} /> Publish Report Assignment
         </button>
       </div>
 
-      {createdAssessments.length > 0 && (
+      {reportTemplates.length > 0 && (
         <div className="premium-card p-5 space-y-3">
-          <h3 className="text-sm font-bold tracking-tight">Recently Created</h3>
-          {createdAssessments.map((a: any, i: number) => (
-            <div key={i} className="flex items-center justify-between p-3 bg-secondary/40 rounded-xl border border-border/40">
-              <div>
-                <p className="font-semibold text-sm">{a.title}</p>
-                <p className="text-[11px] text-muted-foreground">{a.courseCode} · Due {a.dueDate} · Max {a.maxScore}</p>
+          <h3 className="text-sm font-bold tracking-tight">Published Assignments ({reportTemplates.length})</h3>
+          {reportTemplates.map(t => {
+            const subs = reportSubmissions.filter(s => s.templateId === t.id);
+            return (
+              <div key={t.id} className="flex items-start justify-between p-3 bg-secondary/40 rounded-xl border border-border/40">
+                <div className="min-w-0">
+                  <p className="font-semibold text-sm">{t.title}</p>
+                  <p className="text-[11px] text-muted-foreground capitalize">{t.type}{t.dueDate ? ` · Due ${t.dueDate}` : ""}</p>
+                  {t.description && <p className="text-[11px] text-muted-foreground mt-0.5">{t.description}</p>}
+                </div>
+                <span className="text-[10px] px-2.5 py-1 rounded-full bg-blue-500/15 text-blue-600 font-semibold ml-2 whitespace-nowrap">
+                  {subs.length} submitted
+                </span>
               </div>
-              <span className="text-[10px] px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-600 font-semibold">Active</span>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
       <div className="premium-card p-5 space-y-3">
         <h3 className="text-sm font-bold tracking-tight flex items-center gap-2">
-          <span className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center"><MessageSquare size={14} className="text-primary" /></span>
-          Quick Feedback
+          <span className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center"><FileText size={14} className="text-primary" /></span>
+          Student Submissions
+          {pendingCount > 0 && (
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 font-bold">{pendingCount} pending</span>
+          )}
         </h3>
-        <p className="text-xs text-muted-foreground -mt-1">Leave a quick note on any student's most recent assessment</p>
-        <div className="space-y-2">
-          {displayStudents.slice(0, 5).map((s: any) => {
-            const last = s.skills.filter((a: any) => a.completed).slice(-1)[0];
-            if (!last) return null;
-            return (
+        {reportSubmissions.length === 0 ? (
+          <p className="text-xs text-muted-foreground py-4 text-center">No submissions yet. Students will appear here once they upload files.</p>
+        ) : (
+          <div className="space-y-2">
+            {reportSubmissions.map(s => (
               <div key={s.id} className="p-3 bg-secondary/40 rounded-xl border border-border/40 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-semibold">{s.name} · {last.title}</p>
-                    <p className="text-[10px] text-muted-foreground">Score {last.score}/{last.maxScore}</p>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold">{s.studentName}</p>
+                    <p className="text-[11px] text-muted-foreground">{s.title}</p>
+                    <p className="text-[10px] text-muted-foreground truncate">{s.fileName} · {s.submittedDate}</p>
+                    {s.lecturerNote && <p className="text-[10px] text-primary/80 mt-0.5 italic">Your note: "{s.lecturerNote}"</p>}
                   </div>
-                  <StatusBadge status={last.status} />
+                  <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
+                      s.status === "acknowledged" ? "bg-emerald-500/15 text-emerald-600" :
+                      s.status === "reviewed" ? "bg-blue-500/15 text-blue-600" :
+                      "bg-amber-500/15 text-amber-600"
+                    }`}>{s.status}</span>
+                    <a href={s.fileDataUrl} download={s.fileName}
+                      className="text-[10px] text-primary underline underline-offset-2">
+                      Download
+                    </a>
+                  </div>
                 </div>
-                {comments[`${s.id}-${last.id}`] && (
-                  <p className="text-[11px] p-2 bg-primary/5 border border-primary/20 rounded-lg">{comments[`${s.id}-${last.id}`]}</p>
-                )}
-                <div className="flex gap-2">
-                  <input type="text" placeholder="Add a comment…"
-                    className="flex-1 text-xs px-3 py-1.5 rounded-lg bg-card border border-border/60 focus:border-primary/40 focus:outline-none"
-                    value={newComment} onChange={(e: any) => setNewComment(e.target.value)}
-                    onKeyDown={(e: any) => e.key === "Enter" && handleAddComment(s.id, last.id)} />
-                  <button onClick={() => handleAddComment(s.id, last.id)}
-                    className="px-2.5 py-1.5 gradient-brand text-white rounded-lg text-xs flex items-center gap-1">
-                    <MessageSquare size={12} /> Send
+                {s.status === "submitted" && reviewingId !== s.id && (
+                  <button onClick={() => { setReviewingId(s.id); setNote(""); }}
+                    className="text-[11px] px-3 py-1 rounded-lg bg-primary/10 text-primary font-semibold">
+                    Review
                   </button>
-                </div>
+                )}
+                {reviewingId === s.id && (
+                  <div className="space-y-2 border-t border-border/40 pt-2">
+                    <input type="text" placeholder="Add feedback note (optional)…"
+                      className="w-full text-xs px-3 py-2 rounded-lg bg-card border border-border/60 focus:border-primary/40 focus:outline-none"
+                      value={note} onChange={e => setNote(e.target.value)} />
+                    <div className="flex gap-2 flex-wrap">
+                      <button onClick={() => handleReview(s.id, "reviewed")}
+                        className="px-3 py-1.5 text-xs rounded-lg bg-blue-500/15 text-blue-700 font-semibold">Mark Reviewed</button>
+                      <button onClick={() => handleReview(s.id, "acknowledged")}
+                        className="px-3 py-1.5 text-xs rounded-lg bg-emerald-500/15 text-emerald-700 font-semibold">Acknowledge</button>
+                      <button onClick={() => setReviewingId(null)}
+                        className="px-3 py-1.5 text-xs rounded-lg border border-border/60 text-muted-foreground">Cancel</button>
+                    </div>
+                  </div>
+                )}
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

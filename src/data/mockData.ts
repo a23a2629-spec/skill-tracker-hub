@@ -172,6 +172,31 @@ export interface ExternalProblem {
   severity: "low" | "medium" | "high";
 }
 
+export interface ReportTemplate {
+  id: string;
+  title: string;
+  description: string;
+  type: "assignment" | "progress" | "incident" | "general";
+  courseId?: string;
+  dueDate?: string;
+  createdDate: string;
+}
+
+export interface ReportSubmission {
+  id: string;
+  templateId?: string;
+  studentId: string;
+  studentName: string;
+  title: string;
+  description?: string;
+  fileName: string;
+  fileDataUrl: string;
+  fileType: string;
+  submittedDate: string;
+  status: "submitted" | "reviewed" | "acknowledged";
+  lecturerNote?: string;
+}
+
 export interface Appointment {
   id: string;
   studentId: string;

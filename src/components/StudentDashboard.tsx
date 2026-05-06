@@ -1,11 +1,11 @@
 import { useState, useRef } from "react";
-import { Student, Appointment, ExternalProblem } from "@/data/mockData";
+import { Student, Appointment, ExternalProblem, ReportTemplate, ReportSubmission } from "@/data/mockData";
 import {
   CalendarDays, Bell, BookOpen, Brain, UserCheck, TrendingUp, Clock, PlusCircle,
   Check, X, AlertCircle, Sparkles, Activity, LayoutDashboard, Users, Phone,
   AtSign, FileText, BarChart3, Settings as SettingsIcon, LogOut, Menu, ChevronRight,
   Search, StickyNote, Mail, Calendar, Briefcase, Target, ClipboardList, Heart,
-  GraduationCap, MapPin, ShieldCheck, Award, Zap, Circle, User as UserIcon,
+  GraduationCap, MapPin, ShieldCheck, Award, Zap, Circle, User as UserIcon, Upload,
 } from "lucide-react";
 import { ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Area, AreaChart } from "recharts";
 import StatusBadge from "./StatusBadge";
@@ -22,6 +22,9 @@ interface Props {
   onProfileUpdate?: (update: Partial<Student["profile"]> & { avatar?: string }) => void;
   sectionRequest?: string;
   profileTabRequest?: string;
+  reportTemplates: ReportTemplate[];
+  reportSubmissions: ReportSubmission[];
+  onAddSubmission: (s: ReportSubmission) => void;
 }
 
 type Section =
@@ -44,16 +47,18 @@ const navItems: { key: Section; label: string; icon: React.ElementType }[] = [
 const StudentDashboard = ({
   student, appointments: studentAppointments, onAddAppointment, onUpdateStatus,
   problems, onAddProblem, onLogout, onProfileUpdate, sectionRequest, profileTabRequest,
+  reportTemplates, reportSubmissions, onAddSubmission,
 }: Props) => {
   const [active, setActive] = useState<Section>("dashboard");
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Navigate when a search result is clicked
+  // Navigate when a search result is clicked (strip timestamp suffix e.g. "profile-1234")
   const prevSecReq = useRef(sectionRequest);
   if (sectionRequest && sectionRequest !== prevSecReq.current) {
     prevSecReq.current = sectionRequest;
-    setActive(sectionRequest as Section);
+    const secName = sectionRequest.replace(/-\d+$/, "") as Section;
+    setActive(secName);
   }
 
   const completedAssessments = student.skills.filter((s) => s.completed);
@@ -159,7 +164,7 @@ const StudentDashboard = ({
             />
           )}
           {active === "analytics" && <AnalyticsSection student={student} />}
-          {active === "reports" && <ReportsSection completedAssessments={completedAssessments} />}
+          {active === "reports" && <ReportsSection student={student} reportTemplates={reportTemplates} reportSubmissions={reportSubmissions} onAddSubmission={onAddSubmission} />}
           {active === "ai" && <AISection student={student} />}
           {active === "settings" && <SettingsSection student={student} />}
         </div>
@@ -944,41 +949,193 @@ function AnalyticsSection({ student }: { student: Student }) {
   );
 }
 
-function ReportsSection({ completedAssessments }: any) {
+function ReportsSection({ student, reportTemplates, reportSubmissions, onAddSubmission }: {
+  student: Student;
+  reportTemplates: ReportTemplate[];
+  reportSubmissions: ReportSubmission[];
+  onAddSubmission: (s: ReportSubmission) => void;
+}) {
+  const mySubmissions = reportSubmissions.filter(s => s.studentId === student.id);
+  const [submitFor, setSubmitFor] = useState<string | null>(null);
+  const [standaloneTitle, setStandaloneTitle] = useState("");
+  const [standaloneDesc, setStandaloneDesc] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [done, setDone] = useState<string | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedFile(e.target.files?.[0] ?? null);
+  };
+
+  const handleSubmit = (templateId?: string) => {
+    if (!selectedFile) return;
+    setUploading(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      const template = templateId ? reportTemplates.find(t => t.id === templateId) : null;
+      const sub: ReportSubmission = {
+        id: `sub-${Date.now()}`,
+        templateId,
+        studentId: student.id,
+        studentName: student.name,
+        title: template ? template.title : standaloneTitle,
+        description: standaloneDesc || undefined,
+        fileName: selectedFile.name,
+        fileDataUrl: reader.result as string,
+        fileType: selectedFile.type,
+        submittedDate: new Date().toISOString().slice(0, 10),
+        status: "submitted",
+      };
+      onAddSubmission(sub);
+      setDone(templateId ?? "standalone");
+      setSubmitFor(null);
+      setSelectedFile(null);
+      setStandaloneTitle("");
+      setStandaloneDesc("");
+      setUploading(false);
+      setTimeout(() => setDone(null), 3000);
+    };
+    reader.readAsDataURL(selectedFile);
+  };
+
   return (
     <SectionShell>
-      {completedAssessments.map((a: any) => (
-        <div key={a.id} className="bg-white border border-[#E5E7EB] rounded-xl p-5 space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-sm font-bold text-[#213343]">{a.title}</h4>
-              <p className="text-[11px] text-[#7C98B6]">{a.date}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-2xl font-bold text-[#213343]">
-                {a.score}<span className="text-sm text-[#7C98B6]">/{a.maxScore}</span>
-              </p>
-              <StatusBadge status={a.status} />
-            </div>
-          </div>
-          {a.skills.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-              {a.skills.map((sk: any, i: number) => (
-                <div key={i} className="flex items-center justify-between p-2 bg-[#F5F8FA] rounded-md text-xs border border-[#E5E7EB]">
-                  <span className="text-[#213343]">{sk.name}</span>
-                  <StatusBadge status={sk.status} />
+      {done && (
+        <div className="flex items-center gap-2 px-4 py-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-700 font-semibold">
+          <Check size={14} /> File submitted successfully!
+        </div>
+      )}
+
+      {reportTemplates.length > 0 && (
+        <div className="bg-white border border-[#E5E7EB] rounded-xl p-5 space-y-3">
+          <h3 className="text-sm font-bold text-[#213343] flex items-center gap-2">
+            <FileText size={15} className="text-[#2563EB]" /> Assigned Reports
+          </h3>
+          <div className="space-y-2">
+            {reportTemplates.map(t => {
+              const already = mySubmissions.find(s => s.templateId === t.id);
+              return (
+                <div key={t.id} className="p-3 rounded-xl border border-[#E5E7EB] bg-[#F5F8FA]">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-[#213343]">{t.title}</p>
+                      {t.description && <p className="text-[11px] text-[#516F90] mt-0.5">{t.description}</p>}
+                      <p className="text-[10px] text-[#7C98B6] mt-0.5 capitalize">{t.type}{t.dueDate ? ` · Due ${t.dueDate}` : ""}</p>
+                    </div>
+                    {already ? (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-semibold whitespace-nowrap">✓ Submitted</span>
+                    ) : (
+                      <button onClick={() => setSubmitFor(submitFor === t.id ? null : t.id)}
+                        className="text-[11px] px-3 py-1 rounded-lg bg-[#2563EB] text-white font-semibold whitespace-nowrap">
+                        Submit File
+                      </button>
+                    )}
+                  </div>
+                  {already && already.lecturerNote && (
+                    <p className="text-[10px] mt-1.5 text-[#516F90]">
+                      Feedback: <span className="italic">"{already.lecturerNote}"</span>
+                      {already.status !== "submitted" && <span className="ml-1 font-semibold capitalize text-[#2563EB]">({already.status})</span>}
+                    </p>
+                  )}
+                  {submitFor === t.id && (
+                    <div className="mt-3 space-y-2 border-t border-[#E5E7EB] pt-3">
+                      <input type="file"
+                        className="block w-full text-xs text-[#516F90] file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#EEF4FF] file:text-[#2563EB] cursor-pointer"
+                        onChange={handleFileChange} />
+                      <div className="flex gap-2">
+                        <button onClick={() => handleSubmit(t.id)} disabled={!selectedFile || uploading}
+                          className="px-3 py-1.5 bg-[#2563EB] text-white text-xs rounded-lg font-semibold disabled:opacity-50">
+                          {uploading ? "Uploading…" : "Confirm Upload"}
+                        </button>
+                        <button onClick={() => { setSubmitFor(null); setSelectedFile(null); }}
+                          className="px-3 py-1.5 border border-[#E5E7EB] text-[#516F90] text-xs rounded-lg">
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              ))}
-            </div>
-          )}
-          {a.lecturerComment && (
-            <div className="p-3 bg-[#FFF5F2] border border-[#FFD4C7] rounded-lg">
-              <p className="text-[10px] uppercase tracking-wider text-[#FF5C35] font-bold mb-1">Lecturer's Comment</p>
-              <p className="text-xs text-[#213343]">{a.lecturerComment}</p>
-            </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div className="bg-white border border-[#E5E7EB] rounded-xl p-5 space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-bold text-[#213343] flex items-center gap-2">
+            <Upload size={15} className="text-[#FF7A59]" /> Submit a Report
+          </h3>
+          {submitFor !== "standalone" && (
+            <button onClick={() => setSubmitFor("standalone")}
+              className="text-xs px-3 py-1.5 rounded-lg border border-[#2563EB] text-[#2563EB] font-semibold flex items-center gap-1">
+              <PlusCircle size={12} /> New Submission
+            </button>
           )}
         </div>
-      ))}
+        {submitFor === "standalone" && (
+          <div className="space-y-3">
+            <div>
+              <label className="text-[10px] uppercase tracking-wider text-[#7C98B6] font-semibold block mb-1">Report Title *</label>
+              <input type="text" placeholder="e.g. Progress Report Week 5"
+                className="w-full text-sm px-3 py-2 rounded-lg border border-[#E5E7EB] bg-[#F5F8FA] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
+                value={standaloneTitle} onChange={e => setStandaloneTitle(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-[10px] uppercase tracking-wider text-[#7C98B6] font-semibold block mb-1">Notes (optional)</label>
+              <textarea placeholder="Brief notes about this file…"
+                className="w-full text-sm px-3 py-2 rounded-lg border border-[#E5E7EB] bg-[#F5F8FA] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 resize-none h-16"
+                value={standaloneDesc} onChange={e => setStandaloneDesc(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-[10px] uppercase tracking-wider text-[#7C98B6] font-semibold block mb-1">Attach File *</label>
+              <input type="file"
+                className="block w-full text-xs text-[#516F90] file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-[#EEF4FF] file:text-[#2563EB] cursor-pointer"
+                onChange={handleFileChange} />
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => handleSubmit()} disabled={!selectedFile || !standaloneTitle || uploading}
+                className="px-4 py-2 bg-[#2563EB] text-white text-xs rounded-lg font-semibold disabled:opacity-50">
+                {uploading ? "Uploading…" : "Submit Report"}
+              </button>
+              <button onClick={() => { setSubmitFor(null); setSelectedFile(null); setStandaloneTitle(""); setStandaloneDesc(""); }}
+                className="px-4 py-2 border border-[#E5E7EB] text-[#516F90] text-xs rounded-lg">
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+        {reportTemplates.length === 0 && submitFor !== "standalone" && (
+          <p className="text-xs text-[#7C98B6]">Use <span className="font-semibold">New Submission</span> to send a file to your lecturer without an assignment.</p>
+        )}
+      </div>
+
+      {mySubmissions.length > 0 && (
+        <div className="bg-white border border-[#E5E7EB] rounded-xl p-5 space-y-3">
+          <h3 className="text-sm font-bold text-[#213343]">My Submissions ({mySubmissions.length})</h3>
+          <div className="space-y-2">
+            {mySubmissions.map(s => (
+              <div key={s.id} className="flex items-center justify-between p-3 bg-[#F5F8FA] rounded-xl border border-[#E5E7EB]">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-[#EEF4FF] flex items-center justify-center flex-shrink-0">
+                    <FileText size={14} className="text-[#2563EB]" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-[#213343] truncate">{s.title}</p>
+                    <p className="text-[10px] text-[#7C98B6] truncate">{s.fileName} · {s.submittedDate}</p>
+                    {s.lecturerNote && <p className="text-[10px] text-[#516F90] mt-0.5 italic">"{s.lecturerNote}"</p>}
+                  </div>
+                </div>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold whitespace-nowrap ml-2 ${
+                  s.status === "acknowledged" ? "bg-emerald-100 text-emerald-700" :
+                  s.status === "reviewed" ? "bg-blue-100 text-blue-700" :
+                  "bg-amber-100 text-amber-700"
+                }`}>{s.status}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </SectionShell>
   );
 }
