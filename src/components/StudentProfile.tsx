@@ -66,49 +66,86 @@ export default function StudentProfile({ student, problems, onProfileUpdate }: P
   const [activeTab, setActiveTab] = useState<Tab>("personal");
   const [editing, setEditing] = useState(false);
   const [avatar, setAvatar] = useState<string | undefined>(p.avatar);
-  const [form, setForm] = useState({
-    // Module 1
+
+  const initForm = () => ({
+    // M1
     nationality: p.nationality, race: p.race, religion: p.religion,
-    // Module 3 — Contact
+    // M3
     phone: p.phone, email: p.email, address: p.address, postcode: p.postcode, state: p.state,
-    // Module 4 — Emergency Contact
+    // M4
     guardian: p.guardian, guardianPhone: p.guardianPhone, guardianEmail: p.guardianEmail, guardianRelation: p.guardianRelation,
-    // Module 13 — Accommodation
+    // M5
+    previousSchool: p.previousSchool, previousQualification: p.previousQualification, previousResults: p.previousResults,
+    achievementsStr: p.achievements.join(", "),
+    // M9
+    monthlyHouseholdIncome: String(p.monthlyHouseholdIncome),
+    incomeCategory: p.incomeCategory,
+    paymentStatus: p.paymentStatus,
+    sponsorAmount: String(p.sponsorAmount),
+    financialAid: p.financialAid,
+    // M10
+    fatherName: p.fatherName, fatherOccupation: p.fatherOccupation, fatherIncome: String(p.fatherIncome),
+    motherName: p.motherName, motherOccupation: p.motherOccupation, motherIncome: String(p.motherIncome),
+    siblings: String(p.siblings), householdSize: String(p.householdSize),
+    parentMaritalStatus: p.parentMaritalStatus,
+    // M11
+    bloodType: p.bloodType, disabilityStatus: p.disabilityStatus, healthInsurance: p.healthInsurance,
+    medicalConditionsStr: p.medicalConditions.join(", "),
+    allergiesStr: p.allergies.join(", "),
+    // M12
+    counselingStatus: p.counselingStatus,
+    // M13
     hostelBlock: p.hostelBlock ?? "", hostelRoom: p.hostelRoom ?? "",
-    // Module 14 — Skills & Interests
+    // M14
     careerGoal: p.careerGoal,
     technicalSkillsStr: p.technicalSkills.join(", "),
     softSkillsStr: p.softSkills.join(", "),
     cocurricularStr: p.cocurricular.join(", "),
   });
+
+  const [form, setForm] = useState(initForm);
   const setF = (key: string, value: string) => setForm(f => ({ ...f, [key]: value }));
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const report = analyzeIntegrity(student, problems);
+  // Build a live patched student so analyzeIntegrity re-runs in real time while editing
+  const livePatch = (): Partial<SPType> => ({
+    nationality: form.nationality, race: form.race, religion: form.religion,
+    phone: form.phone, email: form.email, address: form.address, postcode: form.postcode, state: form.state,
+    guardian: form.guardian, guardianPhone: form.guardianPhone, guardianEmail: form.guardianEmail, guardianRelation: form.guardianRelation,
+    previousSchool: form.previousSchool, previousQualification: form.previousQualification, previousResults: form.previousResults,
+    achievements: form.achievementsStr.split(",").map(s => s.trim()).filter(Boolean),
+    monthlyHouseholdIncome: Number(form.monthlyHouseholdIncome) || p.monthlyHouseholdIncome,
+    incomeCategory: form.incomeCategory as SPType["incomeCategory"],
+    paymentStatus: form.paymentStatus as SPType["paymentStatus"],
+    sponsorAmount: Number(form.sponsorAmount) || p.sponsorAmount,
+    financialAid: form.financialAid as SPType["financialAid"],
+    fatherName: form.fatherName, fatherOccupation: form.fatherOccupation, fatherIncome: Number(form.fatherIncome) || 0,
+    motherName: form.motherName, motherOccupation: form.motherOccupation, motherIncome: Number(form.motherIncome) || 0,
+    siblings: Number(form.siblings) || 0, householdSize: Number(form.householdSize) || 0,
+    parentMaritalStatus: form.parentMaritalStatus as SPType["parentMaritalStatus"],
+    bloodType: form.bloodType, disabilityStatus: form.disabilityStatus as SPType["disabilityStatus"],
+    healthInsurance: form.healthInsurance as SPType["healthInsurance"],
+    medicalConditions: form.medicalConditionsStr.split(",").map(s => s.trim()).filter(Boolean),
+    allergies: form.allergiesStr.split(",").map(s => s.trim()).filter(Boolean),
+    counselingStatus: form.counselingStatus as SPType["counselingStatus"],
+    hostelBlock: form.hostelBlock, hostelRoom: form.hostelRoom,
+    careerGoal: form.careerGoal, avatar,
+    technicalSkills: form.technicalSkillsStr.split(",").map(s => s.trim()).filter(Boolean),
+    softSkills: form.softSkillsStr.split(",").map(s => s.trim()).filter(Boolean),
+    cocurricular: form.cocurricularStr.split(",").map(s => s.trim()).filter(Boolean),
+  });
+
+  const liveStudent = editing ? { ...student, profile: { ...p, ...livePatch() } } : student;
+  const report = analyzeIntegrity(liveStudent, problems);
   const alertCount = report.flags.filter(f => f.type === "alert").length;
   const warnCount = report.flags.filter(f => f.type === "warning").length;
 
   const handleSave = () => {
-    const { technicalSkillsStr, softSkillsStr, cocurricularStr, ...rest } = form;
-    onProfileUpdate?.({
-      ...rest, avatar,
-      technicalSkills: technicalSkillsStr.split(",").map(s => s.trim()).filter(Boolean),
-      softSkills: softSkillsStr.split(",").map(s => s.trim()).filter(Boolean),
-      cocurricular: cocurricularStr.split(",").map(s => s.trim()).filter(Boolean),
-    });
+    onProfileUpdate?.({ ...livePatch() });
     setEditing(false);
   };
   const handleCancel = () => {
-    setForm({
-      nationality: p.nationality, race: p.race, religion: p.religion,
-      phone: p.phone, email: p.email, address: p.address, postcode: p.postcode, state: p.state,
-      guardian: p.guardian, guardianPhone: p.guardianPhone, guardianEmail: p.guardianEmail, guardianRelation: p.guardianRelation,
-      hostelBlock: p.hostelBlock ?? "", hostelRoom: p.hostelRoom ?? "",
-      careerGoal: p.careerGoal,
-      technicalSkillsStr: p.technicalSkills.join(", "),
-      softSkillsStr: p.softSkills.join(", "),
-      cocurricularStr: p.cocurricular.join(", "),
-    });
+    setForm(initForm());
     setAvatar(p.avatar);
     setEditing(false);
   };
@@ -173,7 +210,14 @@ export default function StudentProfile({ student, problems, onProfileUpdate }: P
         {/* Risk Score Progress Bar */}
         <div className="relative mt-5 pt-5 border-t border-border/60">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Student Risk Score</p>
+            <div className="flex items-center gap-2">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Student Risk Score</p>
+              {editing && (
+                <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/15 text-primary font-semibold animate-pulse">
+                  ● LIVE
+                </span>
+              )}
+            </div>
             <p className="text-xs font-bold text-foreground">{100 - report.trustScore}<span className="text-muted-foreground font-medium">/100</span></p>
           </div>
           <div className="h-2 bg-secondary/80 rounded-full overflow-hidden">
@@ -299,20 +343,31 @@ export default function StudentProfile({ student, problems, onProfileUpdate }: P
         <div className="space-y-4">
           <Section icon={School} title="Module 5 — Academic Background"
             badge={<VerifBadge status={p.academicVerified} />}>
-            <Grid>
-              <InfoRow icon={School} label="Previous School" value={p.previousSchool} />
-              <InfoRow icon={FileText} label="Qualification" value={p.previousQualification} />
-              <InfoRow icon={Award} label="Results" value={p.previousResults} />
-            </Grid>
-            {p.achievements.length > 0 && (
-              <div className="mt-2">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">Achievements</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {p.achievements.map((a, i) => (
-                    <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">{a}</span>
-                  ))}
-                </div>
+            {editing ? (
+              <div className="space-y-2">
+                <EditRow icon={School} label="Previous School" value={form.previousSchool} onChange={v => setF("previousSchool", v)} />
+                <EditRow icon={FileText} label="Qualification (e.g. SPM 2021)" value={form.previousQualification} onChange={v => setF("previousQualification", v)} />
+                <EditRow icon={Award} label="Results (e.g. 5A 2B)" value={form.previousResults} onChange={v => setF("previousResults", v)} />
+                <EditRow icon={Star} label="Achievements (comma-separated)" value={form.achievementsStr} onChange={v => setF("achievementsStr", v)} />
               </div>
+            ) : (
+              <>
+                <Grid>
+                  <InfoRow icon={School} label="Previous School" value={p.previousSchool} />
+                  <InfoRow icon={FileText} label="Qualification" value={p.previousQualification} />
+                  <InfoRow icon={Award} label="Results" value={p.previousResults} />
+                </Grid>
+                {p.achievements.length > 0 && (
+                  <div className="mt-2">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">Achievements</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {p.achievements.map((a, i) => (
+                        <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">{a}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </Section>
 
@@ -356,42 +411,78 @@ export default function StudentProfile({ student, problems, onProfileUpdate }: P
         <div className="space-y-4">
           <Section icon={Banknote} title="Module 9 — Financial Information"
             badge={<VerifBadge status={p.financialVerified} />}>
-            <Grid>
-              <InfoRow icon={Banknote} label="Monthly Household Income" value={`RM ${p.monthlyHouseholdIncome.toLocaleString()}`} />
-              <InfoRow icon={Banknote} label="Income Category" value={p.incomeCategory} />
-              <InfoRow icon={Award} label="Sponsorship / Loan" value={p.financialAid} />
-              <InfoRow icon={Banknote} label="Sponsor Amount" value={p.sponsorAmount > 0 ? `RM ${p.sponsorAmount.toLocaleString()}/year` : "None"} />
-              <InfoRow icon={BadgeCheck} label="Tuition Payment Status"
-                value={p.paymentStatus}
-                valueClass={p.paymentStatus === "Paid" ? "text-status-mastered" : p.paymentStatus === "Pending" ? "text-status-developing" : "text-status-intensive font-bold"} />
-            </Grid>
+            {editing ? (
+              <div className="space-y-2">
+                <EditRow icon={Banknote} label="Monthly Household Income (RM)" value={form.monthlyHouseholdIncome} onChange={v => setF("monthlyHouseholdIncome", v)} />
+                <SelectRow icon={Banknote} label="Income Category" value={form.incomeCategory} onChange={v => setF("incomeCategory", v)} options={["B40","M40","T20"]} />
+                <SelectRow icon={Award} label="Financial Aid / Sponsorship" value={form.financialAid} onChange={v => setF("financialAid", v)} options={["PTPTN","JPA Scholarship","State Scholarship","PTPTN (Processing)","None"]} />
+                <EditRow icon={Banknote} label="Sponsor Amount (RM/year, 0 if none)" value={form.sponsorAmount} onChange={v => setF("sponsorAmount", v)} />
+                <SelectRow icon={BadgeCheck} label="Tuition Payment Status" value={form.paymentStatus} onChange={v => setF("paymentStatus", v)} options={["Paid","Pending","Overdue"]} />
+              </div>
+            ) : (
+              <Grid>
+                <InfoRow icon={Banknote} label="Monthly Household Income" value={`RM ${p.monthlyHouseholdIncome.toLocaleString()}`} />
+                <InfoRow icon={Banknote} label="Income Category" value={p.incomeCategory} />
+                <InfoRow icon={Award} label="Sponsorship / Loan" value={p.financialAid} />
+                <InfoRow icon={Banknote} label="Sponsor Amount" value={p.sponsorAmount > 0 ? `RM ${p.sponsorAmount.toLocaleString()}/year` : "None"} />
+                <InfoRow icon={BadgeCheck} label="Tuition Payment Status"
+                  value={p.paymentStatus}
+                  valueClass={p.paymentStatus === "Paid" ? "text-status-mastered" : p.paymentStatus === "Pending" ? "text-status-developing" : "text-status-intensive font-bold"} />
+              </Grid>
+            )}
           </Section>
 
           <Section icon={Users} title="Module 10 — Family Background"
             badge={<VerifBadge status={p.familyVerified} />}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold">Father</p>
-                <InfoRow icon={UserRound} label="Name" value={p.fatherName} />
-                <InfoRow icon={Building2} label="Occupation" value={p.fatherOccupation} />
-                <InfoRow icon={Banknote} label="Monthly Income" value={`RM ${p.fatherIncome.toLocaleString()}`} />
+            {editing ? (
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div className="space-y-2">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold px-1">Father</p>
+                    <EditRow icon={UserRound} label="Father's Name" value={form.fatherName} onChange={v => setF("fatherName", v)} />
+                    <EditRow icon={Building2} label="Father's Occupation" value={form.fatherOccupation} onChange={v => setF("fatherOccupation", v)} />
+                    <EditRow icon={Banknote} label="Father's Monthly Income (RM)" value={form.fatherIncome} onChange={v => setF("fatherIncome", v)} />
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold px-1">Mother</p>
+                    <EditRow icon={UserRound} label="Mother's Name" value={form.motherName} onChange={v => setF("motherName", v)} />
+                    <EditRow icon={Building2} label="Mother's Occupation" value={form.motherOccupation} onChange={v => setF("motherOccupation", v)} />
+                    <EditRow icon={Banknote} label="Mother's Monthly Income (RM, 0 if N/A)" value={form.motherIncome} onChange={v => setF("motherIncome", v)} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <SelectRow icon={Users} label="Parents' Marital Status" value={form.parentMaritalStatus} onChange={v => setF("parentMaritalStatus", v)} options={["Married","Divorced","Widowed","Single Parent"]} />
+                  <EditRow icon={Users} label="Household Size (persons)" value={form.householdSize} onChange={v => setF("householdSize", v)} />
+                  <EditRow icon={Users} label="Number of Siblings" value={form.siblings} onChange={v => setF("siblings", v)} />
+                </div>
               </div>
-              <div className="space-y-2">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold">Mother</p>
-                <InfoRow icon={UserRound} label="Name" value={p.motherName} />
-                <InfoRow icon={Building2} label="Occupation" value={p.motherOccupation} />
-                <InfoRow icon={Banknote} label="Monthly Income" value={p.motherIncome > 0 ? `RM ${p.motherIncome.toLocaleString()}` : "Not employed"} />
-              </div>
-            </div>
-            <div className="mt-3">
-              <Grid>
-                <InfoRow icon={Users} label="Marital Status" value={p.parentMaritalStatus} />
-                <InfoRow icon={Users} label="Household Size" value={`${p.householdSize} person(s)`} />
-                <InfoRow icon={Users} label="Number of Siblings" value={`${p.siblings}`} />
-                <InfoRow icon={Banknote} label="Combined Household Income"
-                  value={`RM ${(p.fatherIncome + p.motherIncome).toLocaleString()}/month`} />
-              </Grid>
-            </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold">Father</p>
+                    <InfoRow icon={UserRound} label="Name" value={p.fatherName} />
+                    <InfoRow icon={Building2} label="Occupation" value={p.fatherOccupation} />
+                    <InfoRow icon={Banknote} label="Monthly Income" value={`RM ${p.fatherIncome.toLocaleString()}`} />
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-semibold">Mother</p>
+                    <InfoRow icon={UserRound} label="Name" value={p.motherName} />
+                    <InfoRow icon={Building2} label="Occupation" value={p.motherOccupation} />
+                    <InfoRow icon={Banknote} label="Monthly Income" value={p.motherIncome > 0 ? `RM ${p.motherIncome.toLocaleString()}` : "Not employed"} />
+                  </div>
+                </div>
+                <div className="mt-3">
+                  <Grid>
+                    <InfoRow icon={Users} label="Marital Status" value={p.parentMaritalStatus} />
+                    <InfoRow icon={Users} label="Household Size" value={`${p.householdSize} person(s)`} />
+                    <InfoRow icon={Users} label="Number of Siblings" value={`${p.siblings}`} />
+                    <InfoRow icon={Banknote} label="Combined Household Income"
+                      value={`RM ${(p.fatherIncome + p.motherIncome).toLocaleString()}/month`} />
+                  </Grid>
+                </div>
+              </>
+            )}
           </Section>
         </div>
       )}
@@ -403,25 +494,37 @@ export default function StudentProfile({ student, problems, onProfileUpdate }: P
         <div className="space-y-4">
           <Section icon={Stethoscope} title="Module 11 — Health Information"
             badge={<VerifBadge status={p.healthVerified} />}>
-            <Grid>
-              <InfoRow icon={Heart} label="Blood Type" value={p.bloodType} />
-              <InfoRow icon={Stethoscope} label="Disability Status" value={p.disabilityStatus} />
-              <InfoRow icon={Shield} label="Health Insurance" value={p.healthInsurance} />
-            </Grid>
-            <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">Medical Conditions</p>
-                {p.medicalConditions.length === 0
-                  ? <p className="text-sm text-muted-foreground">None reported</p>
-                  : p.medicalConditions.map((c, i) => <Tag key={i} label={c} color="intensive" />)}
+            {editing ? (
+              <div className="space-y-2">
+                <EditRow icon={Heart} label="Blood Type (e.g. B+, O-)" value={form.bloodType} onChange={v => setF("bloodType", v)} />
+                <SelectRow icon={Stethoscope} label="Disability Status" value={form.disabilityStatus} onChange={v => setF("disabilityStatus", v)} options={["None","Physical","Visual","Hearing","Learning"]} />
+                <SelectRow icon={Shield} label="Health Insurance" value={form.healthInsurance} onChange={v => setF("healthInsurance", v)} options={["Active","None"]} />
+                <EditRow icon={Stethoscope} label="Medical Conditions (comma-separated, or leave blank)" value={form.medicalConditionsStr} onChange={v => setF("medicalConditionsStr", v)} />
+                <EditRow icon={Heart} label="Allergies (comma-separated, or leave blank)" value={form.allergiesStr} onChange={v => setF("allergiesStr", v)} />
               </div>
-              <div>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">Allergies</p>
-                {p.allergies.length === 0
-                  ? <p className="text-sm text-muted-foreground">None</p>
-                  : p.allergies.map((a, i) => <Tag key={i} label={a} color="developing" />)}
-              </div>
-            </div>
+            ) : (
+              <>
+                <Grid>
+                  <InfoRow icon={Heart} label="Blood Type" value={p.bloodType} />
+                  <InfoRow icon={Stethoscope} label="Disability Status" value={p.disabilityStatus} />
+                  <InfoRow icon={Shield} label="Health Insurance" value={p.healthInsurance} />
+                </Grid>
+                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">Medical Conditions</p>
+                    {p.medicalConditions.length === 0
+                      ? <p className="text-sm text-muted-foreground">None reported</p>
+                      : p.medicalConditions.map((c, i) => <Tag key={i} label={c} color="intensive" />)}
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide mb-1">Allergies</p>
+                    {p.allergies.length === 0
+                      ? <p className="text-sm text-muted-foreground">None</p>
+                      : p.allergies.map((a, i) => <Tag key={i} label={a} color="developing" />)}
+                  </div>
+                </div>
+              </>
+            )}
           </Section>
 
           <Section icon={Brain} title="Module 12 — Mental Health Support"
@@ -432,12 +535,16 @@ export default function StudentProfile({ student, problems, onProfileUpdate }: P
                 Mental health information is protected under strict privacy controls. Only authorized counselors and welfare officers may access full records.
               </p>
             </div>
-            <Grid>
-              <InfoRow icon={Brain} label="Counseling Status" value={p.counselingStatus}
-                valueClass={p.counselingStatus === "Active" || p.counselingStatus === "Referred" ? "text-status-developing" : p.counselingStatus === "Completed" ? "text-status-mastered" : ""} />
-              {p.lastCounselorVisit && <InfoRow icon={Calendar} label="Last Counselor Visit" value={p.lastCounselorVisit} />}
-              {p.counselorName && <InfoRow icon={UserRound} label="Assigned Counselor" value={p.counselorName} />}
-            </Grid>
+            {editing ? (
+              <SelectRow icon={Brain} label="Counseling Status (self-reported)" value={form.counselingStatus} onChange={v => setF("counselingStatus", v)} options={["None","Active","Referred","Completed"]} />
+            ) : (
+              <Grid>
+                <InfoRow icon={Brain} label="Counseling Status" value={p.counselingStatus}
+                  valueClass={p.counselingStatus === "Active" || p.counselingStatus === "Referred" ? "text-status-developing" : p.counselingStatus === "Completed" ? "text-status-mastered" : ""} />
+                {p.lastCounselorVisit && <InfoRow icon={Calendar} label="Last Counselor Visit" value={p.lastCounselorVisit} />}
+                {p.counselorName && <InfoRow icon={UserRound} label="Assigned Counselor" value={p.counselorName} />}
+              </Grid>
+            )}
             <div className="mt-2 p-2 rounded-lg bg-secondary/50 text-xs text-muted-foreground">
               ⚖️ Ethical Note: This system does not make determinations based on mental health data. All decisions require human counselor review.
             </div>
@@ -534,6 +641,12 @@ export default function StudentProfile({ student, problems, onProfileUpdate }: P
       {activeTab === "integrity" && (
         <div className="space-y-4">
           {/* Trust Index */}
+          {editing && (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/5 border border-primary/20 text-xs text-primary">
+              <span className="w-2 h-2 rounded-full bg-primary animate-pulse shrink-0" />
+              Your edits are reflected live below. Save to make them permanent, or cancel to discard.
+            </div>
+          )}
           <div className={`p-4 rounded-xl ${trustColors[report.trustIndex].bg}`}>
             <div className="flex items-center justify-between mb-2">
               <div>
@@ -650,6 +763,21 @@ function EditRow({ icon: Icon, label, value, onChange }: { icon: React.ElementTy
         <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</p>
         <input type="text" value={value} onChange={e => onChange(e.target.value)}
           className="w-full text-sm bg-background border border-border rounded px-2 py-1 mt-0.5 focus:outline-none focus:ring-1 focus:ring-primary" />
+      </div>
+    </div>
+  );
+}
+
+function SelectRow({ icon: Icon, label, value, onChange, options }: { icon: React.ElementType; label: string; value: string; onChange: (v: string) => void; options: string[] }) {
+  return (
+    <div className="flex items-start gap-2 p-2 bg-secondary/50 rounded-lg">
+      <Icon size={13} className="text-muted-foreground mt-0.5 shrink-0" />
+      <div className="flex-1">
+        <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</p>
+        <select value={value} onChange={e => onChange(e.target.value)}
+          className="w-full text-sm bg-background border border-border rounded px-2 py-1 mt-0.5 focus:outline-none focus:ring-1 focus:ring-primary">
+          {options.map(o => <option key={o} value={o}>{o}</option>)}
+        </select>
       </div>
     </div>
   );
