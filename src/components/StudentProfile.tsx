@@ -85,6 +85,14 @@ export default function StudentProfile({ student, problems, onProfileUpdate, tab
     // M5
     previousSchool: p.previousSchool, previousQualification: p.previousQualification, previousResults: p.previousResults,
     achievementsStr: p.achievements.join(", "),
+    // M6
+    program: p.program, faculty: p.faculty, levelOfStudy: p.levelOfStudy, intake: p.intake,
+    semester: String(p.semester), financialAid: p.financialAid,
+    // M7
+    registrationStatus: p.registrationStatus, enrollmentStatus: p.enrollmentStatus,
+    advisor: p.advisor, campus: p.campus,
+    // M8
+    cgpa: String(p.cgpa), gpa: String(p.gpa),
     // M9
     monthlyHouseholdIncome: String(p.monthlyHouseholdIncome),
     incomeCategory: p.incomeCategory,
@@ -122,11 +130,18 @@ export default function StudentProfile({ student, problems, onProfileUpdate, tab
     guardian: form.guardian, guardianPhone: form.guardianPhone, guardianEmail: form.guardianEmail, guardianRelation: form.guardianRelation,
     previousSchool: form.previousSchool, previousQualification: form.previousQualification, previousResults: form.previousResults,
     achievements: form.achievementsStr.split(",").map(s => s.trim()).filter(Boolean),
+    program: form.program, faculty: form.faculty, levelOfStudy: form.levelOfStudy, intake: form.intake,
+    semester: Number(form.semester) || p.semester,
+    financialAid: form.financialAid as SPType["financialAid"],
+    registrationStatus: form.registrationStatus as SPType["registrationStatus"],
+    enrollmentStatus: form.enrollmentStatus as SPType["enrollmentStatus"],
+    advisor: form.advisor, campus: form.campus,
+    cgpa: Number(form.cgpa) || p.cgpa,
+    gpa: Number(form.gpa) || p.gpa,
     monthlyHouseholdIncome: Number(form.monthlyHouseholdIncome) || p.monthlyHouseholdIncome,
     incomeCategory: form.incomeCategory as SPType["incomeCategory"],
     paymentStatus: form.paymentStatus as SPType["paymentStatus"],
     sponsorAmount: Number(form.sponsorAmount) || p.sponsorAmount,
-    financialAid: form.financialAid as SPType["financialAid"],
     fatherName: form.fatherName, fatherOccupation: form.fatherOccupation, fatherIncome: Number(form.fatherIncome) || 0,
     motherName: form.motherName, motherOccupation: form.motherOccupation, motherIncome: Number(form.motherIncome) || 0,
     siblings: Number(form.siblings) || 0, householdSize: Number(form.householdSize) || 0,
@@ -380,34 +395,67 @@ export default function StudentProfile({ student, problems, onProfileUpdate, tab
           </Section>
 
           <Section icon={BookOpen} title="Module 6 — University Program Details">
-            <Grid>
-              <InfoRow icon={BookOpen} label="Program" value={p.program} />
-              <InfoRow icon={Building2} label="Faculty" value={p.faculty} />
-              <InfoRow icon={GraduationCap} label="Level of Study" value={p.levelOfStudy} />
-              <InfoRow icon={Calendar} label="Intake" value={p.intake} />
-              <InfoRow icon={Calendar} label="Current Semester" value={`Semester ${p.semester}`} />
-              <InfoRow icon={Award} label="Financial Aid / Scholarship" value={p.financialAid} />
-            </Grid>
+            {editing ? (
+              <div className="space-y-2">
+                <EditRow icon={BookOpen} label="Program" value={form.program} onChange={v => setF("program", v)} />
+                <EditRow icon={Building2} label="Faculty" value={form.faculty} onChange={v => setF("faculty", v)} />
+                <EditRow icon={GraduationCap} label="Level of Study" value={form.levelOfStudy} onChange={v => setF("levelOfStudy", v)} />
+                <EditRow icon={Calendar} label="Intake" value={form.intake} onChange={v => setF("intake", v)} />
+                <EditRow icon={Calendar} label="Current Semester" value={form.semester} onChange={v => setF("semester", v)} />
+                <SelectRow icon={Award} label="Financial Aid / Scholarship" value={form.financialAid} onChange={v => setF("financialAid", v)} options={["PTPTN", "JPA Scholarship", "State Scholarship", "PTPTN (Processing)", "None"]} />
+              </div>
+            ) : (
+              <Grid>
+                <InfoRow icon={BookOpen} label="Program" value={p.program} />
+                <InfoRow icon={Building2} label="Faculty" value={p.faculty} />
+                <InfoRow icon={GraduationCap} label="Level of Study" value={p.levelOfStudy} />
+                <InfoRow icon={Calendar} label="Intake" value={p.intake} />
+                <InfoRow icon={Calendar} label="Current Semester" value={`Semester ${p.semester}`} />
+                <InfoRow icon={Award} label="Financial Aid / Scholarship" value={p.financialAid} />
+              </Grid>
+            )}
           </Section>
 
           <Section icon={BadgeCheck} title="Module 7 — Enrollment Information">
-            <Grid>
-              <InfoRow icon={BadgeCheck} label="Registration Status" value={p.registrationStatus} />
-              <InfoRow icon={BadgeCheck} label="Enrollment Status" value={p.enrollmentStatus} />
-              <InfoRow icon={UserRound} label="Academic Advisor" value={p.advisor} />
-              <InfoRow icon={Building2} label="Campus" value={p.campus} />
-            </Grid>
+            {editing ? (
+              <div className="space-y-2">
+                <SelectRow icon={BadgeCheck} label="Registration Status" value={form.registrationStatus} onChange={v => setF("registrationStatus", v)} options={["Registered", "Deferral", "Withdrawn"]} />
+                <SelectRow icon={BadgeCheck} label="Enrollment Status" value={form.enrollmentStatus} onChange={v => setF("enrollmentStatus", v)} options={["Active", "At-Risk", "Probation", "Academic Warning"]} />
+                <EditRow icon={UserRound} label="Academic Advisor" value={form.advisor} onChange={v => setF("advisor", v)} />
+                <EditRow icon={Building2} label="Campus" value={form.campus} onChange={v => setF("campus", v)} />
+              </div>
+            ) : (
+              <Grid>
+                <InfoRow icon={BadgeCheck} label="Registration Status" value={p.registrationStatus} />
+                <InfoRow icon={BadgeCheck} label="Enrollment Status" value={p.enrollmentStatus} />
+                <InfoRow icon={UserRound} label="Academic Advisor" value={p.advisor} />
+                <InfoRow icon={Building2} label="Campus" value={p.campus} />
+              </Grid>
+            )}
           </Section>
 
           <Section icon={Activity} title="Module 8 — Academic Performance">
-            <Grid>
-              <InfoRow icon={Activity} label="CGPA (Cumulative)" value={p.cgpa.toFixed(2)} />
-              <InfoRow icon={Activity} label="GPA (Current Sem)" value={p.gpa.toFixed(2)} />
-              <InfoRow icon={Activity} label="Attendance Rate" value={`${student.attendance}%`} />
-              <InfoRow icon={Activity} label="Average Assessment Score" value={`${student.averageScore}%`} />
-              <InfoRow icon={Brain} label="AI Usage Rate" value={`${student.aiPercentage}%`} />
-              <InfoRow icon={BookOpen} label="Assessments Completed" value={`${student.skills.filter(s => s.completed).length} / ${student.skills.length}`} />
-            </Grid>
+            {editing ? (
+              <div className="space-y-2">
+                <EditRow icon={Activity} label="CGPA (Cumulative)" value={form.cgpa} onChange={v => setF("cgpa", v)} />
+                <EditRow icon={Activity} label="GPA (Current Sem)" value={form.gpa} onChange={v => setF("gpa", v)} />
+                <Grid>
+                  <InfoRow icon={Activity} label="Attendance Rate" value={`${student.attendance}%`} />
+                  <InfoRow icon={Activity} label="Average Assessment Score" value={`${student.averageScore}%`} />
+                  <InfoRow icon={Brain} label="AI Usage Rate" value={`${student.aiPercentage}%`} />
+                  <InfoRow icon={BookOpen} label="Assessments Completed" value={`${student.skills.filter(s => s.completed).length} / ${student.skills.length}`} />
+                </Grid>
+              </div>
+            ) : (
+              <Grid>
+                <InfoRow icon={Activity} label="CGPA (Cumulative)" value={p.cgpa.toFixed(2)} />
+                <InfoRow icon={Activity} label="GPA (Current Sem)" value={p.gpa.toFixed(2)} />
+                <InfoRow icon={Activity} label="Attendance Rate" value={`${student.attendance}%`} />
+                <InfoRow icon={Activity} label="Average Assessment Score" value={`${student.averageScore}%`} />
+                <InfoRow icon={Brain} label="AI Usage Rate" value={`${student.aiPercentage}%`} />
+                <InfoRow icon={BookOpen} label="Assessments Completed" value={`${student.skills.filter(s => s.completed).length} / ${student.skills.length}`} />
+              </Grid>
+            )}
           </Section>
         </div>
       )}

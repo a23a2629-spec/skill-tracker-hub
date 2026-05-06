@@ -292,6 +292,7 @@ const LecturerDashboard = ({
               problems={externalProblems.filter(p => p.studentId === viewingStudentId)}
               onBack={() => setViewingStudentId(null)}
               onEdit={() => setEditStudentId(viewingStudentId)}
+              onProfileUpdate={handleUpdateStudent}
             />
           ) : (
             <>
@@ -873,7 +874,7 @@ function StudentsSection({ selectedCourse, setSelectedCourse, displayStudents, o
 }
 
 // ── Single student profile view (for lecturer) ─────────────────────────
-function StudentProfileView({ studentId, students, problems, onBack, onEdit }: { studentId: string; students: Student[]; problems: ExternalProblem[]; onBack: () => void; onEdit: () => void }) {
+function StudentProfileView({ studentId, students, problems, onBack, onEdit, onProfileUpdate }: { studentId: string; students: Student[]; problems: ExternalProblem[]; onBack: () => void; onEdit: () => void; onProfileUpdate: (updated: Student) => void }) {
   const student = students.find(s => s.id === studentId);
   if (!student) return null;
   return (
@@ -892,7 +893,11 @@ function StudentProfileView({ studentId, students, problems, onBack, onEdit }: {
           <Pencil size={14} /> Edit Student Profile
         </button>
       </div>
-      <StudentProfile student={student} problems={problems} />
+      <StudentProfile
+        student={student}
+        problems={problems}
+        onProfileUpdate={patch => onProfileUpdate({ ...student, profile: { ...student.profile, ...patch } })}
+      />
     </div>
   );
 }
