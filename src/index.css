@@ -146,3 +146,36 @@
   .bg-brand { background-color: hsl(var(--brand-accent)); }
   .glow-border { box-shadow: 0 0 15px -3px hsl(var(--glow-primary) / 0.3); }
 }
+
+/* Dark mode overrides for hardcoded light colors used in Student dashboard */
+:root.dark .bg-white { background-color: hsl(var(--card)) !important; }
+:root.dark .bg-white\/90 { background-color: hsl(var(--card) / 0.9) !important; }
+:root.dark .bg-white\/80 { background-color: hsl(var(--card) / 0.8) !important; }
+:root.dark .border-\[\#E5E7EB\] { border-color: hsl(var(--border)) !important; }
+:root.dark .border-l-\[\#FF7A59\] { border-left-color: hsl(var(--brand-accent, 21 90% 58%)) !important; }
+:root.dark .text-\[\#213343\] { color: hsl(var(--foreground)) !important; }
+:root.dark .text-\[\#516F90\] { color: hsl(var(--muted-foreground)) !important; }
+:root.dark .text-\[\#33475B\] { color: hsl(var(--foreground)) !important; }
+:root.dark .bg-\[\#F5F8FA\] { background-color: hsl(var(--muted)) !important; }
+:root.dark .bg-\[\#FFF5F2\] { background-color: hsl(var(--brand-accent, 21 90% 58%) / 0.15) !important; }
+:root.dark .hover\:bg-\[\#F5F8FA\]:hover { background-color: hsl(var(--muted)) !important; }
+:root.dark .from-\[\#FFF5F2\] { --tw-gradient-from: hsl(var(--brand-accent, 21 90% 58%) / 0.15) var(--tw-gradient-from-position) !important; }
+:root.dark .to-white { --tw-gradient-to: hsl(var(--card)) var(--tw-gradient-to-position) !important; }
+:root.dark .border-\[\#FFD4C7\] { border-color: hsl(var(--brand-accent, 21 90% 58%) / 0.3) !important; }
+
+/* Tailwind tonal light backgrounds → translucent in dark */
+:root.dark .bg-blue-50 { background-color: hsl(217 91% 60% / 0.15) !important; }
+:root.dark .bg-red-50 { background-color: hsl(0 84% 60% / 0.15) !important; }
+:root.dark .bg-emerald-50 { background-color: hsl(160 84% 39% / 0.15) !important; }
+:root.dark .bg-amber-50 { background-color: hsl(38 92% 50% / 0.15) !important; }
+:root.dark .bg-yellow-50 { background-color: hsl(48 96% 53% / 0.15) !important; }
+:root.dark .bg-green-50 { background-color: hsl(142 71% 45% / 0.15) !important; }
+:root.dark .border-blue-200 { border-color: hsl(217 91% 60% / 0.3) !important; }
+:root.dark .border-red-200 { border-color: hsl(0 84% 60% / 0.3) !important; }
+:root.dark .border-emerald-200 { border-color: hsl(160 84% 39% / 0.3) !important; }
+:root.dark .border-amber-200 { border-color: hsl(38 92% 50% / 0.3) !important; }
+
+:root.dark .text-blue-700 { color: hsl(217 91% 75%) !important; }
+:root.dark .text-red-700 { color: hsl(0 84% 75%) !important; }
+:root.dark .text-emerald-700 { color: hsl(160 84% 65%) !important; }
+:root.dark .text-amber-700 { color: hsl(38 92% 70%) !important; }
