@@ -1,54 +1,61 @@
 # In-Campus Skills Gap Tracker
 
-Role-based SPA for Students and Lecturers to track skills gaps, manage appointments, reports, and communicate via in-app chat.
+A web app for university staff and students to track skills gaps, manage appointments, view assessments, and communicate — with separate dashboards for students and lecturers.
 
 ## Run & Operate
-```
-npm run dev      # dev server on port 5000
-npm run build    # production build
-```
-No required env vars — all data is localStorage-only.
+
+- **Dev server**: `npm run dev` (runs Vite on port 5000)
+- **Build**: `npm run build`
+- **Tests**: `npm test` (Vitest unit tests)
+- No environment variables required — all data is stored in localStorage
 
 ## Stack
-- React 18 + TypeScript, Vite 5
-- Tailwind CSS + shadcn/ui
-- React Router DOM v6
-- TanStack React Query, React Hook Form + Zod
-- Recharts
+
+- **Framework**: React 18
+- **Build tool**: Vite 5 with `@vitejs/plugin-react-swc`
+- **Routing**: React Router v6
+- **Styling**: Tailwind CSS v3 + shadcn/ui components (Radix UI primitives)
+- **Charts**: Recharts
+- **Forms**: React Hook Form + Zod
+- **State**: TanStack React Query (QueryClientProvider wrapper)
+- **Language**: TypeScript 5
 
 ## Where things live
-- `src/pages/Index.tsx` — auth gate, all shared state & handlers
-- `src/components/StudentDashboard.tsx` — student role shell + all student sections
-- `src/components/LecturerDashboard.tsx` — lecturer role shell + all lecturer sections
-- `src/components/StudentProfile.tsx` — tabbed profile/skills detail
-- `src/data/mockData.ts` — all types + seed data (source of truth for data model)
-- `src/lib/userRegistry.ts` — localStorage-based user registration
+
+- `src/App.tsx` — root providers and router
+- `src/pages/Index.tsx` — main app logic, session handling, dashboard routing
+- `src/components/` — all UI components (Login, Signup, StudentDashboard, LecturerDashboard, etc.)
+- `src/components/ui/` — shadcn/Radix-based UI primitives
+- `src/data/mockData.ts` — seed/mock data (students, courses, skills, appointments)
+- `src/lib/userRegistry.ts` — localStorage-based registration and auth helpers
+- `src/lib/utils.ts` — Tailwind `cn` utility
 
 ## Architecture decisions
-- No backend: all state lives in `localStorage` with typed JSON parse/stringify in `useState` initialisers
-- Role is determined at login; `Index.tsx` branches between `<StudentDashboard>` and `<LecturerDashboard>`
-- All `useState` hooks in `Index.tsx` must appear **before** the `if (!session)` early return (previous crash lesson)
-- Chat `threadId = studentId + "|" + contactName`; single shared array passed top-down via props
-- Reports: Lecturer creates `ReportTemplate`; student uploads `ReportSubmission`; lecturer reviews with notes
+
+- Auth is entirely client-side using localStorage (no backend server or external auth provider)
+- All user data (sessions, registrations, reports, chat) persisted to localStorage under `skills-tracker-*` keys
+- Demo credentials are hardcoded in mockData for quick access without registration
+- Role-based rendering: `Index.tsx` conditionally shows `StudentDashboard` or `LecturerDashboard` based on session role
 
 ## Product
-- **Student**: Dashboard, Profile (skills/modules/integrity), Cohort, Contacts (in-app chat), Cases, Meetings, Reports (file upload), AI, Settings
-- **Lecturer**: Dashboard, Students, Analytics, Appointments, Cases, Reports (create + review), Messages (chat inbox + reply), AI Insights, Academic Management, Settings
 
-## Chat Feature
-- `ChatMessage` type: `{ id, threadId, studentId, studentName, contactName, senderRole, body, timestamp, read }`
-- Student opens a chat panel per contact card (Dr. Zainab, Dr. Ahmad Ridzuan, Counselling Office); unread badge on button
-- Lecturer sees unified Messages inbox: thread list (left) + reply panel (right); red badge on nav item for unread count
-- Persisted to `localStorage` key `skills-tracker-chat-messages`
+- Student login/signup with matric number
+- Student dashboard: profile, modules, skills/assessments, appointments, case tracking, messaging, analytics, reports
+- Lecturer dashboard: cohort management, academic management (faculties/courses), appointments, problems, reports, AI insights, messaging
 
 ## User preferences
-- Keep existing file/component structure; do not introduce a backend
-- Demo credentials: students use `student123`, lecturers use `lecturer123`
+
+_Populate as you build_
 
 ## Gotchas
-- All `useState` in `Index.tsx` must be before the `if (!session)` guard
-- Vite needs `server.allowedHosts: true` for the Replit proxy iframe
+
+- All data is local to the browser — clearing localStorage resets all user data
+- Demo student password is `student123` for any matric number in the system
+- Vite dev server must bind to `0.0.0.0` and port `5000` for Replit preview to work
 
 ## Pointers
-- shadcn/ui docs: https://ui.shadcn.com
-- React Router v6: https://reactrouter.com/en/main
+
+- Vite config: `vite.config.ts`
+- Tailwind config: `tailwind.config.ts`
+- Mock data: `src/data/mockData.ts`
+- User registry (auth): `src/lib/userRegistry.ts`
