@@ -62,6 +62,8 @@ const Index = () => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
+  const [studentSectionReq, setStudentSectionReq] = useState<string | undefined>();
+  const [studentTabReq, setStudentTabReq] = useState<string | undefined>();
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
@@ -131,9 +133,6 @@ const Index = () => {
     { label: "Meetings", sub: "Appointments with lecturers and advisors", section: "meetings", tab: "" },
     { label: "Analytics", sub: "Skills radar · progress charts", section: "analytics", tab: "" },
   ];
-
-  const [studentSectionReq, setStudentSectionReq] = useState<string | undefined>();
-  const [studentTabReq, setStudentTabReq] = useState<string | undefined>();
 
   const trimmedQuery = searchQuery.trim().toLowerCase();
   const searchResults = trimmedQuery
