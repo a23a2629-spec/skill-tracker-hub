@@ -1,42 +1,54 @@
-# Project Overview
+# In-Campus Skills Gap Tracker
 
-This is a React + Vite + TypeScript frontend application migrated from Lovable to Replit.
+Role-based SPA for Students and Lecturers to track skills gaps, manage appointments, reports, and communicate via in-app chat.
+
+## Run & Operate
+```
+npm run dev      # dev server on port 5000
+npm run build    # production build
+```
+No required env vars — all data is localStorage-only.
 
 ## Stack
-- **Framework**: React 18 with TypeScript
-- **Build tool**: Vite
-- **Styling**: Tailwind CSS with shadcn/ui components
-- **Routing**: React Router DOM v6
-- **State/Data**: TanStack React Query
-- **Forms**: React Hook Form + Zod validation
-- **Charts**: Recharts
+- React 18 + TypeScript, Vite 5
+- Tailwind CSS + shadcn/ui
+- React Router DOM v6
+- TanStack React Query, React Hook Form + Zod
+- Recharts
 
-## Development
+## Where things live
+- `src/pages/Index.tsx` — auth gate, all shared state & handlers
+- `src/components/StudentDashboard.tsx` — student role shell + all student sections
+- `src/components/LecturerDashboard.tsx` — lecturer role shell + all lecturer sections
+- `src/components/StudentProfile.tsx` — tabbed profile/skills detail
+- `src/data/mockData.ts` — all types + seed data (source of truth for data model)
+- `src/lib/userRegistry.ts` — localStorage-based user registration
 
-Run the app:
-```
-npm run dev
-```
-The app runs on port 5000 and is accessible via the Replit preview pane.
+## Architecture decisions
+- No backend: all state lives in `localStorage` with typed JSON parse/stringify in `useState` initialisers
+- Role is determined at login; `Index.tsx` branches between `<StudentDashboard>` and `<LecturerDashboard>`
+- All `useState` hooks in `Index.tsx` must appear **before** the `if (!session)` early return (previous crash lesson)
+- Chat `threadId = studentId + "|" + contactName`; single shared array passed top-down via props
+- Reports: Lecturer creates `ReportTemplate`; student uploads `ReportSubmission`; lecturer reviews with notes
 
-## Build & Deploy
+## Product
+- **Student**: Dashboard, Profile (skills/modules/integrity), Cohort, Contacts (in-app chat), Cases, Meetings, Reports (file upload), AI, Settings
+- **Lecturer**: Dashboard, Students, Analytics, Appointments, Cases, Reports (create + review), Messages (chat inbox + reply), AI Insights, Academic Management, Settings
 
-Build for production:
-```
-npm run build
-```
+## Chat Feature
+- `ChatMessage` type: `{ id, threadId, studentId, studentName, contactName, senderRole, body, timestamp, read }`
+- Student opens a chat panel per contact card (Dr. Zainab, Dr. Ahmad Ridzuan, Counselling Office); unread badge on button
+- Lecturer sees unified Messages inbox: thread list (left) + reply panel (right); red badge on nav item for unread count
+- Persisted to `localStorage` key `skills-tracker-chat-messages`
 
-## Project Structure
+## User preferences
+- Keep existing file/component structure; do not introduce a backend
+- Demo credentials: students use `student123`, lecturers use `lecturer123`
 
-- `src/` — All application source code
-  - `pages/` — Route-level page components
-  - `components/` — Reusable UI components (shadcn/ui + custom)
-  - `hooks/` — Custom React hooks
-  - `lib/` — Utility functions
-  - `data/` — Static data files
-- `public/` — Static assets
+## Gotchas
+- All `useState` in `Index.tsx` must be before the `if (!session)` guard
+- Vite needs `server.allowedHosts: true` for the Replit proxy iframe
 
-## Notes
-
-- Migrated from Lovable: removed `lovable-tagger` dev dependency usage from vite config
-- Vite dev server configured for Replit: `host: "0.0.0.0"`, `port: 5000`, `allowedHosts: true`
+## Pointers
+- shadcn/ui docs: https://ui.shadcn.com
+- React Router v6: https://reactrouter.com/en/main

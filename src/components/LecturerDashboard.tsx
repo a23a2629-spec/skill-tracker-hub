@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   students, courses, Course, SkillStatus, Student,
-  Appointment, ExternalProblem, externalProblems, ReportTemplate, ReportSubmission,
+  Appointment, ExternalProblem, externalProblems, ReportTemplate, ReportSubmission, ChatMessage,
 } from "@/data/mockData";
 import { getRegisteredStudents } from "@/lib/userRegistry";
 import {
@@ -29,11 +29,14 @@ interface Props {
   reportSubmissions: ReportSubmission[];
   onAddTemplate: (t: ReportTemplate) => void;
   onUpdateSubmission: (id: string, patch: Partial<ReportSubmission>) => void;
+  chatMessages: ChatMessage[];
+  onSendMessage: (msg: ChatMessage) => void;
+  onMarkRead: (threadId: string) => void;
 }
 
 type Section =
   | "dashboard" | "students" | "analytics" | "appointments"
-  | "cases" | "reports" | "ai" | "academic" | "settings";
+  | "cases" | "reports" | "messages" | "ai" | "academic" | "settings";
 
 const navItems: { key: Section; label: string; icon: React.ElementType }[] = [
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -42,6 +45,7 @@ const navItems: { key: Section; label: string; icon: React.ElementType }[] = [
   { key: "appointments", label: "Appointments", icon: CalendarDays },
   { key: "cases", label: "Cases / Problems", icon: AlertCircle },
   { key: "reports", label: "Reports", icon: FileText },
+  { key: "messages", label: "Messages", icon: MessageSquare },
   { key: "ai", label: "AI Insights", icon: Sparkles },
   { key: "academic", label: "Academic Management", icon: Building2 },
   { key: "settings", label: "Settings", icon: SettingsIcon },
@@ -90,6 +94,9 @@ const LecturerDashboard = ({
   reportSubmissions,
   onAddTemplate,
   onUpdateSubmission,
+  chatMessages,
+  onSendMessage,
+  onMarkRead,
 }: Props) => {
   const [active, setActive] = useState<Section>("dashboard");
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
@@ -208,6 +215,7 @@ const LecturerDashboard = ({
     appointments: { title: "Appointments", subtitle: "Schedule and manage student meetings" },
     cases: { title: "Cases & Problems", subtitle: "Reported issues that need attention" },
     reports: { title: "Reports", subtitle: "Create assessments and view records" },
+    messages: { title: "Messages", subtitle: "Chat with students and reply to their messages" },
     ai: { title: "AI Insights", subtitle: "Smart summaries generated from cohort data" },
     academic: { title: "Academic Management", subtitle: "Manage faculties and courses across the institution" },
     settings: { title: "Settings", subtitle: "Manage your preferences" },
@@ -345,6 +353,15 @@ const LecturerDashboard = ({
                   onAddTemplate={onAddTemplate}
                   onUpdateSubmission={onUpdateSubmission}
                   displayStudents={displayStudents}
+                />
+              )}
+
+              {active === "messages" && (
+                <MessagesSection
+                  chatMessages={chatMessages}
+                  onSendMessage={onSendMessage}
+                  onMarkRead={onMarkRead}
+                  lecturerName={lecturerName}
                 />
               )}
 
@@ -1253,6 +1270,151 @@ function ReportsSection({ reportTemplates, reportSubmissions, onAddTemplate, onU
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// ── Messages Section ───────────────────────────────────────────────────
+function MessagesSection({ chatMessages, onSendMessage, onMarkRead, lecturerName }: {
+  chatMessages: ChatMessage[];
+  onSendMessage: (msg: ChatMessage) => void;
+  onMarkRead: (threadId: string) => void;
+  lecturerName: string;
+}) {
+  const [activeThread, setActiveThread] = useState<{ threadId: string; studentId: string; studentName: string; contactName: string } | null>(null);
+  const [draft, setDraft] = useState("");
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  const threads = Object.values(
+    chatMessages.reduce<Record<string, { threadId: string; studentId: string; studentName: string; contactName: string; msgs: ChatMessage[] }>>((acc, m) => {
+      if (!acc[m.threadId]) acc[m.threadId] = { threadId: m.threadId, studentId: m.studentId, studentName: m.studentName, contactName: m.contactName, msgs: [] };
+      acc[m.threadId].msgs.push(m);
+      return acc;
+    }, {})
+  ).sort((a, b) => {
+    const la = a.msgs[a.msgs.length - 1]?.timestamp ?? "";
+    const lb = b.msgs[b.msgs.length - 1]?.timestamp ?? "";
+    return lb.localeCompare(la);
+  });
+
+  const openThread = (t: typeof threads[0]) => {
+    setActiveThread({ threadId: t.threadId, studentId: t.studentId, studentName: t.studentName, contactName: t.contactName });
+    onMarkRead(t.threadId);
+    setDraft("");
+    setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: "smooth" }), 80);
+  };
+
+  const sendReply = () => {
+    if (!draft.trim() || !activeThread) return;
+    onSendMessage({
+      id: `msg-${Date.now()}`,
+      threadId: activeThread.threadId,
+      studentId: activeThread.studentId,
+      studentName: activeThread.studentName,
+      contactName: activeThread.contactName,
+      senderRole: "lecturer",
+      body: draft.trim(),
+      timestamp: new Date().toISOString(),
+      read: false,
+    });
+    setDraft("");
+    setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: "smooth" }), 60);
+  };
+
+  const activeMsgs = activeThread ? chatMessages.filter(m => m.threadId === activeThread.threadId) : [];
+  const totalUnread = chatMessages.filter(m => m.senderRole === "student" && !m.read).length;
+
+  return (
+    <div className="space-y-4">
+      {threads.length === 0 ? (
+        <div className="premium-card p-10 text-center">
+          <MessageSquare size={32} className="text-muted-foreground/30 mx-auto mb-3" />
+          <p className="text-sm font-semibold">No messages yet</p>
+          <p className="text-xs text-muted-foreground mt-1">Students can initiate conversations from the Contacts section of their dashboard.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-[280px,1fr] gap-4 items-start">
+          <div className="premium-card overflow-hidden">
+            <div className="p-3 border-b border-border/50">
+              <p className="text-xs font-bold tracking-tight flex items-center gap-2">
+                <MessageSquare size={13} className="text-primary" /> Conversations
+                {totalUnread > 0 && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-500 text-white font-bold">{totalUnread}</span>}
+              </p>
+            </div>
+            <div className="divide-y divide-border/50 max-h-[420px] overflow-y-auto">
+              {threads.map(t => {
+                const unread = t.msgs.filter(m => m.senderRole === "student" && !m.read).length;
+                const last = t.msgs[t.msgs.length - 1];
+                const isActive = activeThread?.threadId === t.threadId;
+                return (
+                  <button key={t.threadId} onClick={() => openThread(t)}
+                    className={`w-full text-left px-3 py-3 flex items-start gap-2.5 hover:bg-secondary/50 transition-colors ${isActive ? "bg-primary/5 border-l-2 border-primary" : ""}`}>
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0">
+                      {t.studentName.split(" ").map((n: string) => n[0]).slice(0, 2).join("")}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-1">
+                        <p className={`text-xs truncate ${unread > 0 ? "font-bold" : "font-semibold"}`}>{t.studentName}</p>
+                        {unread > 0 && <span className="w-4 h-4 rounded-full bg-primary text-white text-[9px] flex items-center justify-center font-bold flex-shrink-0">{unread}</span>}
+                      </div>
+                      <p className="text-[10px] text-muted-foreground truncate">{t.contactName}</p>
+                      {last && <p className="text-[10px] text-muted-foreground truncate mt-0.5 italic">"{last.body}"</p>}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="premium-card overflow-hidden flex flex-col" style={{ minHeight: "420px" }}>
+            {!activeThread ? (
+              <div className="flex-1 flex items-center justify-center">
+                <p className="text-xs text-muted-foreground">Select a conversation to view messages</p>
+              </div>
+            ) : (
+              <>
+                <div className="px-4 py-3 border-b border-border/50 flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center text-white text-[10px] font-bold">
+                    {activeThread.studentName.split(" ").map((n: string) => n[0]).slice(0, 2).join("")}
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold">{activeThread.studentName}</p>
+                    <p className="text-[10px] text-muted-foreground">re: {activeThread.contactName}</p>
+                  </div>
+                </div>
+                <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2 bg-secondary/20" style={{ maxHeight: "300px" }}>
+                  {activeMsgs.map(m => (
+                    <div key={m.id} className={`flex ${m.senderRole === "lecturer" ? "justify-end" : "justify-start"}`}>
+                      <div className={`max-w-[75%] px-3 py-2 rounded-2xl text-xs leading-relaxed ${
+                        m.senderRole === "lecturer"
+                          ? "bg-primary text-white rounded-br-sm"
+                          : "bg-white border border-border/60 text-foreground rounded-bl-sm"
+                      }`}>
+                        <p>{m.body}</p>
+                        <p className={`text-[9px] mt-0.5 ${m.senderRole === "lecturer" ? "text-white/60" : "text-muted-foreground"}`}>
+                          {new Date(m.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={chatEndRef} />
+                </div>
+                <div className="flex gap-2 px-4 py-3 border-t border-border/50">
+                  <input type="text" placeholder={`Reply as ${lecturerName}…`}
+                    className="flex-1 text-xs px-3 py-2 rounded-xl bg-secondary/60 border border-border/60 focus:border-primary/40 focus:outline-none focus:ring-4 focus:ring-primary/10"
+                    value={draft}
+                    onChange={e => setDraft(e.target.value)}
+                    onKeyDown={e => e.key === "Enter" && sendReply()} />
+                  <button onClick={sendReply} disabled={!draft.trim()}
+                    className="px-3 py-2 gradient-brand text-white rounded-xl text-xs font-semibold disabled:opacity-40 flex items-center gap-1">
+                    <MessageSquare size={12} /> Send
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

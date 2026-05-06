@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { students, appointments, Appointment, externalProblems, ExternalProblem, ReportTemplate, ReportSubmission } from "@/data/mockData";
+import { students, appointments, Appointment, externalProblems, ExternalProblem, ReportTemplate, ReportSubmission, ChatMessage } from "@/data/mockData";
 import { getRegisteredStudents, getAllStudents } from "@/lib/userRegistry";
 import StudentDashboard from "@/components/StudentDashboard";
 import LecturerDashboard from "@/components/LecturerDashboard";
@@ -59,6 +59,21 @@ const Index = () => {
     setAllAppointments(prev => prev.map(a => a.id === id ? { ...a, status } : a));
   const handleAddProblem = (problem: ExternalProblem) => setAllProblems(prev => [...prev, problem]);
   const handleLogout = () => setSession(null);
+
+  const CHAT_KEY = "skills-tracker-chat-messages";
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(() => {
+    try { return JSON.parse(localStorage.getItem(CHAT_KEY) || "[]"); } catch { return []; }
+  });
+  const handleSendMessage = (msg: ChatMessage) => {
+    const next = [...chatMessages, msg];
+    setChatMessages(next);
+    localStorage.setItem(CHAT_KEY, JSON.stringify(next));
+  };
+  const handleMarkRead = (threadId: string) => {
+    const next = chatMessages.map(m => m.threadId === threadId ? { ...m, read: true } : m);
+    setChatMessages(next);
+    localStorage.setItem(CHAT_KEY, JSON.stringify(next));
+  };
 
   const handleAddTemplate = (t: ReportTemplate) => {
     const next = [t, ...reportTemplates];
@@ -324,6 +339,9 @@ const Index = () => {
           reportTemplates={reportTemplates}
           reportSubmissions={reportSubmissions}
           onAddSubmission={handleAddSubmission}
+          chatMessages={chatMessages}
+          onSendMessage={handleSendMessage}
+          onMarkRead={handleMarkRead}
         />
       ) : (
         <LecturerDashboard
@@ -337,6 +355,9 @@ const Index = () => {
           reportSubmissions={reportSubmissions}
           onAddTemplate={handleAddTemplate}
           onUpdateSubmission={handleUpdateSubmission}
+          chatMessages={chatMessages}
+          onSendMessage={handleSendMessage}
+          onMarkRead={handleMarkRead}
         />
       )}
     </div>

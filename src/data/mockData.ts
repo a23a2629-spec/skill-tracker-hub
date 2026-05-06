@@ -172,6 +172,18 @@ export interface ExternalProblem {
   severity: "low" | "medium" | "high";
 }
 
+export interface ChatMessage {
+  id: string;
+  threadId: string;
+  studentId: string;
+  studentName: string;
+  contactName: string;
+  senderRole: "student" | "lecturer";
+  body: string;
+  timestamp: string;
+  read: boolean;
+}
+
 export interface ReportTemplate {
   id: string;
   title: string;

@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Student, Appointment, ExternalProblem, ReportTemplate, ReportSubmission } from "@/data/mockData";
+import { Student, Appointment, ExternalProblem, ReportTemplate, ReportSubmission, ChatMessage } from "@/data/mockData";
 import {
   CalendarDays, Bell, BookOpen, Brain, UserCheck, TrendingUp, Clock, PlusCircle,
   Check, X, AlertCircle, Sparkles, Activity, LayoutDashboard, Users, Phone,
@@ -25,6 +25,9 @@ interface Props {
   reportTemplates: ReportTemplate[];
   reportSubmissions: ReportSubmission[];
   onAddSubmission: (s: ReportSubmission) => void;
+  chatMessages: ChatMessage[];
+  onSendMessage: (msg: ChatMessage) => void;
+  onMarkRead: (threadId: string) => void;
 }
 
 type Section =
@@ -48,6 +51,7 @@ const StudentDashboard = ({
   student, appointments: studentAppointments, onAddAppointment, onUpdateStatus,
   problems, onAddProblem, onLogout, onProfileUpdate, sectionRequest, profileTabRequest,
   reportTemplates, reportSubmissions, onAddSubmission,
+  chatMessages, onSendMessage, onMarkRead,
 }: Props) => {
   const [active, setActive] = useState<Section>("dashboard");
   const [activeTab, setActiveTab] = useState("overview");
@@ -151,7 +155,7 @@ const StudentDashboard = ({
             </SectionShell>
           )}
           {active === "students" && <CohortSection student={student} />}
-          {active === "contacts" && <ContactsSection />}
+          {active === "contacts" && <ContactsSection student={student} chatMessages={chatMessages} onSendMessage={onSendMessage} onMarkRead={onMarkRead} />}
           {active === "cases" && (
             <CasesSection problems={problems} studentId={student.id} onAddProblem={onAddProblem} />
           )}
@@ -714,29 +718,126 @@ function CohortSection({ student }: { student: Student }) {
   );
 }
 
-function ContactsSection() {
-  const contacts = [
-    { name: "Dr. Zainab binti Mohd Noor", role: "Course Lecturer", email: "zainab@university.edu" },
-    { name: "Dr. Ahmad Ridzuan", role: "Academic Advisor", email: "ridzuan@university.edu" },
-    { name: "Counselling Office", role: "Student Support", email: "counselling@university.edu" },
-  ];
+const CHAT_CONTACTS = [
+  { name: "Dr. Zainab binti Mohd Noor", role: "Course Lecturer", email: "zainab@university.edu" },
+  { name: "Dr. Ahmad Ridzuan", role: "Academic Advisor", email: "ridzuan@university.edu" },
+  { name: "Counselling Office", role: "Student Support", email: "counselling@university.edu" },
+];
+
+function ContactsSection({ student, chatMessages, onSendMessage, onMarkRead }: {
+  student: Student;
+  chatMessages: ChatMessage[];
+  onSendMessage: (msg: ChatMessage) => void;
+  onMarkRead: (threadId: string) => void;
+}) {
+  const [openChat, setOpenChat] = useState<string | null>(null);
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  const getThreadId = (contactName: string) => `${student.id}|${contactName}`;
+
+  const openThread = (contactName: string) => {
+    const tid = getThreadId(contactName);
+    if (openChat === contactName) { setOpenChat(null); return; }
+    setOpenChat(contactName);
+    onMarkRead(tid);
+    setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: "smooth" }), 80);
+  };
+
+  const sendMsg = (contactName: string) => {
+    const body = (drafts[contactName] ?? "").trim();
+    if (!body) return;
+    onSendMessage({
+      id: `msg-${Date.now()}`,
+      threadId: getThreadId(contactName),
+      studentId: student.id,
+      studentName: student.name,
+      contactName,
+      senderRole: "student",
+      body,
+      timestamp: new Date().toISOString(),
+      read: true,
+    });
+    setDrafts(d => ({ ...d, [contactName]: "" }));
+    setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: "smooth" }), 60);
+  };
+
   return (
     <SectionShell>
-      {contacts.map((c, i) => (
-        <div key={i} className="bg-white border border-[#E5E7EB] rounded-xl p-4 flex items-center gap-4">
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#FF7A59] to-[#FF5C35] flex items-center justify-center text-white text-sm font-bold">
-            {c.name.split(" ").map(n => n[0]).slice(0, 2).join("")}
+      {CHAT_CONTACTS.map((c, i) => {
+        const tid = getThreadId(c.name);
+        const msgs = chatMessages.filter(m => m.threadId === tid);
+        const unread = msgs.filter(m => m.senderRole === "lecturer" && !m.read).length;
+        const isOpen = openChat === c.name;
+        return (
+          <div key={i} className="bg-white border border-[#E5E7EB] rounded-xl overflow-hidden">
+            <div className="p-4 flex items-center gap-4">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#FF7A59] to-[#FF5C35] flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                {c.name.split(" ").map(n => n[0]).slice(0, 2).join("")}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-[#213343]">{c.name}</p>
+                <p className="text-xs text-[#516F90]">{c.role}</p>
+              </div>
+              <div className="hidden sm:flex items-center gap-1.5 text-xs text-[#516F90]">
+                <AtSign size={13} /> {c.email}
+              </div>
+              <button
+                onClick={() => openThread(c.name)}
+                className={`relative px-3 py-1.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                  isOpen ? "bg-[#2563EB] text-white" : "border border-[#E5E7EB] text-[#213343] hover:bg-[#F5F8FA]"
+                }`}>
+                <Mail size={13} />
+                {isOpen ? "Close" : "Chat"}
+                {unread > 0 && !isOpen && (
+                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] flex items-center justify-center font-bold">{unread}</span>
+                )}
+              </button>
+            </div>
+
+            {isOpen && (
+              <div className="border-t border-[#E5E7EB]">
+                <div className="h-56 overflow-y-auto px-4 py-3 space-y-2 bg-[#F5F8FA]">
+                  {msgs.length === 0 && (
+                    <p className="text-xs text-[#7C98B6] text-center py-6">No messages yet. Say hello!</p>
+                  )}
+                  {msgs.map(m => (
+                    <div key={m.id} className={`flex ${m.senderRole === "student" ? "justify-end" : "justify-start"}`}>
+                      <div className={`max-w-[75%] px-3 py-2 rounded-2xl text-xs leading-relaxed ${
+                        m.senderRole === "student"
+                          ? "bg-[#2563EB] text-white rounded-br-sm"
+                          : "bg-white border border-[#E5E7EB] text-[#213343] rounded-bl-sm"
+                      }`}>
+                        <p>{m.body}</p>
+                        <p className={`text-[9px] mt-0.5 ${m.senderRole === "student" ? "text-blue-200" : "text-[#7C98B6]"}`}>
+                          {new Date(m.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={chatEndRef} />
+                </div>
+                <div className="flex gap-2 px-4 py-3 border-t border-[#E5E7EB] bg-white">
+                  <input
+                    type="text"
+                    placeholder="Type a message…"
+                    className="flex-1 text-xs px-3 py-2 rounded-lg border border-[#E5E7EB] bg-[#F5F8FA] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20"
+                    value={drafts[c.name] ?? ""}
+                    onChange={e => setDrafts(d => ({ ...d, [c.name]: e.target.value }))}
+                    onKeyDown={e => e.key === "Enter" && sendMsg(c.name)}
+                  />
+                  <button
+                    onClick={() => sendMsg(c.name)}
+                    disabled={!(drafts[c.name] ?? "").trim()}
+                    className="px-3 py-2 bg-[#2563EB] text-white rounded-lg text-xs font-semibold disabled:opacity-40 flex items-center gap-1">
+                    <Mail size={12} /> Send
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-[#213343]">{c.name}</p>
-            <p className="text-xs text-[#516F90]">{c.role}</p>
-          </div>
-          <div className="hidden sm:flex items-center gap-1.5 text-xs text-[#516F90]">
-            <AtSign size={13} /> {c.email}
-          </div>
-          <button className="px-3 py-1.5 rounded-md border border-[#E5E7EB] text-xs font-semibold text-[#213343] hover:bg-[#F5F8FA]">Email</button>
-        </div>
-      ))}
+        );
+      })}
     </SectionShell>
   );
 }
