@@ -314,7 +314,6 @@ function DashboardSection({
               <span className={`text-3xl font-bold ${student.attendance >= 85 ? "text-emerald-600" : student.attendance >= 70 ? "text-amber-500" : "text-red-500"}`}>
                 {student.attendance}%
               </span>
-              <span className="text-xs text-[#7C98B6] mb-1">last 30 days</span>
             </div>
             <div className="h-2 rounded-full bg-[#F5F8FA] overflow-hidden">
               <div
@@ -325,11 +324,6 @@ function DashboardSection({
             <p className="text-[11px] text-[#7C98B6] mt-2">
               {student.attendance >= 85 ? "Excellent — keep it up." : "Below 85% target. Schedule a check-in."}
             </p>
-          </InfoCard>
-          <InfoCard title="Documents" icon={FileText}>
-            <DocRow name="Enrolment letter.pdf" date="2026-01-15" />
-            <DocRow name="Transcript Sem 3.pdf" date="2026-01-20" />
-            <DocRow name="ID card scan.pdf" date="2025-09-01" />
           </InfoCard>
         </div>
 
