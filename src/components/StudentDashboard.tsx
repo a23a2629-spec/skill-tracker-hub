@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Student, Appointment, ExternalProblem } from "@/data/mockData";
 import {
   CalendarDays, Bell, BookOpen, Brain, UserCheck, TrendingUp, Clock, PlusCircle,
@@ -20,6 +20,8 @@ interface Props {
   onAddProblem: (problem: ExternalProblem) => void;
   onLogout: () => void;
   onProfileUpdate?: (update: Partial<Student["profile"]> & { avatar?: string }) => void;
+  sectionRequest?: string;
+  profileTabRequest?: string;
 }
 
 type Section =
@@ -41,11 +43,18 @@ const navItems: { key: Section; label: string; icon: React.ElementType }[] = [
 
 const StudentDashboard = ({
   student, appointments: studentAppointments, onAddAppointment, onUpdateStatus,
-  problems, onAddProblem, onLogout, onProfileUpdate,
+  problems, onAddProblem, onLogout, onProfileUpdate, sectionRequest, profileTabRequest,
 }: Props) => {
   const [active, setActive] = useState<Section>("dashboard");
   const [activeTab, setActiveTab] = useState("overview");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Navigate when a search result is clicked
+  const prevSecReq = useRef(sectionRequest);
+  if (sectionRequest && sectionRequest !== prevSecReq.current) {
+    prevSecReq.current = sectionRequest;
+    setActive(sectionRequest as Section);
+  }
 
   const completedAssessments = student.skills.filter((s) => s.completed);
   const pendingAssessments = student.skills.filter((s) => !s.completed);
@@ -133,7 +142,7 @@ const StudentDashboard = ({
           )}
           {active === "profile" && (
             <SectionShell>
-              <StudentProfile student={student} problems={problems} onProfileUpdate={onProfileUpdate} />
+              <StudentProfile student={student} problems={problems} onProfileUpdate={onProfileUpdate} tabRequest={profileTabRequest} />
             </SectionShell>
           )}
           {active === "students" && <CohortSection student={student} />}

@@ -107,6 +107,34 @@ const Index = () => {
         ts: n.date ?? n.ts ?? "",
       }));
 
+  // Module index for student search
+  const studentModules = [
+    { label: "Module 1 — Personal Information", sub: "Name · nationality · race · religion · gender", section: "profile", tab: "personal" },
+    { label: "Module 2 — Identification Details", sub: "IC number · Student ID · identity verification", section: "profile", tab: "personal" },
+    { label: "Module 3 — Contact Information", sub: "Phone · email · address · postcode · state", section: "profile", tab: "personal" },
+    { label: "Module 4 — Emergency Contact", sub: "Guardian · relationship · guardian phone & email", section: "profile", tab: "personal" },
+    { label: "Module 5 — Academic Background", sub: "Previous school · SPM · results · achievements", section: "profile", tab: "academic" },
+    { label: "Module 6 — University Program Details", sub: "Program · faculty · intake · semester · scholarship", section: "profile", tab: "academic" },
+    { label: "Module 7 — Enrollment Information", sub: "Registration status · advisor · campus", section: "profile", tab: "academic" },
+    { label: "Module 8 — Academic Performance", sub: "CGPA · GPA · attendance · assessment scores", section: "profile", tab: "academic" },
+    { label: "Module 9 — Financial Information", sub: "Household income · PTPTN · payment status · B40/M40/T20", section: "profile", tab: "financial" },
+    { label: "Module 10 — Family Background", sub: "Father · mother · siblings · household size · marital status", section: "profile", tab: "financial" },
+    { label: "Module 11 — Health Information", sub: "Blood type · disability · insurance · medical conditions · allergies", section: "profile", tab: "health" },
+    { label: "Module 12 — Mental Health Support", sub: "Counseling status · wellbeing · counselor", section: "profile", tab: "health" },
+    { label: "Module 13 — Accommodation Details", sub: "Hostel · block · room · commuter", section: "profile", tab: "health" },
+    { label: "Module 14 — Skills & Interests", sub: "Technical skills · soft skills · career goal · co-curricular", section: "profile", tab: "activities" },
+    { label: "Module 15 — Disciplinary Records", sub: "Disciplinary record · violations · conduct", section: "profile", tab: "activities" },
+    { label: "Module 16 — Uploaded Documents", sub: "IC copy · certificates · offer letter · PTPTN", section: "profile", tab: "activities" },
+    { label: "Integrity & Trust Index", sub: "Risk score · trust index · verification flags", section: "profile", tab: "integrity" },
+    { label: "My Dashboard", sub: "Overview · assessments · appointments · timeline", section: "dashboard", tab: "" },
+    { label: "Cases", sub: "Reported issues · support tickets", section: "cases", tab: "" },
+    { label: "Meetings", sub: "Appointments with lecturers and advisors", section: "meetings", tab: "" },
+    { label: "Analytics", sub: "Skills radar · progress charts", section: "analytics", tab: "" },
+  ];
+
+  const [studentSectionReq, setStudentSectionReq] = useState<string | undefined>();
+  const [studentTabReq, setStudentTabReq] = useState<string | undefined>();
+
   const trimmedQuery = searchQuery.trim().toLowerCase();
   const searchResults = trimmedQuery
     ? (session.role === "lecturer"
@@ -117,10 +145,22 @@ const Index = () => {
               s.course.toLowerCase().includes(trimmedQuery))
             .slice(0, 6)
             .map(s => ({ id: s.id, label: s.name, sub: `${s.matricNo} · ${s.course}`, onClick: () => { setSelectedStudentId(s.id); setSearchOpen(false); setSearchQuery(""); } }))
-        : (selectedStudent.skills ?? [])
-            .filter((sk: any) => sk.name?.toLowerCase().includes(trimmedQuery))
-            .slice(0, 6)
-            .map((sk: any, i: number) => ({ id: `sk-${i}`, label: sk.name, sub: `Score ${sk.score ?? "—"}%`, onClick: () => { setSearchOpen(false); setSearchQuery(""); } })))
+        : studentModules
+            .filter(m =>
+              m.label.toLowerCase().includes(trimmedQuery) ||
+              m.sub.toLowerCase().includes(trimmedQuery))
+            .slice(0, 8)
+            .map((m, i) => ({
+              id: `m-${i}`,
+              label: m.label,
+              sub: m.sub,
+              onClick: () => {
+                setStudentSectionReq(m.section + "-" + Date.now());
+                setStudentTabReq(m.tab + "-" + Date.now());
+                setSearchOpen(false);
+                setSearchQuery("");
+              },
+            })))
     : [];
 
   const headerInner = session.role === "lecturer"
@@ -255,6 +295,8 @@ const Index = () => {
           onAddProblem={handleAddProblem}
           onLogout={handleLogout}
           onProfileUpdate={handleProfileUpdate}
+          sectionRequest={studentSectionReq}
+          profileTabRequest={studentTabReq}
         />
       ) : (
         <LecturerDashboard

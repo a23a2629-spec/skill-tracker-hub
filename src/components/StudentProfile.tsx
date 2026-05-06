@@ -14,6 +14,7 @@ interface Props {
   student: Student;
   problems: ExternalProblem[];
   onProfileUpdate?: (profile: Partial<SPType> & { avatar?: string }) => void;
+  tabRequest?: string;
 }
 
 type Tab = "personal" | "academic" | "financial" | "health" | "activities" | "integrity";
@@ -57,7 +58,7 @@ const domainIcons: Record<string, React.ElementType> = {
   family: Users, mental: Brain, identity: CreditCard, integrity: Shield,
 };
 
-export default function StudentProfile({ student, problems, onProfileUpdate }: Props) {
+export default function StudentProfile({ student, problems, onProfileUpdate, tabRequest }: Props) {
   const { profile: p } = student;
   const courseName = courses.find(c => c.code === student.course)?.name || student.course;
   const initials = student.name.split(" ").map(n => n[0]).filter(Boolean).slice(0, 2).join("").toUpperCase();
@@ -65,6 +66,13 @@ export default function StudentProfile({ student, problems, onProfileUpdate }: P
 
   const [activeTab, setActiveTab] = useState<Tab>("personal");
   const [editing, setEditing] = useState(false);
+
+  // Navigate to a specific tab when requested from outside (e.g. search)
+  const prevTabReq = useRef(tabRequest);
+  if (tabRequest && tabRequest !== prevTabReq.current && tabConfig.some(t => t.key === tabRequest)) {
+    prevTabReq.current = tabRequest;
+    setActiveTab(tabRequest as Tab);
+  }
   const [avatar, setAvatar] = useState<string | undefined>(p.avatar);
 
   const initForm = () => ({
