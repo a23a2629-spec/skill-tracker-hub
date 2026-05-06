@@ -98,7 +98,6 @@ export default function StudentProfile({ student, problems, onProfileUpdate, tab
     incomeCategory: p.incomeCategory,
     paymentStatus: p.paymentStatus,
     sponsorAmount: String(p.sponsorAmount),
-    financialAid: p.financialAid,
     // M10
     fatherName: p.fatherName, fatherOccupation: p.fatherOccupation, fatherIncome: String(p.fatherIncome),
     motherName: p.motherName, motherOccupation: p.motherOccupation, motherIncome: String(p.motherIncome),
