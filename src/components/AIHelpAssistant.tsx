@@ -9,7 +9,11 @@ interface AIHelpAssistantProps {
   userName?: string;
 }
 
-const ONBOARD_KEY = "skills-tracker-onboarded";
+const userKey = (role: string, userName?: string) =>
+  `skills-tracker:${role}:${(userName || "anon").toLowerCase().replace(/\s+/g, "-")}`;
+const ONBOARD_KEY = (role: string, userName?: string) => `${userKey(role, userName)}:onboarded`;
+const HISTORY_KEY = (role: string, userName?: string) => `${userKey(role, userName)}:history`;
+const MAX_HISTORY = 50;
 
 const QUICK_QUESTIONS_LECTURER = [
   "How do I filter students by course?",
@@ -54,10 +58,19 @@ export default function AIHelpAssistant({ role, userName }: AIHelpAssistantProps
 
   const quickQuestions = role === "lecturer" ? QUICK_QUESTIONS_LECTURER : QUICK_QUESTIONS_STUDENT;
   const tourSteps = role === "lecturer" ? TOUR_STEPS_LECTURER : TOUR_STEPS_STUDENT;
+  const onboardKey = ONBOARD_KEY(role, userName);
+  const historyKey = HISTORY_KEY(role, userName);
 
-  // First-time onboarding prompt
+  // Load persisted history & onboarding when user changes
   useEffect(() => {
-    const seen = localStorage.getItem(ONBOARD_KEY);
+    try {
+      const raw = localStorage.getItem(historyKey);
+      setMessages(raw ? (JSON.parse(raw) as Msg[]) : []);
+    } catch { setMessages([]); }
+    setTourStep(null);
+    setShowOnboarding(false);
+
+    const seen = localStorage.getItem(onboardKey);
     if (!seen) {
       const t = setTimeout(() => {
         setShowOnboarding(true);
@@ -65,14 +78,22 @@ export default function AIHelpAssistant({ role, userName }: AIHelpAssistantProps
       }, 1200);
       return () => clearTimeout(t);
     }
-  }, []);
+  }, [onboardKey, historyKey]);
+
+  // Persist history
+  useEffect(() => {
+    try {
+      const trimmed = messages.slice(-MAX_HISTORY);
+      localStorage.setItem(historyKey, JSON.stringify(trimmed));
+    } catch { /* ignore quota */ }
+  }, [messages, historyKey]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, loading, tourStep, showOnboarding]);
 
   const dismissOnboarding = () => {
-    localStorage.setItem(ONBOARD_KEY, "1");
+    localStorage.setItem(onboardKey, "1");
     setShowOnboarding(false);
     setTourStep(null);
   };
@@ -80,7 +101,7 @@ export default function AIHelpAssistant({ role, userName }: AIHelpAssistantProps
   const startTour = () => {
     setShowOnboarding(false);
     setTourStep(0);
-    localStorage.setItem(ONBOARD_KEY, "1");
+    localStorage.setItem(onboardKey, "1");
   };
 
   const advanceTour = () => {
@@ -157,7 +178,11 @@ export default function AIHelpAssistant({ role, userName }: AIHelpAssistantProps
     }
   };
 
-  const resetChat = () => { setMessages([]); setTourStep(null); };
+  const resetChat = () => {
+    setMessages([]);
+    setTourStep(null);
+    try { localStorage.removeItem(historyKey); } catch { /* ignore */ }
+  };
 
   const renderMarkdown = (text: string) => {
     // light markdown: **bold** and \n
