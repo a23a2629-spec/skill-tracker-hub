@@ -128,7 +128,44 @@ export default function AIHelpAssistant({ role, userName }: AIHelpAssistantProps
           "Content-Type": "application/json",
           ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
         },
-        body: JSON.stringify({ messages: next, role }),
+        body: JSON.stringify({
+          messages: next,
+          role,
+          students: role === "lecturer"
+            ? ALL_STUDENTS.map(s => ({
+                id: s.id,
+                name: s.name,
+                matricNo: s.matricNo,
+                course: s.course,
+                attendance: s.attendance,
+                averageScore: s.averageScore,
+                aiPercentage: s.aiPercentage,
+                skills: s.skills.map(a => ({
+                  title: a.title,
+                  status: a.status,
+                  score: a.score,
+                  maxScore: a.maxScore,
+                  completed: a.completed,
+                })),
+                profile: {
+                  studentId: s.profile.studentId,
+                  email: s.profile.email,
+                  phone: s.profile.phone,
+                  program: s.profile.program,
+                  faculty: s.profile.faculty,
+                  semester: s.profile.semester,
+                  enrollmentStatus: s.profile.enrollmentStatus,
+                  registrationStatus: s.profile.registrationStatus,
+                  guardian: s.profile.guardian,
+                  guardianPhone: s.profile.guardianPhone,
+                  financialAid: s.profile.financialAid,
+                  previousSchool: s.profile.previousSchool,
+                  previousQualification: s.profile.previousQualification,
+                  achievements: s.profile.achievements,
+                },
+              }))
+            : undefined,
+        }),
       });
 
       if (!res.ok || !res.body) {
