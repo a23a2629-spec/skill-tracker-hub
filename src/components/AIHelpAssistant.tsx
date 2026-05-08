@@ -178,7 +178,11 @@ export default function AIHelpAssistant({ role, userName }: AIHelpAssistantProps
     }
   };
 
-  const resetChat = () => { setMessages([]); setTourStep(null); };
+  const resetChat = () => {
+    setMessages([]);
+    setTourStep(null);
+    try { localStorage.removeItem(historyKey); } catch { /* ignore */ }
+  };
 
   const renderMarkdown = (text: string) => {
     // light markdown: **bold** and \n
