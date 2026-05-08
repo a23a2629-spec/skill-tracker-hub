@@ -9,7 +9,11 @@ interface AIHelpAssistantProps {
   userName?: string;
 }
 
-const ONBOARD_KEY = "skills-tracker-onboarded";
+const userKey = (role: string, userName?: string) =>
+  `skills-tracker:${role}:${(userName || "anon").toLowerCase().replace(/\s+/g, "-")}`;
+const ONBOARD_KEY = (role: string, userName?: string) => `${userKey(role, userName)}:onboarded`;
+const HISTORY_KEY = (role: string, userName?: string) => `${userKey(role, userName)}:history`;
+const MAX_HISTORY = 50;
 
 const QUICK_QUESTIONS_LECTURER = [
   "How do I filter students by course?",
