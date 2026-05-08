@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages, role } = await req.json();
+    const { messages, role, students } = await req.json();
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
     if (!apiKey) {
       return new Response(JSON.stringify({ error: "Missing LOVABLE_API_KEY" }), {
@@ -40,7 +40,11 @@ Deno.serve(async (req) => {
       });
     }
 
-    const system = `${SYSTEM_PROMPT_BASE}\n\nThe current user role is: ${role || "unknown"}.`;
+    let system = `${SYSTEM_PROMPT_BASE}\n\nThe current user role is: ${role || "unknown"}.`;
+
+    if (role === "lecturer" && Array.isArray(students) && students.length > 0) {
+      system += `\n\nYou ALSO have access to a STUDENT DIRECTORY for this lecturer. When the lecturer mentions a student's name, matric number, or student ID (even partial / case-insensitive), look them up in the directory below and provide a clear, well-organized full report including: name, matric no, course, program/faculty, semester, enrollment & registration status, attendance %, average score, AI percentage, skill breakdown (mastered/developing/intensive with titles & scores), guardian contact, financial aid, and prior education. If multiple students match, list them and ask which one. If no match, say so politely and suggest the closest names. Format with markdown headings and bullet lists. Never invent data not present in the directory.\n\nSTUDENT DIRECTORY (JSON):\n${JSON.stringify(students)}`;
+    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
