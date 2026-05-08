@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { MessageCircle, X, Send, Sparkles, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { students as ALL_STUDENTS } from "@/data/mockData";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
