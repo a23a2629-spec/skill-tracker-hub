@@ -361,6 +361,8 @@ const Index = () => {
           onMarkRead={handleMarkRead}
         />
       )}
+
+      <AIHelpAssistant role={session.role} userName={session.name} />
     </div>
   );
 };
