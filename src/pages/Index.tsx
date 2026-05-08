@@ -4,6 +4,7 @@ import { getRegisteredStudents, getAllStudents } from "@/lib/userRegistry";
 import StudentDashboard from "@/components/StudentDashboard";
 import LecturerDashboard from "@/components/LecturerDashboard";
 import ThemeToggle from "@/components/ThemeToggle";
+import AIHelpAssistant from "@/components/AIHelpAssistant";
 import Login, { AuthSession } from "@/components/Login";
 import Signup from "@/components/Signup";
 import { LogOut, Search, ChevronDown, UserCircle2, Mail } from "lucide-react";
