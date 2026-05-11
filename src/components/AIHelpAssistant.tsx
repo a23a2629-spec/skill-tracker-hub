@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { MessageCircle, X, Send, Sparkles, RotateCcw } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { students as ALL_STUDENTS } from "@/data/mockData";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -120,13 +119,10 @@ export default function AIHelpAssistant({ role, userName }: AIHelpAssistantProps
     setLoading(true);
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const url = `https://xmqhguhgekmxdineqadr.supabase.co/functions/v1/faq-assistant`;
-      const res = await fetch(url, {
+      const res = await fetch("/api/faq-assistant", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
         },
         body: JSON.stringify({
           messages: next,
