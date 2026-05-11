@@ -314,6 +314,12 @@ function DashboardSection({
           </div>
         </div>
 
+        {/* Quick Overview – ring stats */}
+        <QuickOverview student={student} riskLabel={riskLabel} completed={completedAssessments.length} total={student.skills.length} />
+
+        {/* AI Insight banner */}
+        <AIInsightBanner student={student} />
+
         {/* CRM info grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <InfoCard title="Contact Information" icon={AtSign}>
