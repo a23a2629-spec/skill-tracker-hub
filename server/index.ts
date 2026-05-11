@@ -85,7 +85,7 @@ app.post("/api/faq-assistant", async (req, res) => {
   }
 });
 
-const PORT = process.env.API_PORT ? parseInt(process.env.API_PORT) : 5001;
+const PORT = process.env.API_PORT ? parseInt(process.env.API_PORT) : 3000;
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`API server listening on port ${PORT}`);
 });
