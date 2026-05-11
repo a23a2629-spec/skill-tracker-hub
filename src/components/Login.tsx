@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { students } from "@/data/mockData";
 import { getRegisteredStudents, getRegisteredLecturers, getStudentPassword } from "@/lib/userRegistry";
 import { User, BookOpen, Lock, AlertCircle, Eye, EyeOff, Bot, ChevronRight, Send, X, RotateCcw, Sparkles } from "lucide-react";
+import { getAnswer } from "@/lib/assistantFAQ";
 
 export type AuthSession =
   | { role: "student"; studentId: string; name: string }
@@ -25,6 +26,18 @@ const STUDENT_DEFAULT_PASSWORD = "student123";
 // ── Inline mini AI assistant for the login page ──────────────────────────────
 type Msg = { role: "user" | "assistant"; content: string };
 
+function simulateTyping(text: string, onChunk: (p: string) => void, onDone: () => void) {
+  let i = 0;
+  const words = text.split(" ");
+  const tick = () => {
+    if (i >= words.length) { onDone(); return; }
+    onChunk(words.slice(0, i + 1).join(" "));
+    i++;
+    setTimeout(tick, 18 + Math.random() * 20);
+  };
+  setTimeout(tick, 280);
+}
+
 function LoginAIAssistant() {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -36,58 +49,31 @@ function LoginAIAssistant() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, loading]);
 
-  const send = async (text: string) => {
+  const send = (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
     const next: Msg[] = [...messages, { role: "user", content: trimmed }];
-    setMessages(next);
+    setMessages([...next, { role: "assistant", content: "" }]);
     setInput("");
     setLoading(true);
-    try {
-      const res = await fetch("/api/faq-assistant", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: next, role: "visitor" }),
-      });
-      if (!res.ok || !res.body) {
-        setMessages([...next, { role: "assistant", content: "Sorry, I couldn't reach the assistant right now." }]);
+
+    const answer = getAnswer(trimmed, "visitor");
+    simulateTyping(
+      answer,
+      (partial) => setMessages(m => {
+        const copy = [...m];
+        copy[copy.length - 1] = { role: "assistant", content: partial };
+        return copy;
+      }),
+      () => {
+        setMessages(m => {
+          const copy = [...m];
+          copy[copy.length - 1] = { role: "assistant", content: answer };
+          return copy;
+        });
         setLoading(false);
-        return;
-      }
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let assistant = "";
-      setMessages([...next, { role: "assistant", content: "" }]);
-      let buf = "";
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buf += decoder.decode(value, { stream: true });
-        const lines = buf.split("\n");
-        buf = lines.pop() || "";
-        for (const line of lines) {
-          if (!line.startsWith("data: ")) continue;
-          const data = line.slice(6).trim();
-          if (data === "[DONE]") continue;
-          try {
-            const json = JSON.parse(data);
-            const delta = json.choices?.[0]?.delta?.content;
-            if (delta) {
-              assistant += delta;
-              setMessages(m => {
-                const copy = [...m];
-                copy[copy.length - 1] = { role: "assistant", content: assistant };
-                return copy;
-              });
-            }
-          } catch { /* ignore */ }
-        }
-      }
-    } catch {
-      setMessages(prev => [...prev.slice(0, -0), { role: "assistant", content: "Network error. Please try again." }]);
-    } finally {
-      setLoading(false);
-    }
+      },
+    );
   };
 
   const quickQs = [
@@ -97,12 +83,18 @@ function LoginAIAssistant() {
     "How do I create an account?",
   ];
 
-  const renderMarkdown = (text: string) =>
-    text.split(/(\*\*[^*]+\*\*)/g).map((p, i) =>
-      p.startsWith("**") && p.endsWith("**")
-        ? <strong key={i}>{p.slice(2, -2)}</strong>
-        : <span key={i}>{p}</span>
-    );
+  const renderMarkdown = (text: string) => {
+    const lines = text.split("\n");
+    return lines.map((line, li) => {
+      const parts = line.split(/(\*\*[^*]+\*\*)/g);
+      const rendered = parts.map((p, i) =>
+        p.startsWith("**") && p.endsWith("**")
+          ? <strong key={i}>{p.slice(2, -2)}</strong>
+          : <span key={i}>{p}</span>
+      );
+      return <span key={li}>{rendered}{li < lines.length - 1 && <br />}</span>;
+    });
+  };
 
   return (
     <>
