@@ -263,10 +263,18 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
         </div>
 
         {/* ── CENTER STAGE ── */}
-        <div className="relative z-10 flex flex-col items-center justify-center text-center px-6 max-w-2xl mx-auto">
+        <div className="absolute inset-0 z-10">
 
           {/* Phase: text1 */}
-          <div className={`absolute inset-x-0 ${vis("text1")}`}>
+          <div
+            className={`absolute left-0 right-0 px-6 text-center max-w-2xl mx-auto transition-all duration-700 ${
+              phase === "text1" ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
+            style={{
+              top: "50%",
+              transform: phase === "text1" ? "translateY(-50%)" : "translateY(calc(-50% + 12px))",
+            }}
+          >
             <p className="text-[13px] uppercase tracking-[0.35em] text-cyan-400/70 font-semibold mb-5">
               In-Campus Skills Gap Tracker
             </p>
@@ -276,18 +284,34 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
           </div>
 
           {/* Phase: text2 */}
-          <div className={`absolute inset-x-0 ${vis("text2")}`}>
+          <div
+            className={`absolute left-0 right-0 px-6 text-center max-w-2xl mx-auto transition-all duration-700 ${
+              phase === "text2" ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
+            style={{
+              top: "50%",
+              transform: phase === "text2" ? "translateY(-50%)" : "translateY(calc(-50% + 12px))",
+            }}
+          >
             <p className="text-[13px] uppercase tracking-[0.35em] text-cyan-400/70 font-semibold mb-5">
               The challenge is
             </p>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black leading-tight tracking-tight text-white">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black leading-snug tracking-tight text-white">
               But not every struggle{" "}
               <span className="gradient-text">is detected early.</span>
             </h1>
           </div>
 
           {/* Phase: reveal — logo + tagline */}
-          <div className={`absolute inset-x-0 flex flex-col items-center ${vis("reveal")}`}>
+          <div
+            className={`absolute left-0 right-0 px-6 flex flex-col items-center text-center max-w-2xl mx-auto transition-all duration-700 ${
+              phase === "reveal" ? "opacity-100" : "opacity-0 pointer-events-none"
+            }`}
+            style={{
+              top: "50%",
+              transform: phase === "reveal" ? "translateY(-50%)" : "translateY(calc(-50% + 12px))",
+            }}
+          >
             {/* Logo */}
             <div className="logo-glow mb-5">
               <img
