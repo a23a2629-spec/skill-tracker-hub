@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { students } from "@/data/mockData";
 import { getRegisteredStudents, getRegisteredLecturers, getStudentPassword } from "@/lib/userRegistry";
-import { User, BookOpen, Lock, AlertCircle, Eye, EyeOff, Sparkles, Target, TrendingUp, ShieldCheck } from "lucide-react";
+import { User, BookOpen, Lock, AlertCircle, Eye, EyeOff, Sparkles, Target, TrendingUp, ShieldCheck, Bot, ChevronRight } from "lucide-react";
 import heroImage from "@/assets/login-hero.png";
 
 export type AuthSession =
@@ -295,6 +295,22 @@ export default function Login({ onLogin, onShowSignup }: Props) {
           </p>
         </div>
       </main>
+
+      {/* Floating AI Assistant chip */}
+      <button
+        type="button"
+        className="fixed bottom-5 right-5 z-50 flex items-center gap-3 pl-2 pr-3 py-2 rounded-full bg-foreground text-background shadow-2xl hover:scale-[1.02] transition-transform border border-border"
+      >
+        <span className="w-9 h-9 rounded-full bg-primary flex items-center justify-center relative">
+          <Bot size={18} className="text-primary-foreground" />
+          <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-status-mastered border-2 border-foreground" />
+        </span>
+        <span className="text-left leading-tight">
+          <span className="block text-xs font-semibold">Need help?</span>
+          <span className="block text-[10px] opacity-70">AI Assistant</span>
+        </span>
+        <ChevronRight size={14} className="opacity-70" />
+      </button>
     </div>
   );
 }
