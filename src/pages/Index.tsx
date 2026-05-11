@@ -7,7 +7,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import AIHelpAssistant from "@/components/AIHelpAssistant";
 import Login, { AuthSession } from "@/components/Login";
 import Signup from "@/components/Signup";
-import { LogOut, Search, ChevronDown, UserCircle2, Mail } from "lucide-react";
+import { LogOut, Search, ChevronDown, UserCircle2, Mail, RefreshCw } from "lucide-react";
 
 const SESSION_KEY = "skills-tracker-session";
 
@@ -101,6 +101,7 @@ const Index = () => {
 
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [switchOpen, setSwitchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [studentSectionReq, setStudentSectionReq] = useState<string | undefined>();
@@ -301,6 +302,43 @@ const Index = () => {
                     {session.role === "student" && (
                       <div className="flex items-center gap-2 px-2.5 py-2 text-[11px] text-muted-foreground">
                         <Mail size={13} /> {selectedStudent.profile?.email || "—"}
+                      </div>
+                    )}
+                    {session.role === "student" && (
+                      <div className="relative">
+                        <button
+                          onClick={() => setSwitchOpen(o => !o)}
+                          className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-semibold text-foreground hover:bg-secondary/60 transition"
+                        >
+                          <RefreshCw size={13} /> Switch Account
+                          <ChevronDown size={11} className={`ml-auto transition-transform ${switchOpen ? "rotate-180" : ""}`} />
+                        </button>
+                        {switchOpen && (
+                          <div className="mx-1 mb-1 rounded-lg border border-border bg-secondary/40 overflow-hidden">
+                            {allStudents.slice(0, 8).map(s => (
+                              <button
+                                key={s.id}
+                                onClick={() => {
+                                  setSession({ role: "student", studentId: s.id, name: s.name });
+                                  setProfileOpen(false);
+                                  setSwitchOpen(false);
+                                }}
+                                className={`w-full text-left px-3 py-2 text-[11px] hover:bg-card transition flex items-center gap-2 ${session.role === "student" && session.studentId === s.id ? "text-primary font-semibold" : "text-foreground"}`}
+                              >
+                                <div className="w-5 h-5 rounded bg-primary/10 text-primary text-[9px] font-bold flex items-center justify-center shrink-0">
+                                  {s.name.split(" ").map(n => n[0]).slice(0, 2).join("")}
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="truncate">{s.name}</p>
+                                  <p className="text-muted-foreground font-mono text-[9px]">{s.matricNo}</p>
+                                </div>
+                                {session.role === "student" && session.studentId === s.id && (
+                                  <span className="ml-auto text-[9px] text-primary">✓ active</span>
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                     <button

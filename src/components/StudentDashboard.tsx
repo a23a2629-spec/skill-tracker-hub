@@ -148,6 +148,7 @@ const StudentDashboard = ({
               lecturerSetAppointments={lecturerSetAppointments}
               onUpdateStatus={onUpdateStatus}
               problems={problems}
+              onNavigate={setActive}
             />
           )}
           {active === "profile" && (
@@ -268,6 +269,7 @@ function DashboardSection({
   student, initials, activeTab, setActiveTab,
   completedAssessments, pendingAssessments,
   studentAppointments, lecturerSetAppointments, onUpdateStatus, problems,
+  onNavigate,
 }: any) {
   const riskScore = computeRiskScore(student);
   const riskLabel = riskScore >= 70 ? "High Risk" : riskScore >= 40 ? "Medium Risk" : "Low Risk";
@@ -315,10 +317,10 @@ function DashboardSection({
         </div>
 
         {/* Quick Overview – ring stats */}
-        <QuickOverview student={student} riskLabel={riskLabel} completed={completedAssessments.length} total={student.skills.length} />
+        <QuickOverview student={student} riskLabel={riskLabel} completed={completedAssessments.length} total={student.skills.length} onViewDetails={() => onNavigate?.("profile")} />
 
         {/* AI Insight banner */}
-        <AIInsightBanner student={student} />
+        <AIInsightBanner student={student} onViewInsight={() => onNavigate?.("ai")} />
 
         {/* CRM info grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -508,8 +510,8 @@ function RingStat({
 }
 
 function QuickOverview({
-  student, riskLabel, completed, total,
-}: { student: Student; riskLabel: string; completed: number; total: number }) {
+  student, riskLabel, completed, total, onViewDetails,
+}: { student: Student; riskLabel: string; completed: number; total: number; onViewDetails?: () => void }) {
   const creditsCompleted = 36;
   const creditsTotal = 48;
   const creditsPct = Math.round((creditsCompleted / creditsTotal) * 100);
@@ -518,7 +520,7 @@ function QuickOverview({
     <div className="bg-white border border-[#E5E7EB] rounded-xl p-5">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-[15px] font-bold text-[#213343]">Quick Overview</h3>
-        <button className="text-xs font-semibold text-[#2563EB] hover:underline flex items-center gap-1">
+        <button onClick={onViewDetails} className="text-xs font-semibold text-[#2563EB] hover:underline flex items-center gap-1">
           View details <ChevronRight size={12} />
         </button>
       </div>
@@ -557,7 +559,7 @@ function QuickOverview({
 }
 
 // ── AI Insight banner ──────────────────────────────────────────────────
-function AIInsightBanner({ student }: { student: Student }) {
+function AIInsightBanner({ student, onViewInsight }: { student: Student; onViewInsight?: () => void }) {
   const weakest = [...student.skills].sort((a, b) => (a.score / a.maxScore) - (b.score / b.maxScore))[0];
   const topic = weakest?.title ?? "Quantitative Reasoning";
   return (
@@ -576,7 +578,7 @@ function AIInsightBanner({ student }: { student: Student }) {
           AI detected declining engagement in <span className="font-semibold">{topic}</span>. Consider early intervention to support continued improvement.
         </p>
       </div>
-      <button className="shrink-0 self-center px-3.5 py-2 rounded-lg border border-[#7C3AED]/30 bg-white text-[#7C3AED] text-xs font-semibold hover:bg-[#7C3AED]/5 transition whitespace-nowrap">
+      <button onClick={onViewInsight} className="shrink-0 self-center px-3.5 py-2 rounded-lg border border-[#7C3AED]/30 bg-white text-[#7C3AED] text-xs font-semibold hover:bg-[#7C3AED]/5 transition whitespace-nowrap">
         View Insight
       </button>
     </div>
