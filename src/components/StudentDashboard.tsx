@@ -6,6 +6,7 @@ import {
   AtSign, FileText, BarChart3, Settings as SettingsIcon, LogOut, Menu, ChevronRight,
   Search, StickyNote, Mail, Calendar, Briefcase, Target, ClipboardList, Heart,
   GraduationCap, MapPin, ShieldCheck, Award, Zap, Circle, User as UserIcon, Upload,
+  Bot,
 } from "lucide-react";
 import { ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Area, AreaChart } from "recharts";
 import StatusBadge from "./StatusBadge";
