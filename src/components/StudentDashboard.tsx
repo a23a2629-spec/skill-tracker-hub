@@ -476,6 +476,113 @@ function DashboardSection({
   );
 }
 
+// ── Quick Overview (ring stats) ───────────────────────────────────────
+function RingStat({
+  value, label, sub, color, center, icon: Icon,
+}: {
+  value: number; label: string; sub?: string;
+  color: string; center?: React.ReactNode; icon?: React.ElementType;
+}) {
+  const r = 32;
+  const c = 2 * Math.PI * r;
+  const pct = Math.max(0, Math.min(100, value));
+  const dash = (pct / 100) * c;
+  return (
+    <div className="flex flex-col items-center text-center">
+      <p className="text-[11px] text-[#516F90] font-medium mb-2">{label}</p>
+      <div className="relative w-[88px] h-[88px]">
+        <svg width="88" height="88" viewBox="0 0 88 88" className="-rotate-90">
+          <circle cx="44" cy="44" r={r} stroke="#EEF2F7" strokeWidth="8" fill="none" />
+          <circle
+            cx="44" cy="44" r={r} stroke={color} strokeWidth="8" fill="none"
+            strokeLinecap="round" strokeDasharray={`${dash} ${c - dash}`}
+          />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          {center ?? (Icon ? <Icon size={22} style={{ color }} /> : <span className="text-[15px] font-bold text-[#213343]">{pct}%</span>)}
+        </div>
+      </div>
+      {sub && <p className="text-[10px] text-[#7C98B6] mt-2">{sub}</p>}
+    </div>
+  );
+}
+
+function QuickOverview({
+  student, riskLabel, completed, total,
+}: { student: Student; riskLabel: string; completed: number; total: number }) {
+  const creditsCompleted = 36;
+  const creditsTotal = 48;
+  const creditsPct = Math.round((creditsCompleted / creditsTotal) * 100);
+  const riskColor = riskLabel === "Low Risk" ? "#10B981" : riskLabel === "Medium Risk" ? "#F59E0B" : "#EF4444";
+  return (
+    <div className="bg-white border border-[#E5E7EB] rounded-xl p-5">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-[15px] font-bold text-[#213343]">Quick Overview</h3>
+        <button className="text-xs font-semibold text-[#2563EB] hover:underline flex items-center gap-1">
+          View details <ChevronRight size={12} />
+        </button>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="rounded-xl border border-[#EEF2F7] p-4">
+          <RingStat
+            value={student.averageScore} label="Average Score" color="#2563EB"
+            center={<span className="text-[15px] font-bold text-[#213343]">{student.averageScore}%</span>}
+            sub="↑ 8% vs last sem"
+          />
+        </div>
+        <div className="rounded-xl border border-[#EEF2F7] p-4">
+          <RingStat
+            value={creditsPct} label="Credits Completed" color="#10B981"
+            center={<div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center"><BookOpen size={16} className="text-emerald-600" /></div>}
+            sub={`${creditsCompleted} / ${creditsTotal}`}
+          />
+        </div>
+        <div className="rounded-xl border border-[#EEF2F7] p-4">
+          <RingStat
+            value={student.attendance} label="Attendance" color="#F97316"
+            center={<span className="text-[15px] font-bold text-[#213343]">{student.attendance}%</span>}
+            sub="↑ 5% vs last sem"
+          />
+        </div>
+        <div className="rounded-xl border border-[#EEF2F7] p-4">
+          <RingStat
+            value={100} label="Risk Level" color={riskColor}
+            center={<div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: `${riskColor}14` }}><ShieldCheck size={16} style={{ color: riskColor }} /></div>}
+            sub={riskLabel}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── AI Insight banner ──────────────────────────────────────────────────
+function AIInsightBanner({ student }: { student: Student }) {
+  const weakest = [...student.skills].sort((a, b) => (a.score / a.maxScore) - (b.score / b.maxScore))[0];
+  const topic = weakest?.title ?? "Quantitative Reasoning";
+  return (
+    <div className="rounded-xl border border-[#E0E7FF] bg-gradient-to-br from-[#EEF2FF] via-[#F5F3FF] to-[#FAF5FF] p-4 sm:p-5 flex items-start gap-4">
+      <div className="w-11 h-11 rounded-xl bg-white/80 backdrop-blur flex items-center justify-center shadow-sm shrink-0">
+        <Bot size={22} className="text-[#7C3AED]" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-[13px] font-bold text-[#7C3AED] flex items-center gap-1">
+            <Sparkles size={13} /> AI Insight
+          </span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#7C3AED]/10 text-[#7C3AED] font-bold">New</span>
+        </div>
+        <p className="text-[13px] text-[#213343] leading-relaxed">
+          AI detected declining engagement in <span className="font-semibold">{topic}</span>. Consider early intervention to support continued improvement.
+        </p>
+      </div>
+      <button className="shrink-0 self-center px-3.5 py-2 rounded-lg border border-[#7C3AED]/30 bg-white text-[#7C3AED] text-xs font-semibold hover:bg-[#7C3AED]/5 transition whitespace-nowrap">
+        View Insight
+      </button>
+    </div>
+  );
+}
+
 // ── Helper components ─────────────────────────────────────────────────
 function ContactRow({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
   return (
