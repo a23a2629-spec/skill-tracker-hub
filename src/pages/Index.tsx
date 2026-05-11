@@ -7,9 +7,11 @@ import ThemeToggle from "@/components/ThemeToggle";
 import AIHelpAssistant from "@/components/AIHelpAssistant";
 import Login, { AuthSession } from "@/components/Login";
 import Signup from "@/components/Signup";
+import SplashScreen from "@/components/SplashScreen";
 import { LogOut, Search, ChevronDown, UserCircle2, Mail, RefreshCw } from "lucide-react";
 
 const SESSION_KEY = "skills-tracker-session";
+const SPLASH_KEY = "skills-tracker-splash-seen";
 
 const Index = () => {
   const [session, setSession] = useState<AuthSession | null>(() => {
@@ -18,6 +20,17 @@ const Index = () => {
       return raw ? (JSON.parse(raw) as AuthSession) : null;
     } catch { return null; }
   });
+
+  const [showSplash, setShowSplash] = useState(() => {
+    try {
+      return !sessionStorage.getItem(SPLASH_KEY);
+    } catch { return false; }
+  });
+
+  const handleSplashComplete = () => {
+    try { sessionStorage.setItem(SPLASH_KEY, "1"); } catch { /* ignore */ }
+    setShowSplash(false);
+  };
 
   const [showSignup, setShowSignup] = useState(false);
 
@@ -122,6 +135,9 @@ const Index = () => {
   }, []);
 
   if (!session) {
+    if (showSplash) {
+      return <SplashScreen onComplete={handleSplashComplete} />;
+    }
     if (showSignup) {
       return (
         <Signup
