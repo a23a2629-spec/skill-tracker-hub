@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { students } from "@/data/mockData";
 import { getRegisteredStudents, getRegisteredLecturers, getStudentPassword } from "@/lib/userRegistry";
-import { User, BookOpen, Lock, AlertCircle, Eye, EyeOff, Sparkles, Target, TrendingUp, ShieldCheck } from "lucide-react";
+import { User, BookOpen, Lock, AlertCircle, Eye, EyeOff, Sparkles, Target, TrendingUp, ShieldCheck, Bot, ChevronRight } from "lucide-react";
 import heroImage from "@/assets/login-hero.png";
 
 export type AuthSession =
