@@ -189,32 +189,50 @@ function SidebarContent({
   initials: string;
   onLogout: () => void;
 }) {
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const firstName = studentName.split(" ")[0];
   return (
     <>
-      <div className="flex items-center gap-2.5 px-4 py-4 border-b border-[#E5E7EB]">
-        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#FF7A59] to-[#FF5C35] flex items-center justify-center shadow-sm shrink-0">
-          <Briefcase size={17} className="text-white" />
+      {/* Brand */}
+      <div className="flex items-center gap-2.5 px-4 py-4">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2563EB] to-[#0EA5E9] flex items-center justify-center shadow-md shadow-[#2563EB]/25 shrink-0">
+          <GraduationCap size={20} className="text-white" />
         </div>
-        <div className="min-w-0">
-          <p className="text-[13px] font-bold leading-tight text-[#213343] truncate">Skills Gap Tracker</p>
-          <p className="text-[10px] text-[#7C98B6]">Student CRM</p>
+        <div className="min-w-0 leading-tight">
+          <p className="text-[15px] font-extrabold text-[#2563EB] tracking-tight">In-Campus</p>
+          <p className="text-[10px] text-[#7C98B6] font-medium -mt-0.5">Skills Gap Tracker</p>
         </div>
       </div>
 
-      <nav className="flex-1 px-2.5 py-3 space-y-0.5 overflow-y-auto">
+      {/* Greeting card */}
+      <div className="mx-3 mb-3 rounded-xl border border-[#E5E7EB] bg-gradient-to-br from-white to-[#F5F8FA] p-3.5 relative overflow-hidden">
+        <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-[#2563EB]" />
+        <p className="text-[11px] text-[#516F90]">{greeting},</p>
+        <p className="text-[13px] font-bold text-[#213343] leading-tight mt-0.5 truncate">
+          {firstName} <span className="inline-block">👋</span>
+        </p>
+        <p className="text-[10px] text-[#7C98B6] mt-1 leading-snug">
+          Here's what's happening today.
+        </p>
+      </div>
+
+      <p className="px-4 mb-1.5 text-[10px] uppercase tracking-wider text-[#7C98B6] font-bold">Main Menu</p>
+
+      <nav className="flex-1 px-2.5 py-1 space-y-0.5 overflow-y-auto">
         {navItems.map(({ key, label, icon: Icon }) => {
           const isActive = active === key;
           return (
             <button
               key={key}
               onClick={() => setActive(key)}
-              className={`group relative w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] font-medium transition-all ${
+              className={`group relative w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all ${
                 isActive
-                  ? "bg-[#FFF5F2] text-[#FF5C35] shadow-[inset_3px_0_0_#FF7A59]"
+                  ? "bg-[#EFF6FF] text-[#2563EB] shadow-[inset_3px_0_0_#2563EB]"
                   : "text-[#516F90] hover:bg-[#F5F8FA] hover:text-[#213343]"
               }`}
             >
-              <Icon size={16} className={isActive ? "text-[#FF5C35]" : "text-[#7C98B6] group-hover:text-[#516F90]"} />
+              <Icon size={16} className={isActive ? "text-[#2563EB]" : "text-[#7C98B6] group-hover:text-[#516F90]"} />
               <span>{label}</span>
             </button>
           );
