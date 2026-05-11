@@ -356,7 +356,7 @@ function DashboardSection({
                   onClick={() => setActiveTab(t)}
                   className={`px-3.5 py-3 text-[13px] font-medium border-b-2 transition-colors whitespace-nowrap ${
                     activeTab === t
-                      ? "border-[#FF7A59] text-[#FF5C35]"
+                      ? "border-[#2563EB] text-[#2563EB]"
                       : "border-transparent text-[#516F90] hover:text-[#213343]"
                   }`}
                 >
