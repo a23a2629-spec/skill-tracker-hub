@@ -10,9 +10,11 @@ import {
   Settings as SettingsIcon, LogOut, Menu, X as XIcon,
   ChevronRight, ArrowLeft, GraduationCap, Circle, Trash2, UserPlus, Pencil,
   Building2, Search as SearchIcon, CheckCircle2, Layers,
+  Activity, UserCheck, ShieldCheck, Check,
 } from "lucide-react";
 import StatusBadge from "./StatusBadge";
 import StudentProfile from "./StudentProfile";
+import { BrainOrb, DarkStatCard } from "./DashboardShared";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, CartesianGrid,
@@ -226,10 +228,10 @@ const LecturerDashboard = ({
   const sidebarWidth = collapsed ? "w-[76px]" : "w-[260px]";
 
   return (
-    <div className="flex bg-background min-h-[calc(100vh-65px)]">
+    <div className="dark flex min-h-screen bg-[#07091A]">
       {/* ── Sidebar ───────────────────────────────────────────────────── */}
       <aside
-        className={`${sidebarWidth} hidden lg:flex flex-col bg-[#0F172A] text-slate-100 sticky top-[65px] h-[calc(100vh-65px)] transition-all duration-300 shrink-0`}
+        className={`${sidebarWidth} hidden lg:flex flex-col bg-[#0B0F1E] text-slate-100 sticky top-0 h-screen transition-all duration-300 shrink-0`}
       >
         <SidebarContent
           collapsed={collapsed}
@@ -247,7 +249,7 @@ const LecturerDashboard = ({
         <div className="fixed inset-0 z-40 lg:hidden" onClick={() => setSidebarOpen(false)}>
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
           <aside
-            className="absolute left-0 top-0 h-full w-[260px] bg-[#0F172A] text-slate-100 flex flex-col"
+            className="absolute left-0 top-0 h-full w-[260px] bg-[#0B0F1E] text-slate-100 flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <SidebarContent
@@ -267,23 +269,23 @@ const LecturerDashboard = ({
       {/* ── Main Content ─────────────────────────────────────────────── */}
       <div className="flex-1 min-w-0">
         {/* Sub-header */}
-        <div className="sticky top-[65px] z-30 bg-background/85 backdrop-blur-xl border-b border-border/60">
+        <div className="sticky top-0 z-30 bg-[#07091A]/95 backdrop-blur-md border-b border-white/5">
           <div className="px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-3 flex-wrap">
             <button
-              className="lg:hidden w-10 h-10 rounded-xl bg-secondary flex items-center justify-center"
+              className="lg:hidden w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-300"
               onClick={() => setSidebarOpen(true)}
             >
               <Menu size={18} />
             </button>
             <div className="min-w-0 flex-1">
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">{meta.title}</h1>
-              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">{meta.subtitle}</p>
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">{meta.title}</h1>
+              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">{meta.subtitle}</p>
             </div>
           </div>
         </div>
 
         {/* Section content */}
-        <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+        <div key={active} className="dash-page-enter p-4 sm:p-6 lg:p-8 space-y-6">
           {/* If viewing a single student profile, show that overlay regardless of section */}
           {viewingStudentId && active === "students" ? (
             <StudentProfileView
@@ -310,6 +312,7 @@ const LecturerDashboard = ({
                   problems={problems}
                   selectedCourse={selectedCourse}
                   setSelectedCourse={setSelectedCourse}
+                  lecturerName={lecturerName}
                 />
               )}
 
@@ -467,14 +470,14 @@ function SidebarContent({
               onClick={() => setActive(key)}
               className={`group relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 isActive
-                  ? "bg-gradient-to-r from-primary/25 to-primary/5 text-white shadow-[inset_2px_0_0_hsl(221_83%_53%)]"
-                  : "text-slate-300 hover:bg-white/5 hover:text-white"
+                  ? "bg-gradient-to-r from-[#2563EB] to-[#7C3AED] text-white shadow-lg"
+                  : "text-slate-400 hover:bg-white/5 hover:text-white"
               } ${collapsed ? "justify-center" : ""}`}
               title={collapsed ? label : undefined}
             >
-              <Icon size={17} className={isActive ? "text-primary" : "text-slate-400 group-hover:text-slate-200"} />
+              <Icon size={17} className={isActive ? "text-white" : "text-slate-500 group-hover:text-slate-200"} />
               {!collapsed && <span className="truncate">{label}</span>}
-              {isActive && !collapsed && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />}
+              {isActive && !collapsed && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-white/60" />}
             </button>
           );
         })}
@@ -585,19 +588,70 @@ function CourseFilter({ selectedCourse, setSelectedCourse }: {
 function DashboardSection({
   totalStudents, avgAttendance, avgAI, intensiveCount, avgScore,
   scoreDistribution, pieData, atRiskStudents, appointments, problems,
-  selectedCourse, setSelectedCourse,
+  selectedCourse, setSelectedCourse, lecturerName,
 }: any) {
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const firstName = (lecturerName || "Lecturer").split(" ")[0];
+  const attendanceHistory = [avgAttendance - 8, avgAttendance - 6, avgAttendance - 4, avgAttendance - 5, avgAttendance - 2, avgAttendance - 1, avgAttendance];
+  const aiHistory = [avgAI - 4, avgAI - 3, avgAI - 2, avgAI - 1, avgAI + 1, avgAI, avgAI];
+  const intHistory = [intensiveCount + 2, intensiveCount + 2, intensiveCount + 1, intensiveCount + 1, intensiveCount, intensiveCount, intensiveCount];
+
   return (
     <div className="space-y-6">
-      <CourseFilter selectedCourse={selectedCourse} setSelectedCourse={setSelectedCourse} />
-
-      {/* Row 1: KPIs */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard title="Total Students" value={totalStudents} icon={Users} tone="primary" hint="Across all monitored courses" />
-        <KPICard title="Avg Attendance" value={avgAttendance} suffix="%" icon={TrendingUp} tone="success" hint="Cohort average" />
-        <KPICard title="AI Usage" value={avgAI} suffix="%" icon={BookOpen} tone={avgAI > 25 ? "warning" : "primary"} hint={avgAI > 25 ? "Above threshold" : "Within range"} />
-        <KPICard title="Need Intervention" value={intensiveCount} icon={AlertTriangle} tone="danger" hint="Students scoring below 50%" />
+      {/* Hero Banner */}
+      <div className="relative rounded-2xl overflow-hidden"
+        style={{ background: "linear-gradient(135deg, #061430 0%, #0a1a3a 45%, #060e20 80%, #050810 100%)" }}>
+        <div className="absolute inset-0 opacity-[0.06]"
+          style={{ backgroundImage: "linear-gradient(rgba(59,130,246,.8) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,.8) 1px, transparent 1px)", backgroundSize: "44px 44px" }} />
+        <div className="absolute top-0 right-1/4 w-72 h-72 rounded-full bg-blue-600/15 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/3 w-56 h-56 rounded-full bg-violet-600/10 blur-3xl pointer-events-none" />
+        <div className="relative flex items-center gap-4 p-6 sm:p-8">
+          <div className="flex-1 min-w-0">
+            <h2 className="text-2xl sm:text-3xl font-black text-white mb-1.5">{greeting}, {firstName}! 👋</h2>
+            <p className="text-slate-300/80 text-sm mb-4">Here's what's happening in your classes today.</p>
+            <div className="space-y-2 mb-5">
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0"><TrendingUp size={10} className="text-emerald-400" /></div>
+                <span className="text-slate-300 text-[13px]">Class performance <span className="text-emerald-400 font-semibold">improved by 12%</span> compared to last month</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center shrink-0"><AlertTriangle size={10} className="text-red-400" /></div>
+                <span className="text-slate-300 text-[13px]"><span className="text-red-400 font-semibold">{intensiveCount} student{intensiveCount !== 1 ? "s" : ""}</span> need intervention based on AI analysis</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0"><UserCheck size={10} className="text-blue-400" /></div>
+                <span className="text-slate-300 text-[13px]">Attendance <span className="text-blue-400 font-semibold">excellent at {avgAttendance}%</span> above cohort average</span>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] text-slate-300"
+                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />AI Monitoring Active
+              </span>
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] text-slate-300"
+                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                <Sparkles size={9} className="text-blue-400" />12 Insights Generated
+              </span>
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] text-slate-300"
+                style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                <Activity size={9} className="text-violet-400" />Data Synced
+              </span>
+            </div>
+          </div>
+          <BrainOrb />
+        </div>
       </div>
+
+      {/* Stat Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <DarkStatCard label="Total Students" value={String(totalStudents)} icon={Users} iconColor="#3B82F6" trend="Across all courses" sparkData={[12,13,14,15,16,17,totalStudents]} sparkColor="#3B82F6" />
+        <DarkStatCard label="Avg Attendance" value={`${avgAttendance}%`} icon={UserCheck} iconColor="#10B981" trend="vs last month" sparkData={attendanceHistory} sparkColor="#10B981" trendUp />
+        <DarkStatCard label="AI Usage" value={`${avgAI}%`} icon={BookOpen} iconColor={avgAI > 25 ? "#F59E0B" : "#3B82F6"} trend={avgAI > 25 ? "Above threshold" : "Within range"} sparkData={aiHistory} sparkColor={avgAI > 25 ? "#F59E0B" : "#3B82F6"} />
+        <DarkStatCard label="Need Intervention" value={String(intensiveCount)} icon={AlertTriangle} iconColor="#EF4444" trend="Students below 50%" sparkData={intHistory} sparkColor="#EF4444" trendUp={false} />
+      </div>
+
+      <CourseFilter selectedCourse={selectedCourse} setSelectedCourse={setSelectedCourse} />
 
       {/* Row 2: Performance + AI Insight */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

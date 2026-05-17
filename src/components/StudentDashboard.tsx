@@ -11,6 +11,7 @@ import {
 import { ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Area, AreaChart } from "recharts";
 import StatusBadge from "./StatusBadge";
 import StudentProfile from "./StudentProfile";
+import { BrainOrb, DarkStatCard } from "./DashboardShared";
 
 interface Props {
   student: Student;
@@ -86,9 +87,9 @@ const StudentDashboard = ({
   const meta = sectionMeta[active];
 
   return (
-    <div className="flex bg-[#F5F8FA] min-h-[calc(100vh-65px)]">
-      {/* ── Sidebar (HubSpot style: white, light borders, orange active) ── */}
-      <aside className="w-[240px] hidden lg:flex flex-col bg-white border-r border-[#E5E7EB] sticky top-[65px] h-[calc(100vh-65px)] shrink-0">
+    <div className="dark flex min-h-screen bg-[#07091A]">
+      {/* ── Sidebar ── */}
+      <aside className="w-[240px] hidden lg:flex flex-col bg-[#0B0F1E] border-r border-white/5 sticky top-0 h-screen shrink-0">
         <SidebarContent
           active={active}
           setActive={setActive}
@@ -104,7 +105,7 @@ const StudentDashboard = ({
         <div className="fixed inset-0 z-40 lg:hidden" onClick={() => setSidebarOpen(false)}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <aside
-            className="absolute left-0 top-0 h-full w-[240px] bg-white flex flex-col border-r border-[#E5E7EB]"
+            className="absolute left-0 top-0 h-full w-[240px] bg-[#0B0F1E] flex flex-col border-r border-white/5"
             onClick={(e) => e.stopPropagation()}
           >
             <SidebarContent
@@ -121,23 +122,23 @@ const StudentDashboard = ({
 
       <div className="flex-1 min-w-0">
         {/* Sub-header */}
-        <div className="sticky top-[65px] z-30 bg-white/90 backdrop-blur-md border-b border-[#E5E7EB]">
+        <div className="sticky top-0 z-30 bg-[#07091A]/95 backdrop-blur-md border-b border-white/5">
           <div className="px-4 sm:px-6 lg:px-8 py-3.5 flex items-center gap-3 flex-wrap">
             <button
-              className="lg:hidden w-10 h-10 rounded-lg bg-[#F5F8FA] border border-[#E5E7EB] flex items-center justify-center"
+              className="lg:hidden w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-300"
               onClick={() => setSidebarOpen(true)}
             >
               <Menu size={18} />
             </button>
             <div className="min-w-0 flex-1">
-              <h1 className="text-lg sm:text-xl font-bold text-[#213343] tracking-tight">{meta.title}</h1>
-              <p className="text-xs text-[#516F90] mt-0.5">{meta.subtitle}</p>
+              <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">{meta.title}</h1>
+              <p className="text-xs text-slate-500 mt-0.5">{meta.subtitle}</p>
             </div>
           </div>
         </div>
 
         {/* Section content */}
-        <div className="p-4 sm:p-6 lg:p-8">
+        <div key={active} className="dash-page-enter p-4 sm:p-6 lg:p-8">
           {active === "dashboard" && (
             <DashboardSection
               student={student} initials={initials}
@@ -190,72 +191,62 @@ function SidebarContent({
   initials: string;
   onLogout: () => void;
 }) {
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-  const firstName = studentName.split(" ")[0];
   return (
     <>
       {/* Brand */}
-      <div className="flex items-center gap-2.5 px-4 py-4">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2563EB] to-[#0EA5E9] flex items-center justify-center shadow-md shadow-[#2563EB]/25 shrink-0">
-          <GraduationCap size={20} className="text-white" />
+      <div className="flex items-center gap-2.5 px-4 pt-5 pb-4">
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2563EB] to-[#7C3AED] flex items-center justify-center shadow-lg shrink-0">
+          <GraduationCap size={18} className="text-white" />
         </div>
         <div className="min-w-0 leading-tight">
-          <p className="text-[15px] font-extrabold text-[#2563EB] tracking-tight">In-Campus</p>
-          <p className="text-[10px] text-[#7C98B6] font-medium -mt-0.5">Skills Gap Tracker</p>
+          <p className="text-[14px] font-extrabold text-white tracking-tight">In-Campus</p>
+          <p className="text-[10px] text-slate-500 font-medium -mt-0.5">Skills Gap Tracker</p>
         </div>
       </div>
 
-      {/* Greeting card */}
-      <div className="mx-3 mb-3 rounded-xl border border-[#E5E7EB] bg-gradient-to-br from-white to-[#F5F8FA] p-3.5 relative overflow-hidden">
-        <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-[#2563EB]" />
-        <p className="text-[11px] text-[#516F90]">{greeting},</p>
-        <p className="text-[13px] font-bold text-[#213343] leading-tight mt-0.5 truncate">
-          {firstName} <span className="inline-block">👋</span>
-        </p>
-        <p className="text-[10px] text-[#7C98B6] mt-1 leading-snug">
-          Here's what's happening today.
-        </p>
+      {/* User card */}
+      <div className="mx-3 mb-4 rounded-xl p-3" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+        <div className="flex items-center gap-2.5">
+          <div className="relative shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2563EB] to-[#7C3AED] flex items-center justify-center text-white text-[11px] font-bold">
+              {initials}
+            </div>
+            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-[#0B0F1E]" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[12px] font-semibold text-white truncate">{studentName}</p>
+            <p className="text-[10px] text-slate-500 truncate">{studentMatric} · Student</p>
+          </div>
+        </div>
       </div>
 
-      <p className="px-4 mb-1.5 text-[10px] uppercase tracking-wider text-[#7C98B6] font-bold">Main Menu</p>
+      <p className="px-4 mb-2 text-[10px] uppercase tracking-wider text-slate-600 font-bold">Navigation</p>
 
-      <nav className="flex-1 px-2.5 py-1 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 px-2 space-y-0.5 overflow-y-auto">
         {navItems.map(({ key, label, icon: Icon }) => {
           const isActive = active === key;
           return (
             <button
               key={key}
               onClick={() => setActive(key)}
-              className={`group relative w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all ${
+              className={`group w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all ${
                 isActive
-                  ? "bg-[#EFF6FF] text-[#2563EB] shadow-[inset_3px_0_0_#2563EB]"
-                  : "text-[#516F90] hover:bg-[#F5F8FA] hover:text-[#213343]"
+                  ? "bg-gradient-to-r from-[#2563EB] to-[#7C3AED] text-white shadow-lg"
+                  : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
               }`}
             >
-              <Icon size={16} className={isActive ? "text-[#2563EB]" : "text-[#7C98B6] group-hover:text-[#516F90]"} />
+              <Icon size={16} className={isActive ? "text-white" : "text-slate-500 group-hover:text-slate-300"} />
               <span>{label}</span>
+              {isActive && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-white/50" />}
             </button>
           );
         })}
       </nav>
 
-      <div className="p-2.5 border-t border-[#E5E7EB]">
-        <div className="flex items-center gap-2.5 p-2 rounded-md hover:bg-[#F5F8FA] transition mb-1">
-          <div className="relative shrink-0">
-            <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#2563EB] to-[#0EA5E9] flex items-center justify-center text-white text-[11px] font-bold">
-              {initials}
-            </div>
-            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-white" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-[12px] font-semibold text-[#213343] truncate">{studentName}</p>
-            <p className="text-[10px] text-[#7C98B6] truncate">{studentMatric}</p>
-          </div>
-        </div>
+      <div className="p-3 border-t border-white/5">
         <button
           onClick={onLogout}
-          className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-[12px] text-[#516F90] hover:bg-[#F5F8FA] hover:text-[#213343] transition"
+          className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-[12px] text-slate-500 hover:bg-white/5 hover:text-slate-300 transition"
         >
           <LogOut size={14} /> Logout
         </button>
@@ -273,51 +264,72 @@ function DashboardSection({
 }: any) {
   const riskScore = computeRiskScore(student);
   const riskLabel = riskScore >= 70 ? "High Risk" : riskScore >= 40 ? "Medium Risk" : "Low Risk";
-  const riskTone = riskScore >= 70 ? "bg-red-50 text-red-600 border-red-200"
-    : riskScore >= 40 ? "bg-amber-50 text-amber-600 border-amber-200"
-    : "bg-emerald-50 text-emerald-600 border-emerald-200";
+  const riskColor = riskLabel === "Low Risk" ? "#10B981" : riskLabel === "Medium Risk" ? "#F59E0B" : "#EF4444";
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const firstName = student.name.split(" ")[0];
+  const upcomingApts = [...studentAppointments].filter((a: any) => a.status !== "cancelled").slice(0, 3);
+  const scoreHistory = [student.averageScore - 13, student.averageScore - 10, student.averageScore - 8, student.averageScore - 5, student.averageScore - 6, student.averageScore - 2, student.averageScore];
+  const attendanceHistory = [student.attendance - 7, student.attendance - 5, student.attendance - 3, student.attendance - 4, student.attendance - 2, student.attendance - 1, student.attendance];
+  const creditsCompleted = 36;
+  const creditsHistory = [24, 27, 30, 32, 33, 35, creditsCompleted];
+  const riskHistory = riskScore >= 70 ? [20, 30, 45, 55, 65, 70, 72] : riskScore >= 40 ? [20, 25, 30, 38, 42, 41, 40] : [40, 35, 30, 25, 22, 20, riskScore];
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-[1fr_320px] gap-5 max-w-[1500px] mx-auto">
+    <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-5 max-w-[1600px] mx-auto">
       {/* ── Main column ── */}
       <div className="space-y-5 min-w-0">
-        {/* Hero CRM card */}
-        <div className="bg-white border border-[#E5E7EB] rounded-xl p-5 sm:p-6">
-          <div className="flex flex-col sm:flex-row gap-5">
-            <div className="relative shrink-0 mx-auto sm:mx-0">
-              <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-[#2563EB] to-[#0EA5E9] flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-[#2563EB]/25">
-                {initials}
+        {/* Hero Banner */}
+        <div className="relative rounded-2xl overflow-hidden"
+          style={{ background: "linear-gradient(135deg, #1c0840 0%, #0d1b4b 45%, #071035 80%, #070b1c 100%)" }}>
+          <div className="absolute inset-0 opacity-[0.07]"
+            style={{ backgroundImage: "linear-gradient(rgba(139,92,246,.8) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,.8) 1px, transparent 1px)", backgroundSize: "44px 44px" }} />
+          <div className="absolute top-0 left-1/4 w-80 h-80 rounded-full bg-violet-600/18 blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 right-1/4 w-60 h-60 rounded-full bg-blue-600/12 blur-3xl pointer-events-none" />
+          <div className="relative flex items-center gap-4 p-6 sm:p-8">
+            <div className="flex-1 min-w-0">
+              <h2 className="text-2xl sm:text-3xl font-black text-white mb-1.5">{greeting}, {firstName}! 👋</h2>
+              <p className="text-slate-300/80 text-sm mb-4">Your academic journey is on the right track.</p>
+              <div className="space-y-2 mb-5">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0"><TrendingUp size={10} className="text-emerald-400" /></div>
+                  <span className="text-slate-300 text-[13px]">AI detected <span className="text-white font-semibold">stable performance</span> with consistent engagement</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0"><UserCheck size={10} className="text-blue-400" /></div>
+                  <span className="text-slate-300 text-[13px]">Attendance at <span className="text-emerald-400 font-semibold">{student.attendance}%</span> — excellent standing</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-5 rounded-full bg-violet-500/20 flex items-center justify-center shrink-0"><Sparkles size={10} className="text-violet-400" /></div>
+                  <span className="text-slate-300 text-[13px]">Keep up the excellent work!</span>
+                </div>
               </div>
-              <span className="absolute bottom-1 right-1 w-4 h-4 rounded-full bg-emerald-500 ring-[3px] ring-white" />
-            </div>
-            <div className="flex-1 min-w-0 text-center sm:text-left">
-              <div className="flex flex-wrap items-center gap-2 justify-center sm:justify-start mb-1.5">
-                <h2 className="text-xl sm:text-2xl font-bold text-[#213343]">{student.name}</h2>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold flex items-center gap-1">
-                  <Circle size={6} fill="currentColor" /> Active
+              <div className="flex flex-wrap gap-2">
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] text-slate-300"
+                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />AI Monitoring Active
                 </span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-semibold flex items-center gap-1">
-                  <ShieldCheck size={11} /> High Trust
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] text-slate-300"
+                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                  <Sparkles size={9} className="text-violet-400" />{pendingAssessments.length + 3} New Insights
                 </span>
-                <span className={`text-xs px-2 py-0.5 rounded-full border font-semibold ${riskTone}`}>{riskLabel}</span>
-              </div>
-              <p className="text-sm text-[#516F90]">
-                <span className="font-mono text-[12px] bg-[#F5F8FA] px-1.5 py-0.5 rounded">{student.matricNo}</span>
-                <span className="mx-2">·</span>
-                {student.course}
-              </p>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
-                <ContactRow icon={AtSign} label="Email" value={`${student.matricNo.toLowerCase()}@student.edu`} />
-                <ContactRow icon={Phone} label="Phone" value="+60 12-345 6789" />
-                <ContactRow icon={GraduationCap} label="Semester" value="Sem 4 · 2026" />
-                <ContactRow icon={MapPin} label="Faculty" value="Business" />
+                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] text-slate-300"
+                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
+                  <Activity size={9} className="text-blue-400" />Data Synced Today
+                </span>
               </div>
             </div>
+            <BrainOrb />
           </div>
         </div>
 
-        {/* Quick Overview – ring stats */}
-        <QuickOverview student={student} riskLabel={riskLabel} completed={completedAssessments.length} total={student.skills.length} onViewDetails={() => onNavigate?.("profile")} />
+        {/* Stat Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <DarkStatCard label="Average Score" value={`${student.averageScore}%`} icon={BarChart3} iconColor="#3B82F6" trend="↑ 8% vs last sem" sparkData={scoreHistory} sparkColor="#3B82F6" trendUp />
+          <DarkStatCard label="Attendance" value={`${student.attendance}%`} icon={UserCheck} iconColor="#10B981" trend="↑ 5% vs last sem" sparkData={attendanceHistory} sparkColor="#10B981" trendUp />
+          <DarkStatCard label="Credits Completed" value={`${creditsCompleted} / 48`} icon={BookOpen} iconColor="#8B5CF6" trend="75% completed" sparkData={creditsHistory} sparkColor="#8B5CF6" />
+          <DarkStatCard label="Risk Status" value={riskLabel.replace(" Risk", "")} icon={ShieldCheck} iconColor={riskColor} trend="Stable" sparkData={riskHistory} sparkColor={riskColor} />
+        </div>
 
         {/* AI Insight banner */}
         <AIInsightBanner student={student} onViewInsight={() => onNavigate?.("ai")} />
@@ -413,51 +425,87 @@ function DashboardSection({
         )}
       </div>
 
-      {/* ── Right action panel ── */}
+      {/* ── Right panel ── */}
       <aside className="space-y-4">
-        <div className="bg-white border border-[#E5E7EB] rounded-xl p-5 sticky top-[145px]">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-lg bg-[#FFF5F2] flex items-center justify-center">
-              <Target size={15} className="text-[#FF5C35]" />
+        {/* AI Recommendations */}
+        <div className="rounded-2xl p-5"
+          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+          <div className="flex items-center gap-2.5 mb-4">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#2563EB] to-[#7C3AED] flex items-center justify-center shadow-lg">
+              <Sparkles size={14} className="text-white" />
             </div>
-            <h3 className="text-sm font-bold text-[#213343]">Next Best Action</h3>
+            <h3 className="text-sm font-bold text-white">AI Recommendations</h3>
           </div>
-          <div className="p-3.5 rounded-lg bg-gradient-to-br from-[#FFF5F2] to-white border border-[#FFD4C7]">
-            <p className="text-sm font-semibold text-[#213343] mb-1">
-              {student.attendance < 75 ? "Schedule intervention session" :
-                student.averageScore < 60 ? "Book tutoring with Dr. Zainab" :
-                "Continue current pace"}
-            </p>
-            <p className="text-xs text-[#516F90] leading-relaxed">
-              Suggested by AI based on this week's signals.
-            </p>
-            <button className="mt-3 w-full px-3 py-2 bg-[#FF7A59] hover:bg-[#FF8F73] text-white text-xs font-semibold rounded-md flex items-center justify-center gap-1.5 transition">
-              <Zap size={12} /> Take action
+          <div className="space-y-2.5">
+            {buildRecommendations(student).slice(0, 3).map((r: any, i: number) => (
+              <div key={i} className="flex items-start gap-3 p-3 rounded-xl"
+                style={{ background: "rgba(255,255,255,0.04)" }}>
+                <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                  r.tone === "warning" ? "bg-amber-500/20" : r.tone === "bad" ? "bg-red-500/20" : "bg-emerald-500/20"
+                }`}>
+                  {r.tone === "good" ? <Check size={12} className="text-emerald-400" /> :
+                   r.tone === "warning" ? <AlertCircle size={12} className="text-amber-400" /> :
+                   <AlertCircle size={12} className="text-red-400" />}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[11px] font-semibold text-white mb-0.5">
+                    {r.tone === "good" ? "Excellent performance" : r.tone === "warning" ? "Needs attention" : "Focus area"}
+                  </p>
+                  <p className="text-[11px] text-slate-400 leading-snug">{r.text}</p>
+                </div>
+              </div>
+            ))}
+            <button onClick={() => onNavigate?.("ai")}
+              className="w-full text-center text-xs text-blue-400 hover:text-blue-300 py-1 flex items-center justify-center gap-1 transition">
+              View all recommendations <ChevronRight size={12} />
             </button>
           </div>
+        </div>
 
-          <div className="mt-5 mb-3 flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-              <Sparkles size={15} className="text-[#2563EB]" />
+        {/* Upcoming */}
+        <div className="rounded-2xl p-5"
+          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <CalendarDays size={15} className="text-blue-400" />
+              <h3 className="text-sm font-bold text-white">Upcoming</h3>
             </div>
-            <h3 className="text-sm font-bold text-[#213343]">AI Recommendation</h3>
+            <button onClick={() => onNavigate?.("meetings")} className="text-xs text-blue-400 hover:text-blue-300 transition">View all</button>
           </div>
-          <ul className="space-y-2 text-xs">
-            {buildRecommendations(student).map((r, i) => (
-              <li key={i} className="flex items-start gap-2 p-2.5 rounded-lg bg-[#F5F8FA]">
-                <span className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${
-                  r.tone === "warning" ? "bg-amber-500" : r.tone === "bad" ? "bg-red-500" : "bg-emerald-500"
-                }`} />
-                <span className="text-[#213343]/85 leading-relaxed">{r.text}</span>
-              </li>
-            ))}
-          </ul>
-
-          <div className="mt-5 mb-3 flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-              <ClipboardList size={15} className="text-emerald-600" />
+          {upcomingApts.length === 0 ? (
+            <p className="text-xs text-slate-500 text-center py-4">No upcoming meetings</p>
+          ) : (
+            <div className="space-y-3">
+              {upcomingApts.map((apt: any) => {
+                const d = apt.date ? new Date(apt.date) : new Date();
+                const day = d.getDate();
+                const mon = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+                const statusColor = apt.status === "confirmed" ? "text-emerald-400" : apt.status === "cancelled" ? "text-red-400" : "text-amber-400";
+                const statusLabel = apt.status === "confirmed" ? "Confirmed" : apt.status === "cancelled" ? "Cancelled" : "Upcoming";
+                return (
+                  <div key={apt.id} className="flex items-center gap-3">
+                    <div className="shrink-0 text-center w-10">
+                      <div className="text-[10px] font-bold text-blue-400">{mon}</div>
+                      <div className="text-lg font-black text-white leading-tight">{day}</div>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[12px] font-semibold text-white truncate">{apt.reason || "Meeting"}</p>
+                      <p className="text-[10px] text-slate-500">{apt.time || "TBD"}</p>
+                    </div>
+                    <span className={`text-[10px] font-bold ${statusColor}`}>{statusLabel}</span>
+                  </div>
+                );
+              })}
             </div>
-            <h3 className="text-sm font-bold text-[#213343]">Tasks</h3>
+          )}
+        </div>
+
+        {/* Tasks */}
+        <div className="rounded-2xl p-5"
+          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+          <div className="flex items-center gap-2 mb-3">
+            <ClipboardList size={15} className="text-violet-400" />
+            <h3 className="text-sm font-bold text-white">Tasks</h3>
           </div>
           <div className="space-y-1.5">
             {[
@@ -466,9 +514,9 @@ function DashboardSection({
               { label: "Submit attendance excuse", done: true },
               { label: "Confirm next appointment", done: false },
             ].map((t, i) => (
-              <label key={i} className="flex items-center gap-2.5 p-2 rounded-md hover:bg-[#F5F8FA] cursor-pointer transition">
-                <input type="checkbox" defaultChecked={t.done} className="w-4 h-4 accent-[#FF7A59]" />
-                <span className={`text-xs ${t.done ? "line-through text-[#7C98B6]" : "text-[#213343]"}`}>{t.label}</span>
+              <label key={i} className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-white/5 cursor-pointer transition">
+                <input type="checkbox" defaultChecked={t.done} className="w-4 h-4 accent-violet-500" />
+                <span className={`text-xs ${t.done ? "line-through text-slate-600" : "text-slate-300"}`}>{t.label}</span>
               </label>
             ))}
           </div>
