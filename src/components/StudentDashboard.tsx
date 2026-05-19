@@ -87,9 +87,9 @@ const StudentDashboard = ({
   const meta = sectionMeta[active];
 
   return (
-    <div className="dark flex min-h-screen bg-[#07091A]">
+    <div className="flex min-h-screen bg-background">
       {/* ── Sidebar ── */}
-      <aside className="w-[240px] hidden lg:flex flex-col bg-[#0B0F1E] border-r border-white/5 sticky top-0 h-screen shrink-0">
+      <aside className="w-[240px] hidden lg:flex flex-col bg-sidebar border-r border-sidebar-border sticky top-0 h-screen shrink-0">
         <SidebarContent
           active={active}
           setActive={setActive}
@@ -105,7 +105,7 @@ const StudentDashboard = ({
         <div className="fixed inset-0 z-40 lg:hidden" onClick={() => setSidebarOpen(false)}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
           <aside
-            className="absolute left-0 top-0 h-full w-[240px] bg-[#0B0F1E] flex flex-col border-r border-white/5"
+            className="absolute left-0 top-0 h-full w-[240px] bg-sidebar flex flex-col border-r border-sidebar-border"
             onClick={(e) => e.stopPropagation()}
           >
             <SidebarContent
@@ -122,17 +122,17 @@ const StudentDashboard = ({
 
       <div className="flex-1 min-w-0">
         {/* Sub-header */}
-        <div className="sticky top-0 z-30 bg-[#07091A]/95 backdrop-blur-md border-b border-white/5">
+        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md border-b border-border">
           <div className="px-4 sm:px-6 lg:px-8 py-3.5 flex items-center gap-3 flex-wrap">
             <button
-              className="lg:hidden w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-300"
+              className="lg:hidden w-10 h-10 rounded-xl bg-secondary border border-border flex items-center justify-center text-foreground"
               onClick={() => setSidebarOpen(true)}
             >
               <Menu size={18} />
             </button>
             <div className="min-w-0 flex-1">
-              <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">{meta.title}</h1>
-              <p className="text-xs text-slate-500 mt-0.5">{meta.subtitle}</p>
+              <h1 className="text-lg sm:text-xl font-bold text-foreground tracking-tight">{meta.title}</h1>
+              <p className="text-xs text-muted-foreground mt-0.5">{meta.subtitle}</p>
             </div>
           </div>
         </div>
@@ -199,28 +199,28 @@ function SidebarContent({
           <GraduationCap size={18} className="text-white" />
         </div>
         <div className="min-w-0 leading-tight">
-          <p className="text-[14px] font-extrabold text-white tracking-tight">In-Campus</p>
-          <p className="text-[10px] text-slate-500 font-medium -mt-0.5">Skills Gap Tracker</p>
+          <p className="text-[14px] font-extrabold text-sidebar-foreground tracking-tight">In-Campus</p>
+          <p className="text-[10px] text-muted-foreground font-medium -mt-0.5">Skills Gap Tracker</p>
         </div>
       </div>
 
       {/* User card */}
-      <div className="mx-3 mb-4 rounded-xl p-3" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+      <div className="mx-3 mb-4 rounded-xl p-3 bg-sidebar-accent border border-sidebar-border">
         <div className="flex items-center gap-2.5">
           <div className="relative shrink-0">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#2563EB] to-[#7C3AED] flex items-center justify-center text-white text-[11px] font-bold">
               {initials}
             </div>
-            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-[#0B0F1E]" />
+            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-sidebar" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[12px] font-semibold text-white truncate">{studentName}</p>
-            <p className="text-[10px] text-slate-500 truncate">{studentMatric} · Student</p>
+            <p className="text-[12px] font-semibold text-sidebar-foreground truncate">{studentName}</p>
+            <p className="text-[10px] text-muted-foreground truncate">{studentMatric} · Student</p>
           </div>
         </div>
       </div>
 
-      <p className="px-4 mb-2 text-[10px] uppercase tracking-wider text-slate-600 font-bold">Navigation</p>
+      <p className="px-4 mb-2 text-[10px] uppercase tracking-wider text-muted-foreground font-bold">Navigation</p>
 
       <nav className="flex-1 px-2 space-y-0.5 overflow-y-auto">
         {navItems.map(({ key, label, icon: Icon }) => {
@@ -232,10 +232,10 @@ function SidebarContent({
               className={`group w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all ${
                 isActive
                   ? "bg-gradient-to-r from-[#2563EB] to-[#7C3AED] text-white shadow-lg"
-                  : "text-slate-400 hover:bg-white/5 hover:text-slate-200"
+                  : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
               }`}
             >
-              <Icon size={16} className={isActive ? "text-white" : "text-slate-500 group-hover:text-slate-300"} />
+              <Icon size={16} className={isActive ? "text-white" : "text-sidebar-foreground/50 group-hover:text-sidebar-foreground"} />
               <span>{label}</span>
               {isActive && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-white/50" />}
             </button>
@@ -243,10 +243,10 @@ function SidebarContent({
         })}
       </nav>
 
-      <div className="p-3 border-t border-white/5">
+      <div className="p-3 border-t border-sidebar-border">
         <button
           onClick={onLogout}
-          className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-[12px] text-slate-500 hover:bg-white/5 hover:text-slate-300 transition"
+          className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-[12px] text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition"
         >
           <LogOut size={14} /> Logout
         </button>
@@ -428,69 +428,66 @@ function DashboardSection({
       {/* ── Right panel ── */}
       <aside className="space-y-4">
         {/* AI Recommendations */}
-        <div className="rounded-2xl p-5"
-          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+        <div className="rounded-2xl p-5 bg-card border border-border">
           <div className="flex items-center gap-2.5 mb-4">
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#2563EB] to-[#7C3AED] flex items-center justify-center shadow-lg">
               <Sparkles size={14} className="text-white" />
             </div>
-            <h3 className="text-sm font-bold text-white">AI Recommendations</h3>
+            <h3 className="text-sm font-bold text-foreground">AI Recommendations</h3>
           </div>
           <div className="space-y-2.5">
             {buildRecommendations(student).slice(0, 3).map((r: any, i: number) => (
-              <div key={i} className="flex items-start gap-3 p-3 rounded-xl"
-                style={{ background: "rgba(255,255,255,0.04)" }}>
+              <div key={i} className="flex items-start gap-3 p-3 rounded-xl bg-secondary/60">
                 <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
                   r.tone === "warning" ? "bg-amber-500/20" : r.tone === "bad" ? "bg-red-500/20" : "bg-emerald-500/20"
                 }`}>
-                  {r.tone === "good" ? <Check size={12} className="text-emerald-400" /> :
-                   r.tone === "warning" ? <AlertCircle size={12} className="text-amber-400" /> :
-                   <AlertCircle size={12} className="text-red-400" />}
+                  {r.tone === "good" ? <Check size={12} className="text-emerald-500" /> :
+                   r.tone === "warning" ? <AlertCircle size={12} className="text-amber-500" /> :
+                   <AlertCircle size={12} className="text-red-500" />}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[11px] font-semibold text-white mb-0.5">
+                  <p className="text-[11px] font-semibold text-foreground mb-0.5">
                     {r.tone === "good" ? "Excellent performance" : r.tone === "warning" ? "Needs attention" : "Focus area"}
                   </p>
-                  <p className="text-[11px] text-slate-400 leading-snug">{r.text}</p>
+                  <p className="text-[11px] text-muted-foreground leading-snug">{r.text}</p>
                 </div>
               </div>
             ))}
             <button onClick={() => onNavigate?.("ai")}
-              className="w-full text-center text-xs text-blue-400 hover:text-blue-300 py-1 flex items-center justify-center gap-1 transition">
+              className="w-full text-center text-xs text-blue-500 hover:text-blue-400 py-1 flex items-center justify-center gap-1 transition">
               View all recommendations <ChevronRight size={12} />
             </button>
           </div>
         </div>
 
         {/* Upcoming */}
-        <div className="rounded-2xl p-5"
-          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+        <div className="rounded-2xl p-5 bg-card border border-border">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <CalendarDays size={15} className="text-blue-400" />
-              <h3 className="text-sm font-bold text-white">Upcoming</h3>
+              <CalendarDays size={15} className="text-blue-500" />
+              <h3 className="text-sm font-bold text-foreground">Upcoming</h3>
             </div>
-            <button onClick={() => onNavigate?.("meetings")} className="text-xs text-blue-400 hover:text-blue-300 transition">View all</button>
+            <button onClick={() => onNavigate?.("meetings")} className="text-xs text-blue-500 hover:text-blue-400 transition">View all</button>
           </div>
           {upcomingApts.length === 0 ? (
-            <p className="text-xs text-slate-500 text-center py-4">No upcoming meetings</p>
+            <p className="text-xs text-muted-foreground text-center py-4">No upcoming meetings</p>
           ) : (
             <div className="space-y-3">
               {upcomingApts.map((apt: any) => {
                 const d = apt.date ? new Date(apt.date) : new Date();
                 const day = d.getDate();
                 const mon = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-                const statusColor = apt.status === "confirmed" ? "text-emerald-400" : apt.status === "cancelled" ? "text-red-400" : "text-amber-400";
+                const statusColor = apt.status === "confirmed" ? "text-emerald-500" : apt.status === "cancelled" ? "text-red-500" : "text-amber-500";
                 const statusLabel = apt.status === "confirmed" ? "Confirmed" : apt.status === "cancelled" ? "Cancelled" : "Upcoming";
                 return (
                   <div key={apt.id} className="flex items-center gap-3">
                     <div className="shrink-0 text-center w-10">
-                      <div className="text-[10px] font-bold text-blue-400">{mon}</div>
-                      <div className="text-lg font-black text-white leading-tight">{day}</div>
+                      <div className="text-[10px] font-bold text-blue-500">{mon}</div>
+                      <div className="text-lg font-black text-foreground leading-tight">{day}</div>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[12px] font-semibold text-white truncate">{apt.reason || "Meeting"}</p>
-                      <p className="text-[10px] text-slate-500">{apt.time || "TBD"}</p>
+                      <p className="text-[12px] font-semibold text-foreground truncate">{apt.reason || "Meeting"}</p>
+                      <p className="text-[10px] text-muted-foreground">{apt.time || "TBD"}</p>
                     </div>
                     <span className={`text-[10px] font-bold ${statusColor}`}>{statusLabel}</span>
                   </div>
@@ -501,11 +498,10 @@ function DashboardSection({
         </div>
 
         {/* Tasks */}
-        <div className="rounded-2xl p-5"
-          style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+        <div className="rounded-2xl p-5 bg-card border border-border">
           <div className="flex items-center gap-2 mb-3">
-            <ClipboardList size={15} className="text-violet-400" />
-            <h3 className="text-sm font-bold text-white">Tasks</h3>
+            <ClipboardList size={15} className="text-violet-500" />
+            <h3 className="text-sm font-bold text-foreground">Tasks</h3>
           </div>
           <div className="space-y-1.5">
             {[
@@ -514,9 +510,9 @@ function DashboardSection({
               { label: "Submit attendance excuse", done: true },
               { label: "Confirm next appointment", done: false },
             ].map((t, i) => (
-              <label key={i} className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-white/5 cursor-pointer transition">
+              <label key={i} className="flex items-center gap-2.5 p-2 rounded-lg hover:bg-secondary cursor-pointer transition">
                 <input type="checkbox" defaultChecked={t.done} className="w-4 h-4 accent-violet-500" />
-                <span className={`text-xs ${t.done ? "line-through text-slate-600" : "text-slate-300"}`}>{t.label}</span>
+                <span className={`text-xs ${t.done ? "line-through text-muted-foreground" : "text-foreground/80"}`}>{t.label}</span>
               </label>
             ))}
           </div>

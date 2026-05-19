@@ -228,10 +228,10 @@ const LecturerDashboard = ({
   const sidebarWidth = collapsed ? "w-[76px]" : "w-[260px]";
 
   return (
-    <div className="dark flex min-h-screen bg-[#07091A]">
+    <div className="flex min-h-screen bg-background">
       {/* ── Sidebar ───────────────────────────────────────────────────── */}
       <aside
-        className={`${sidebarWidth} hidden lg:flex flex-col bg-[#0B0F1E] text-slate-100 sticky top-0 h-screen transition-all duration-300 shrink-0`}
+        className={`${sidebarWidth} hidden lg:flex flex-col bg-sidebar border-r border-sidebar-border sticky top-0 h-screen transition-all duration-300 shrink-0`}
       >
         <SidebarContent
           collapsed={collapsed}
@@ -249,7 +249,7 @@ const LecturerDashboard = ({
         <div className="fixed inset-0 z-40 lg:hidden" onClick={() => setSidebarOpen(false)}>
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
           <aside
-            className="absolute left-0 top-0 h-full w-[260px] bg-[#0B0F1E] text-slate-100 flex flex-col"
+            className="absolute left-0 top-0 h-full w-[260px] bg-sidebar border-r border-sidebar-border flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <SidebarContent
@@ -269,17 +269,17 @@ const LecturerDashboard = ({
       {/* ── Main Content ─────────────────────────────────────────────── */}
       <div className="flex-1 min-w-0">
         {/* Sub-header */}
-        <div className="sticky top-0 z-30 bg-[#07091A]/95 backdrop-blur-md border-b border-white/5">
+        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur-md border-b border-border">
           <div className="px-4 sm:px-6 lg:px-8 py-4 flex items-center gap-3 flex-wrap">
             <button
-              className="lg:hidden w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-300"
+              className="lg:hidden w-10 h-10 rounded-xl bg-secondary border border-border flex items-center justify-center text-foreground"
               onClick={() => setSidebarOpen(true)}
             >
               <Menu size={18} />
             </button>
             <div className="min-w-0 flex-1">
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">{meta.title}</h1>
-              <p className="text-xs sm:text-sm text-slate-500 mt-0.5">{meta.subtitle}</p>
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">{meta.title}</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">{meta.subtitle}</p>
             </div>
           </div>
         </div>
@@ -449,15 +449,15 @@ function SidebarContent({
         </div>
         {!collapsed && (
           <div className="min-w-0">
-            <p className="text-sm font-bold leading-tight text-white truncate">Skills Gap Tracker</p>
-            <p className="text-[10px] text-slate-400 truncate">University Edition</p>
+            <p className="text-sm font-bold leading-tight text-sidebar-foreground truncate">Skills Gap Tracker</p>
+            <p className="text-[10px] text-muted-foreground truncate">University Edition</p>
           </div>
         )}
       </div>
 
       {!collapsed && (
         <div className="px-4 mb-2">
-          <p className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">Workspace</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Workspace</p>
         </div>
       )}
 
@@ -471,11 +471,11 @@ function SidebarContent({
               className={`group relative w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 isActive
                   ? "bg-gradient-to-r from-[#2563EB] to-[#7C3AED] text-white shadow-lg"
-                  : "text-slate-400 hover:bg-white/5 hover:text-white"
+                  : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
               } ${collapsed ? "justify-center" : ""}`}
               title={collapsed ? label : undefined}
             >
-              <Icon size={17} className={isActive ? "text-white" : "text-slate-500 group-hover:text-slate-200"} />
+              <Icon size={17} className={isActive ? "text-white" : "text-sidebar-foreground/50 group-hover:text-sidebar-foreground"} />
               {!collapsed && <span className="truncate">{label}</span>}
               {isActive && !collapsed && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-white/60" />}
             </button>
@@ -483,18 +483,18 @@ function SidebarContent({
         })}
       </nav>
 
-      <div className="p-3 border-t border-white/10 space-y-2">
-        <div className={`flex items-center gap-3 p-2.5 rounded-xl bg-white/5 ${collapsed ? "justify-center" : ""}`}>
+      <div className="p-3 border-t border-sidebar-border space-y-2">
+        <div className={`flex items-center gap-3 p-2.5 rounded-xl bg-sidebar-accent ${collapsed ? "justify-center" : ""}`}>
           <div className="relative shrink-0">
             <div className="w-9 h-9 rounded-xl gradient-brand flex items-center justify-center text-white text-xs font-bold">
               {initials}
             </div>
-            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-[#0F172A]" />
+            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-sidebar" />
           </div>
           {!collapsed && (
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-semibold text-white truncate">{lecturerName}</p>
-              <p className="text-[10px] text-emerald-400 flex items-center gap-1">
+              <p className="text-xs font-semibold text-sidebar-foreground truncate">{lecturerName}</p>
+              <p className="text-[10px] text-emerald-500 flex items-center gap-1">
                 <Circle size={6} fill="currentColor" /> Online · Lecturer
               </p>
             </div>
@@ -502,7 +502,7 @@ function SidebarContent({
         </div>
         <button
           onClick={onLogout}
-          className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-slate-300 hover:bg-white/5 hover:text-white transition ${collapsed ? "justify-center" : ""}`}
+          className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition ${collapsed ? "justify-center" : ""}`}
         >
           <LogOut size={15} />
           {!collapsed && <span>Logout</span>}
@@ -510,14 +510,14 @@ function SidebarContent({
         {!isMobile && (
           <button
             onClick={onCollapse}
-            className="w-full flex items-center justify-center gap-2 px-2 py-1.5 rounded-lg text-[10px] text-slate-500 hover:text-slate-300 transition"
+            className="w-full flex items-center justify-center gap-2 px-2 py-1.5 rounded-lg text-[10px] text-muted-foreground hover:text-sidebar-foreground transition"
           >
             <ChevronRight size={12} className={`transition-transform ${collapsed ? "" : "rotate-180"}`} />
             {!collapsed && <span>Collapse</span>}
           </button>
         )}
         {isMobile && (
-          <button onClick={onCollapse} className="w-full flex items-center justify-center gap-2 px-2 py-1.5 rounded-lg text-[10px] text-slate-500 hover:text-slate-300 transition">
+          <button onClick={onCollapse} className="w-full flex items-center justify-center gap-2 px-2 py-1.5 rounded-lg text-[10px] text-muted-foreground hover:text-sidebar-foreground transition">
             <XIcon size={12} /> Close
           </button>
         )}
