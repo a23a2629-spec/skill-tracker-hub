@@ -1,40 +1,94 @@
 import { Brain } from "lucide-react";
 
-// ── Brain Orb ────────────────────────────────────────────────────────────
+// ── Brain Orb ─────────────────────────────────────────────────────────────
 export function BrainOrb() {
   return (
-    <div className="relative w-32 h-32 sm:w-44 sm:h-44 shrink-0 hidden sm:flex items-center justify-center select-none">
-      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-violet-600/20 to-blue-600/10 blur-2xl pointer-events-none" />
-      <svg className="absolute inset-0 w-full h-full animate-spin" style={{ animationDuration: "20s" }}>
-        <ellipse cx="50%" cy="50%" rx="47%" ry="22%" fill="none" stroke="url(#og1)" strokeWidth="1" strokeDasharray="6 10" opacity="0.5" />
-        <defs>
-          <linearGradient id="og1" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#7C3AED" stopOpacity="0" />
-            <stop offset="50%" stopColor="#7C3AED" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#7C3AED" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-      </svg>
-      <svg className="absolute inset-[12%] w-[76%] h-[76%] animate-spin" style={{ animationDuration: "14s", animationDirection: "reverse" }}>
-        <ellipse cx="50%" cy="50%" rx="47%" ry="20%" fill="none" stroke="url(#og2)" strokeWidth="0.8" strokeDasharray="4 7" opacity="0.35" />
-        <defs>
-          <linearGradient id="og2" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#3B82F6" stopOpacity="0" />
-            <stop offset="50%" stopColor="#3B82F6" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
-          </linearGradient>
-        </defs>
-      </svg>
-      <div
-        className="relative w-[56%] h-[56%] rounded-full bg-gradient-to-br from-[#2e1065]/80 via-[#1e3a8a]/60 to-[#0c4a6e]/40 border border-violet-400/25 flex items-center justify-center"
-        style={{ boxShadow: "0 0 30px rgba(139,92,246,0.25), inset 0 0 20px rgba(99,102,241,0.1)" }}
-      >
-        <Brain size={36} className="text-violet-200/75" />
+    <div className="relative w-36 h-36 sm:w-52 sm:h-52 shrink-0 hidden sm:flex items-center justify-center select-none">
+
+      {/* ── Ambient glow ── */}
+      <div className="absolute inset-[-15%] rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(ellipse at center, rgba(139,92,246,0.30) 0%, rgba(59,130,246,0.14) 45%, transparent 72%)", filter: "blur(10px)" }} />
+
+      {/* ── Expanding pulse rings ── */}
+      <div className="absolute inset-[18%] rounded-full border border-violet-400/30 animate-ping" style={{ animationDuration: "3s" }} />
+      <div className="absolute inset-[10%] rounded-full border border-cyan-400/20 animate-ping" style={{ animationDuration: "4.2s", animationDelay: "1.4s" }} />
+
+      {/* ── Ring 1: equatorial, violet, fast ── */}
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 animate-spin" style={{ animationDuration: "9s" }}>
+          <svg className="w-full h-full" viewBox="0 0 100 100">
+            <defs>
+              <linearGradient id="brg1" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#7C3AED" stopOpacity="0" />
+                <stop offset="45%" stopColor="#A78BFA" stopOpacity="1" />
+                <stop offset="65%" stopColor="#C4B5FD" stopOpacity="0.9" />
+                <stop offset="100%" stopColor="#7C3AED" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <ellipse cx="50" cy="50" rx="46" ry="13" fill="none" stroke="url(#brg1)" strokeWidth="1.4" />
+          </svg>
+        </div>
       </div>
-      <div className="absolute top-[10%] right-[12%] w-4 h-4 rounded-full bg-blue-500/35 border border-blue-400/50 animate-pulse" />
-      <div className="absolute bottom-[15%] left-[8%] w-3 h-3 rounded-sm bg-violet-500/35 border border-violet-400/50 animate-pulse" style={{ animationDelay: "0.8s" }} />
-      <div className="absolute top-[38%] left-[4%] w-2.5 h-2.5 rounded-full bg-cyan-500/35 border border-cyan-400/50 animate-pulse" style={{ animationDelay: "1.5s" }} />
-      <div className="absolute bottom-[4%] w-[55%] h-[8%] rounded-full bg-gradient-to-r from-violet-600/0 via-violet-500/30 to-violet-600/0 blur-lg pointer-events-none" />
+
+      {/* ── Ring 2: tilted 58°, cyan, medium reverse ── */}
+      <div className="absolute inset-0" style={{ transform: "rotate(58deg)" }}>
+        <div className="absolute inset-0 animate-spin" style={{ animationDuration: "15s", animationDirection: "reverse" }}>
+          <svg className="w-full h-full" viewBox="0 0 100 100">
+            <defs>
+              <linearGradient id="brg2" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#06B6D4" stopOpacity="0" />
+                <stop offset="50%" stopColor="#22D3EE" stopOpacity="1" />
+                <stop offset="100%" stopColor="#06B6D4" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <ellipse cx="50" cy="50" rx="44" ry="15" fill="none" stroke="url(#brg2)" strokeWidth="1.1" />
+          </svg>
+        </div>
+      </div>
+
+      {/* ── Ring 3: tilted 116°, pink, slow ── */}
+      <div className="absolute inset-0" style={{ transform: "rotate(116deg)" }}>
+        <div className="absolute inset-0 animate-spin" style={{ animationDuration: "23s" }}>
+          <svg className="w-full h-full" viewBox="0 0 100 100">
+            <defs>
+              <linearGradient id="brg3" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#EC4899" stopOpacity="0" />
+                <stop offset="50%" stopColor="#F472B6" stopOpacity="0.85" />
+                <stop offset="100%" stopColor="#EC4899" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <ellipse cx="50" cy="50" rx="41" ry="11" fill="none" stroke="url(#brg3)" strokeWidth="0.9" />
+          </svg>
+        </div>
+      </div>
+
+      {/* ── Central sphere ── */}
+      <div className="relative w-[46%] h-[46%] rounded-full flex items-center justify-center z-10"
+        style={{
+          background: "radial-gradient(circle at 33% 30%, #B45FFC, #7C3AED 42%, #4C1D95 75%, #1E1B4B 100%)",
+          boxShadow: "0 0 0 1.5px rgba(196,181,253,0.45), 0 0 22px rgba(139,92,246,0.65), 0 0 55px rgba(139,92,246,0.22), inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -2px 8px rgba(0,0,0,0.3)"
+        }}>
+        {/* gloss highlight */}
+        <div className="absolute top-[10%] left-[14%] w-[38%] h-[25%] rounded-full bg-white/22 blur-[3px]" />
+        <Brain size={22} className="relative text-white/95"
+          style={{ filter: "drop-shadow(0 0 7px rgba(216,180,254,0.95)) drop-shadow(0 0 2px rgba(255,255,255,0.6))" }} />
+      </div>
+
+      {/* ── Orbiting nodes ── */}
+      <div className="absolute rounded-full bg-cyan-300 w-3.5 h-3.5 top-[7%] right-[15%]"
+        style={{ boxShadow: "0 0 10px rgba(103,232,249,1), 0 0 22px rgba(34,211,238,0.55)", animation: "pulse 2.1s ease-in-out infinite" }} />
+      <div className="absolute rounded-full bg-violet-300 w-3 h-3 bottom-[13%] left-[11%]"
+        style={{ boxShadow: "0 0 10px rgba(196,181,253,1), 0 0 20px rgba(139,92,246,0.55)", animation: "pulse 3.1s ease-in-out infinite 0.9s" }} />
+      <div className="absolute rounded-full bg-blue-300 w-2.5 h-2.5 top-[37%] left-[3%]"
+        style={{ boxShadow: "0 0 8px rgba(147,197,253,1), 0 0 16px rgba(96,165,250,0.5)", animation: "pulse 2.7s ease-in-out infinite 1.7s" }} />
+      <div className="absolute rounded-full bg-fuchsia-300 w-2.5 h-2.5 bottom-[20%] right-[7%]"
+        style={{ boxShadow: "0 0 8px rgba(240,171,252,1), 0 0 16px rgba(217,70,239,0.5)", animation: "pulse 3.5s ease-in-out infinite 0.4s" }} />
+      <div className="absolute rounded-full bg-emerald-300 w-2 h-2 top-[22%] left-[16%]"
+        style={{ boxShadow: "0 0 6px rgba(110,231,183,1), 0 0 12px rgba(52,211,153,0.45)", animation: "pulse 2.9s ease-in-out infinite 2.1s" }} />
+
+      {/* ── Ground reflection glow ── */}
+      <div className="absolute bottom-[-3%] left-1/2 -translate-x-1/2 w-[44%] h-[8%] rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(ellipse at center, rgba(139,92,246,0.45), transparent 70%)", filter: "blur(6px)" }} />
     </div>
   );
 }
