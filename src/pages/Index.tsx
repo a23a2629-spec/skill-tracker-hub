@@ -230,7 +230,7 @@ const Index = () => {
         <div className={headerInner}>
           {/* Logo */}
           <div className="flex items-center gap-2 shrink-0">
-            <img src="/logo.png" alt="In-Campus Skills Gap Tracker" className="h-14 object-contain" />
+            <img src="/logo.png" alt="In-Campus Skills Gap Tracker" className="h-20 object-contain" />
             <div className="hidden lg:block">
               <h1 className="font-bold text-sm leading-tight text-foreground">Skills Gap Tracker</h1>
               <p className="text-[10px] text-muted-foreground">Early Detection · Smarter Intervention</p>

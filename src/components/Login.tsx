@@ -418,7 +418,7 @@ export default function Login({ onLogin, onShowSignup }: Props) {
           {/* Logo + Brand */}
           <div className="flex flex-col items-center mb-8">
             <div className="mb-3" style={{ filter: "drop-shadow(0 0 16px rgba(37,99,235,0.5))" }}>
-              <img src="/logo.png" alt="In-Campus" className="h-14 object-contain" />
+              <img src="/logo.png" alt="In-Campus" className="h-28 object-contain" />
             </div>
             <h1 className="text-lg font-extrabold text-white leading-tight">In-Campus</h1>
             <p className="text-xs font-medium tracking-widest uppercase mt-0.5"
