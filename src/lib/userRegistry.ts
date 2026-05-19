@@ -175,3 +175,31 @@ export function getStudentPassword(studentId: string): string | null {
 export function getAllStudents(mockStudents: Student[]): Student[] {
   return [...mockStudents, ...getRegisteredStudents()];
 }
+
+// ── Persistent student edits (lecturer can edit any student) ──────────────
+const STUDENT_OVERRIDES_KEY = "skills-tracker-student-overrides";
+
+function loadOverrides(): Record<string, Student> {
+  try {
+    const raw = localStorage.getItem(STUDENT_OVERRIDES_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+export function saveStudentUpdate(student: Student) {
+  if (student.id.startsWith("reg-s-")) {
+    const existing = getRegisteredStudents();
+    save(REG_STUDENTS_KEY, existing.map(s => s.id === student.id ? student : s));
+  } else {
+    const overrides = loadOverrides();
+    overrides[student.id] = student;
+    localStorage.setItem(STUDENT_OVERRIDES_KEY, JSON.stringify(overrides));
+  }
+}
+
+export function applyStudentOverrides(studentList: Student[]): Student[] {
+  const overrides = loadOverrides();
+  return studentList.map(s => (overrides[s.id] ? { ...s, ...overrides[s.id] } : s));
+}

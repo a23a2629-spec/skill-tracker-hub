@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { students, appointments, Appointment, externalProblems, ExternalProblem, ReportTemplate, ReportSubmission, ChatMessage } from "@/data/mockData";
-import { getRegisteredStudents, getAllStudents } from "@/lib/userRegistry";
+import { getRegisteredStudents, getAllStudents, applyStudentOverrides } from "@/lib/userRegistry";
 import StudentDashboard from "@/components/StudentDashboard";
 import LecturerDashboard from "@/components/LecturerDashboard";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -40,7 +40,7 @@ const Index = () => {
   }, [session]);
 
   // All students = mock + registered
-  const allStudents = [...students, ...getRegisteredStudents()];
+  const allStudents = applyStudentOverrides([...students, ...getRegisteredStudents()]);
 
   const [selectedStudentId, setSelectedStudentId] = useState(allStudents[0].id);
   const [allAppointments, setAllAppointments] = useState<Appointment[]>(appointments);

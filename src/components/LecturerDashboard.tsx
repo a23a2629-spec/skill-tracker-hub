@@ -3,7 +3,7 @@ import {
   students, courses, Course, SkillStatus, Student,
   Appointment, ExternalProblem, externalProblems, ReportTemplate, ReportSubmission, ChatMessage,
 } from "@/data/mockData";
-import { getRegisteredStudents } from "@/lib/userRegistry";
+import { getRegisteredStudents, saveStudentUpdate, applyStudentOverrides } from "@/lib/userRegistry";
 import {
   Users, BookOpen, AlertTriangle, TrendingUp, MessageSquare, ChevronUp, PlusCircle,
   CalendarDays, AlertCircle, LayoutDashboard, BarChart3, FileText, Sparkles,
@@ -111,7 +111,7 @@ const LecturerDashboard = ({
   const [lecturerBookingForm, setLecturerBookingForm] = useState({ studentId: "", date: "", time: "", reason: "" });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-  const [studentsList, setStudentsList] = useState<Student[]>(() => [...students, ...getRegisteredStudents()]);
+  const [studentsList, setStudentsList] = useState<Student[]>(() => applyStudentOverrides([...students, ...getRegisteredStudents()]));
   const [showAddStudent, setShowAddStudent] = useState(false);
   const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
   const [editStudentId, setEditStudentId] = useState<string | null>(null);
@@ -123,6 +123,7 @@ const LecturerDashboard = ({
     if (viewingStudentId === id) setViewingStudentId(null);
   };
   const handleUpdateStudent = (updated: Student) => {
+    saveStudentUpdate(updated);
     setStudentsList(prev => prev.map(s => s.id === updated.id ? updated : s));
     setEditStudentId(null);
   };
