@@ -73,8 +73,7 @@ export function DarkStatCard({
 }) {
   return (
     <div
-      className="rounded-2xl p-4 relative overflow-hidden group hover:scale-[1.01] transition-transform cursor-default"
-      style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}
+      className="rounded-2xl p-4 relative overflow-hidden group hover:scale-[1.01] transition-transform cursor-default bg-card border border-border"
     >
       <div
         className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
@@ -82,12 +81,12 @@ export function DarkStatCard({
       />
       <div className="relative">
         <div className="flex items-center justify-between mb-2">
-          <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">{label}</p>
+          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">{label}</p>
           <div className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${iconColor}22` }}>
             <Icon size={14} style={{ color: iconColor }} />
           </div>
         </div>
-        <p className="text-xl sm:text-2xl font-black text-white mb-1 leading-none">{value}</p>
+        <p className="text-xl sm:text-2xl font-black text-foreground mb-1 leading-none">{value}</p>
         <p
           className="text-[10px] mb-3"
           style={{ color: trendUp === false ? "#EF4444" : trendUp === true ? "#10B981" : "#64748B" }}

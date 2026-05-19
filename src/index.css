@@ -207,3 +207,29 @@
 .dark .text-red-700    { color: #fca5a5 !important; }
 .dark .text-emerald-700 { color: #6ee7b7 !important; }
 .dark .text-amber-700  { color: #fcd34d !important; }
+
+/* ── Hero banner (theme-aware gradient) ──────────────────────────────── */
+.hero-banner-lecturer {
+  background: linear-gradient(135deg, #EEF4FF 0%, #EFF6FF 45%, #F5F0FF 80%, #F0F4FF 100%);
+}
+.dark .hero-banner-lecturer {
+  background: linear-gradient(135deg, #061430 0%, #0a1a3a 45%, #060e20 80%, #050810 100%);
+}
+.hero-banner-student {
+  background: linear-gradient(135deg, #F5F0FF 0%, #EEF4FF 45%, #F8F5FF 80%, #EFF4FF 100%);
+}
+.dark .hero-banner-student {
+  background: linear-gradient(135deg, #1c0840 0%, #0d1b4b 45%, #071035 80%, #070b1c 100%);
+}
+
+/* ── Hero status pills (theme-aware) ─────────────────────────────────── */
+.hero-pill {
+  background: rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(0, 0, 0, 0.10);
+  color: #334155;
+}
+.dark .hero-pill {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #CBD5E1;
+}

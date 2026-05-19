@@ -280,42 +280,38 @@ function DashboardSection({
       {/* ── Main column ── */}
       <div className="space-y-5 min-w-0">
         {/* Hero Banner */}
-        <div className="relative rounded-2xl overflow-hidden"
-          style={{ background: "linear-gradient(135deg, #1c0840 0%, #0d1b4b 45%, #071035 80%, #070b1c 100%)" }}>
+        <div className="relative rounded-2xl overflow-hidden hero-banner-student">
           <div className="absolute inset-0 opacity-[0.07]"
             style={{ backgroundImage: "linear-gradient(rgba(139,92,246,.8) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,.8) 1px, transparent 1px)", backgroundSize: "44px 44px" }} />
-          <div className="absolute top-0 left-1/4 w-80 h-80 rounded-full bg-violet-600/18 blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 right-1/4 w-60 h-60 rounded-full bg-blue-600/12 blur-3xl pointer-events-none" />
+          <div className="absolute top-0 left-1/4 w-80 h-80 rounded-full bg-violet-600/20 blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 right-1/4 w-60 h-60 rounded-full bg-blue-600/15 blur-3xl pointer-events-none" />
           <div className="relative flex items-center gap-4 p-6 sm:p-8">
             <div className="flex-1 min-w-0">
-              <h2 className="text-2xl sm:text-3xl font-black text-white mb-1.5">{greeting}, {firstName}! 👋</h2>
-              <p className="text-slate-300/80 text-sm mb-4">Your academic journey is on the right track.</p>
+              <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white mb-1.5">{greeting}, {firstName}! 👋</h2>
+              <p className="text-gray-600 dark:text-slate-300 text-sm mb-4">Your academic journey is on the right track.</p>
               <div className="space-y-2 mb-5">
                 <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0"><TrendingUp size={10} className="text-emerald-400" /></div>
-                  <span className="text-slate-300 text-[13px]">AI detected <span className="text-white font-semibold">stable performance</span> with consistent engagement</span>
+                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0"><TrendingUp size={10} className="text-emerald-600 dark:text-emerald-400" /></div>
+                  <span className="text-gray-700 dark:text-slate-300 text-[13px]">AI detected <span className="text-gray-900 dark:text-white font-semibold">stable performance</span> with consistent engagement</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0"><UserCheck size={10} className="text-blue-400" /></div>
-                  <span className="text-slate-300 text-[13px]">Attendance at <span className="text-emerald-400 font-semibold">{student.attendance}%</span> — excellent standing</span>
+                  <div className="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0"><UserCheck size={10} className="text-blue-600 dark:text-blue-400" /></div>
+                  <span className="text-gray-700 dark:text-slate-300 text-[13px]">Attendance at <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{student.attendance}%</span> — excellent standing</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded-full bg-violet-500/20 flex items-center justify-center shrink-0"><Sparkles size={10} className="text-violet-400" /></div>
-                  <span className="text-slate-300 text-[13px]">Keep up the excellent work!</span>
+                  <div className="w-5 h-5 rounded-full bg-violet-500/20 flex items-center justify-center shrink-0"><Sparkles size={10} className="text-violet-600 dark:text-violet-400" /></div>
+                  <span className="text-gray-700 dark:text-slate-300 text-[13px]">Keep up the excellent work!</span>
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
-                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] text-slate-300"
-                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />AI Monitoring Active
+                <span className="hero-pill flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px]">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />AI Monitoring Active
                 </span>
-                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] text-slate-300"
-                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
-                  <Sparkles size={9} className="text-violet-400" />{pendingAssessments.length + 3} New Insights
+                <span className="hero-pill flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px]">
+                  <Sparkles size={9} className="text-violet-600 dark:text-violet-400" />{pendingAssessments.length + 3} New Insights
                 </span>
-                <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] text-slate-300"
-                  style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.12)" }}>
-                  <Activity size={9} className="text-blue-400" />Data Synced Today
+                <span className="hero-pill flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px]">
+                  <Activity size={9} className="text-blue-600 dark:text-blue-400" />Data Synced Today
                 </span>
               </div>
             </div>
